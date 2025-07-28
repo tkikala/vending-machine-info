@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentType {
+  COIN
+  BANKNOTE
+  CREDIT_CARD
+}
+
+model User {
+  id       Int              @id @default(autoincrement())
+  email    String           @unique
+  password String
+  name     String
+  machines VendingMachine[]
+  reviews  Review[]
+}
+
+model VendingMachine {
+  id             Int             @id @default(autoincrement())
+  name           String
+  location       String
+  ownerId        Int
+  owner          User            @relation(fields: [ownerId], references: [id])
+  products       Product[]
+  paymentMethods PaymentMethod[]
+  photos         Photo[] // Relation to Photo model
+  reviews        Review[]
+}
+
+model Photo {
+  id               Int            @id @default(autoincrement())
+  url              String
+  vendingMachineId Int
+  vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
+}
+
+model Product {
+  id               Int            @id @default(autoincrement())
+  name             String
+  description      String?
+  photo            String?
+  vendingMachineId Int
+  vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
+}
+
+model PaymentMethod {
+  id               Int            @id @default(autoincrement())
+  type             PaymentType
+  available        Boolean        @default(false)
+  vendingMachineId Int
+  vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
+}
+
+model Review {
+  id               Int            @id @default(autoincrement())
+  rating           Int
+  comment          String
+  userId           Int
+  vendingMachineId Int
+  user             User           @relation(fields: [userId], references: [id])
+  vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
+  createdAt        DateTime       @default(now())
+}
