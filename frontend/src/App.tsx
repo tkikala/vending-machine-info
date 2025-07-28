@@ -58,7 +58,10 @@ function PaymentIcon({ type, available }: { type: string; available: boolean }) 
     label = 'Credit Card';
   }
   return (
-    <span className={`payment-icon ${available ? 'available' : 'unavailable'}`}>{icon} {label}</span>
+    <span className="payment-icon">
+      <span className="payment-text">{icon} {label}</span>
+      <span className={`payment-status ${available ? 'available' : 'unavailable'}`}></span>
+    </span>
   );
 }
 
@@ -104,18 +107,50 @@ function DarkModeToggle({ mode, setMode }: { mode: string; setMode: (m: 'light' 
   );
 }
 
-function VendingMachineDisplay({ products }: { products: Product[] }) {
+function Gallery({ photos }: { photos: { id: number; url: string }[] }) {
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+
+  return (
+    <>
+      <div className="gallery">
+        <h3>Gallery</h3>
+        <div className="gallery-scroll">
+          {photos.map((photo) => (
+            <img
+              key={photo.id}
+              src={photo.url}
+              alt="Vending Machine"
+              className="gallery-photo"
+              onClick={() => setSelectedPhoto(photo.url)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {selectedPhoto && (
+        <div className="modal-overlay" onClick={() => setSelectedPhoto(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <img src={selectedPhoto} alt="Vending Machine" className="modal-image" />
+            <button className="modal-close" onClick={() => setSelectedPhoto(null)}>×</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
   // Create a 3x4 grid (3 rows, 4 columns) for vending machine slots
   const slots = [];
   const rows = ['A', 'B', 'C'];
   const cols = [1, 2, 3, 4];
-  
+
   let productIndex = 0;
-  
+
   for (let row of rows) {
     for (let col of cols) {
       const slotCode = `${row}${col}`;
-      const product = products[productIndex];
+      const product = machine.products[productIndex];
       slots.push({
         code: slotCode,
         product: product || null,
@@ -123,11 +158,28 @@ function VendingMachineDisplay({ products }: { products: Product[] }) {
       productIndex++;
     }
   }
-  
+
   return (
     <div className="vending-machine">
       <div className="vending-machine-header">
-        <h3>Select Your Item</h3>
+        <div className="machine-info-header">
+          <img
+            className="owner-logo-header"
+            src="/images/vending-machine-default.png"
+            alt="Owner Logo"
+          />
+          <div className="machine-details">
+            <h3 style={{ margin: 0 }}>{machine.name}</h3>
+            <div style={{ color: 'inherit', opacity: 0.8, fontSize: '0.9rem' }}>{machine.location}</div>
+            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Owner: {machine.owner.name}</div>
+          </div>
+          <div className="payment-methods-header">
+            <div style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.25rem' }}>Payment:</div>
+            {machine.paymentMethods.map((pm) => (
+              <PaymentIcon key={pm.id} type={pm.type} available={pm.available} />
+            ))}
+          </div>
+        </div>
       </div>
       <div className="vending-machine-display">
         {slots.map((slot) => (
@@ -184,44 +236,20 @@ function App() {
       </div>
       {machines.map((m) => (
         <div key={m.id} className="machine-card">
-          <div className="machine-header">
-            <img
-              className="machine-photo"
-              src={m.photos[0]?.url || 'https://via.placeholder.com/120x120?text=No+Photo'}
-              alt="Vending Machine"
-            />
-            <div className="machine-info">
-              <h2 style={{ margin: 0 }}>{m.name}</h2>
-              <div style={{ color: '#666', marginBottom: 4 }}>{m.location}</div>
-              <div style={{ fontSize: '0.98rem', color: '#888' }}>Owner: {m.owner.name}</div>
-            </div>
-          </div>
-          
           <div className="machine-content">
-            <VendingMachineDisplay products={m.products} />
-            
+            <VendingMachineDisplay machine={m} />
+
+            <Gallery photos={m.photos} />
+
             <div style={{ marginTop: '2rem' }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
-                <div style={{ flex: 1 }}>
-                  <b>Payment Methods:</b>
-                  <div className="payment-methods">
-                    {m.paymentMethods.map((pm) => (
-                      <PaymentIcon key={pm.id} type={pm.type} available={pm.available} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              <div style={{ marginTop: '1.5rem' }}>
-                <b>Reviews:</b>
-                <ul className="reviews-list">
-                  {m.reviews.map((r) => (
-                    <li key={r.id} className="review-item">
-                      <b style={{ color: '#f59e42' }}>{r.rating}★</b> {r.comment}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <b>Reviews:</b>
+              <ul className="reviews-list">
+                {m.reviews.map((r) => (
+                  <li key={r.id} className="review-item">
+                    <b style={{ color: '#f59e42' }}>{r.rating}★</b> {r.comment}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>

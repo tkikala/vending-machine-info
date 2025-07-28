@@ -3,13 +3,20 @@ import { PrismaClient, PaymentType } from '../generated/prisma';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create a user (owner)
-  const user = await prisma.user.create({
-    data: {
+  // Create or update a user (owner)
+  const user = await prisma.user.upsert({
+    where: { email: 'owner@example.com' },
+    update: {},
+    create: {
       email: 'owner@example.com',
-      password: 'password123', // In production, hash passwords!
+      password: 'password123',
       name: 'Vending Owner',
     },
+  });
+
+  // Delete existing machine if it exists and create a new one
+  await prisma.vendingMachine.deleteMany({
+    where: { name: 'Central Park Vending' },
   });
 
   // Create a vending machine
@@ -35,6 +42,9 @@ async function main() {
       photos: {
         create: [
           { url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' },
+          { url: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c' },
+          { url: 'https://images.unsplash.com/photo-1563298723-dcfebaa392e3' },
+          { url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b' },
         ],
       },
       reviews: {
