@@ -22,10 +22,10 @@ function PaymentIcon({ type, available }: { type: string; available: boolean }) 
 }
 
 function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
-  // Create a 3x4 grid (3 rows, 4 columns) for vending machine slots
+  // Create a 5x6 grid (5 rows, 6 columns) for vending machine slots
   const slots = [];
-  const rows = ['A', 'B', 'C'];
-  const cols = [1, 2, 3, 4];
+  const rows = ['A', 'B', 'C', 'D', 'E'];
+  const cols = [1, 2, 3, 4, 5, 6];
 
   let productIndex = 0;
 
@@ -36,6 +36,7 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
       slots.push({
         code: slotCode,
         product: product || null,
+        isEmpty: !product,
       });
       productIndex++;
     }
@@ -65,7 +66,11 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
       </div>
       <div className="vending-machine-display">
         {slots.map((slot) => (
-          <div key={slot.code} className="vending-slot">
+          <div 
+            key={slot.code} 
+            className="vending-slot"
+            style={{ display: slot.isEmpty ? 'none' : 'flex' }}
+          >
             <div className="slot-code">{slot.code}</div>
             {slot.product ? (
               <div className="slot-product">
