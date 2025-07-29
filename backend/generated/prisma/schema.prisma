@@ -27,21 +27,21 @@ model User {
 }
 
 model VendingMachine {
-  id             Int             @id @default(autoincrement())
+  id             String          @id @default(uuid())
   name           String
   location       String
   ownerId        Int
   owner          User            @relation(fields: [ownerId], references: [id])
   products       Product[]
   paymentMethods PaymentMethod[]
-  photos         Photo[] // Relation to Photo model
+  photos         Photo[]
   reviews        Review[]
 }
 
 model Photo {
   id               Int            @id @default(autoincrement())
   url              String
-  vendingMachineId Int
+  vendingMachineId String
   vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
 }
 
@@ -50,7 +50,7 @@ model Product {
   name             String
   description      String?
   photo            String?
-  vendingMachineId Int
+  vendingMachineId String
   vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
 }
 
@@ -58,7 +58,7 @@ model PaymentMethod {
   id               Int            @id @default(autoincrement())
   type             PaymentType
   available        Boolean        @default(false)
-  vendingMachineId Int
+  vendingMachineId String
   vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
 }
 
@@ -67,7 +67,7 @@ model Review {
   rating           Int
   comment          String
   userId           Int
-  vendingMachineId Int
+  vendingMachineId String
   user             User           @relation(fields: [userId], references: [id])
   vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id])
   createdAt        DateTime       @default(now())

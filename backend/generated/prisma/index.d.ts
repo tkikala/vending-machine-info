@@ -2569,24 +2569,22 @@ export namespace Prisma {
   }
 
   export type VendingMachineAvgAggregateOutputType = {
-    id: number | null
     ownerId: number | null
   }
 
   export type VendingMachineSumAggregateOutputType = {
-    id: number | null
     ownerId: number | null
   }
 
   export type VendingMachineMinAggregateOutputType = {
-    id: number | null
+    id: string | null
     name: string | null
     location: string | null
     ownerId: number | null
   }
 
   export type VendingMachineMaxAggregateOutputType = {
-    id: number | null
+    id: string | null
     name: string | null
     location: string | null
     ownerId: number | null
@@ -2602,12 +2600,10 @@ export namespace Prisma {
 
 
   export type VendingMachineAvgAggregateInputType = {
-    id?: true
     ownerId?: true
   }
 
   export type VendingMachineSumAggregateInputType = {
-    id?: true
     ownerId?: true
   }
 
@@ -2720,7 +2716,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineGroupByOutputType = {
-    id: number
+    id: string
     name: string
     location: string
     ownerId: number
@@ -2807,7 +2803,7 @@ export namespace Prisma {
       reviews: Prisma.$ReviewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
+      id: string
       name: string
       location: string
       ownerId: number
@@ -3239,7 +3235,7 @@ export namespace Prisma {
    * Fields of the VendingMachine model
    */
   interface VendingMachineFieldRefs {
-    readonly id: FieldRef<"VendingMachine", 'Int'>
+    readonly id: FieldRef<"VendingMachine", 'String'>
     readonly name: FieldRef<"VendingMachine", 'String'>
     readonly location: FieldRef<"VendingMachine", 'String'>
     readonly ownerId: FieldRef<"VendingMachine", 'Int'>
@@ -3765,24 +3761,22 @@ export namespace Prisma {
 
   export type PhotoAvgAggregateOutputType = {
     id: number | null
-    vendingMachineId: number | null
   }
 
   export type PhotoSumAggregateOutputType = {
     id: number | null
-    vendingMachineId: number | null
   }
 
   export type PhotoMinAggregateOutputType = {
     id: number | null
     url: string | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
   }
 
   export type PhotoMaxAggregateOutputType = {
     id: number | null
     url: string | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
   }
 
   export type PhotoCountAggregateOutputType = {
@@ -3795,12 +3789,10 @@ export namespace Prisma {
 
   export type PhotoAvgAggregateInputType = {
     id?: true
-    vendingMachineId?: true
   }
 
   export type PhotoSumAggregateInputType = {
     id?: true
-    vendingMachineId?: true
   }
 
   export type PhotoMinAggregateInputType = {
@@ -3911,7 +3903,7 @@ export namespace Prisma {
   export type PhotoGroupByOutputType = {
     id: number
     url: string
-    vendingMachineId: number
+    vendingMachineId: string
     _count: PhotoCountAggregateOutputType | null
     _avg: PhotoAvgAggregateOutputType | null
     _sum: PhotoSumAggregateOutputType | null
@@ -3979,7 +3971,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       url: string
-      vendingMachineId: number
+      vendingMachineId: string
     }, ExtArgs["result"]["photo"]>
     composites: {}
   }
@@ -4406,7 +4398,7 @@ export namespace Prisma {
   interface PhotoFieldRefs {
     readonly id: FieldRef<"Photo", 'Int'>
     readonly url: FieldRef<"Photo", 'String'>
-    readonly vendingMachineId: FieldRef<"Photo", 'Int'>
+    readonly vendingMachineId: FieldRef<"Photo", 'String'>
   }
     
 
@@ -4833,12 +4825,10 @@ export namespace Prisma {
 
   export type ProductAvgAggregateOutputType = {
     id: number | null
-    vendingMachineId: number | null
   }
 
   export type ProductSumAggregateOutputType = {
     id: number | null
-    vendingMachineId: number | null
   }
 
   export type ProductMinAggregateOutputType = {
@@ -4846,7 +4836,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     photo: string | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
   }
 
   export type ProductMaxAggregateOutputType = {
@@ -4854,7 +4844,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     photo: string | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
   }
 
   export type ProductCountAggregateOutputType = {
@@ -4869,12 +4859,10 @@ export namespace Prisma {
 
   export type ProductAvgAggregateInputType = {
     id?: true
-    vendingMachineId?: true
   }
 
   export type ProductSumAggregateInputType = {
     id?: true
-    vendingMachineId?: true
   }
 
   export type ProductMinAggregateInputType = {
@@ -4993,7 +4981,7 @@ export namespace Prisma {
     name: string
     description: string | null
     photo: string | null
-    vendingMachineId: number
+    vendingMachineId: string
     _count: ProductCountAggregateOutputType | null
     _avg: ProductAvgAggregateOutputType | null
     _sum: ProductSumAggregateOutputType | null
@@ -5071,7 +5059,7 @@ export namespace Prisma {
       name: string
       description: string | null
       photo: string | null
-      vendingMachineId: number
+      vendingMachineId: string
     }, ExtArgs["result"]["product"]>
     composites: {}
   }
@@ -5500,7 +5488,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Product", 'String'>
     readonly description: FieldRef<"Product", 'String'>
     readonly photo: FieldRef<"Product", 'String'>
-    readonly vendingMachineId: FieldRef<"Product", 'Int'>
+    readonly vendingMachineId: FieldRef<"Product", 'String'>
   }
     
 
@@ -5927,26 +5915,24 @@ export namespace Prisma {
 
   export type PaymentMethodAvgAggregateOutputType = {
     id: number | null
-    vendingMachineId: number | null
   }
 
   export type PaymentMethodSumAggregateOutputType = {
     id: number | null
-    vendingMachineId: number | null
   }
 
   export type PaymentMethodMinAggregateOutputType = {
     id: number | null
     type: $Enums.PaymentType | null
     available: boolean | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
   }
 
   export type PaymentMethodMaxAggregateOutputType = {
     id: number | null
     type: $Enums.PaymentType | null
     available: boolean | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
   }
 
   export type PaymentMethodCountAggregateOutputType = {
@@ -5960,12 +5946,10 @@ export namespace Prisma {
 
   export type PaymentMethodAvgAggregateInputType = {
     id?: true
-    vendingMachineId?: true
   }
 
   export type PaymentMethodSumAggregateInputType = {
     id?: true
-    vendingMachineId?: true
   }
 
   export type PaymentMethodMinAggregateInputType = {
@@ -6080,7 +6064,7 @@ export namespace Prisma {
     id: number
     type: $Enums.PaymentType
     available: boolean
-    vendingMachineId: number
+    vendingMachineId: string
     _count: PaymentMethodCountAggregateOutputType | null
     _avg: PaymentMethodAvgAggregateOutputType | null
     _sum: PaymentMethodSumAggregateOutputType | null
@@ -6153,7 +6137,7 @@ export namespace Prisma {
       id: number
       type: $Enums.PaymentType
       available: boolean
-      vendingMachineId: number
+      vendingMachineId: string
     }, ExtArgs["result"]["paymentMethod"]>
     composites: {}
   }
@@ -6581,7 +6565,7 @@ export namespace Prisma {
     readonly id: FieldRef<"PaymentMethod", 'Int'>
     readonly type: FieldRef<"PaymentMethod", 'PaymentType'>
     readonly available: FieldRef<"PaymentMethod", 'Boolean'>
-    readonly vendingMachineId: FieldRef<"PaymentMethod", 'Int'>
+    readonly vendingMachineId: FieldRef<"PaymentMethod", 'String'>
   }
     
 
@@ -7010,14 +6994,12 @@ export namespace Prisma {
     id: number | null
     rating: number | null
     userId: number | null
-    vendingMachineId: number | null
   }
 
   export type ReviewSumAggregateOutputType = {
     id: number | null
     rating: number | null
     userId: number | null
-    vendingMachineId: number | null
   }
 
   export type ReviewMinAggregateOutputType = {
@@ -7025,7 +7007,7 @@ export namespace Prisma {
     rating: number | null
     comment: string | null
     userId: number | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
     createdAt: Date | null
   }
 
@@ -7034,7 +7016,7 @@ export namespace Prisma {
     rating: number | null
     comment: string | null
     userId: number | null
-    vendingMachineId: number | null
+    vendingMachineId: string | null
     createdAt: Date | null
   }
 
@@ -7053,14 +7035,12 @@ export namespace Prisma {
     id?: true
     rating?: true
     userId?: true
-    vendingMachineId?: true
   }
 
   export type ReviewSumAggregateInputType = {
     id?: true
     rating?: true
     userId?: true
-    vendingMachineId?: true
   }
 
   export type ReviewMinAggregateInputType = {
@@ -7182,7 +7162,7 @@ export namespace Prisma {
     rating: number
     comment: string
     userId: number
-    vendingMachineId: number
+    vendingMachineId: string
     createdAt: Date
     _count: ReviewCountAggregateOutputType | null
     _avg: ReviewAvgAggregateOutputType | null
@@ -7272,7 +7252,7 @@ export namespace Prisma {
       rating: number
       comment: string
       userId: number
-      vendingMachineId: number
+      vendingMachineId: string
       createdAt: Date
     }, ExtArgs["result"]["review"]>
     composites: {}
@@ -7703,7 +7683,7 @@ export namespace Prisma {
     readonly rating: FieldRef<"Review", 'Int'>
     readonly comment: FieldRef<"Review", 'String'>
     readonly userId: FieldRef<"Review", 'Int'>
-    readonly vendingMachineId: FieldRef<"Review", 'Int'>
+    readonly vendingMachineId: FieldRef<"Review", 'String'>
     readonly createdAt: FieldRef<"Review", 'DateTime'>
   }
     
@@ -8315,7 +8295,7 @@ export namespace Prisma {
     AND?: VendingMachineWhereInput | VendingMachineWhereInput[]
     OR?: VendingMachineWhereInput[]
     NOT?: VendingMachineWhereInput | VendingMachineWhereInput[]
-    id?: IntFilter<"VendingMachine"> | number
+    id?: StringFilter<"VendingMachine"> | string
     name?: StringFilter<"VendingMachine"> | string
     location?: StringFilter<"VendingMachine"> | string
     ownerId?: IntFilter<"VendingMachine"> | number
@@ -8339,7 +8319,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: VendingMachineWhereInput | VendingMachineWhereInput[]
     OR?: VendingMachineWhereInput[]
     NOT?: VendingMachineWhereInput | VendingMachineWhereInput[]
@@ -8369,7 +8349,7 @@ export namespace Prisma {
     AND?: VendingMachineScalarWhereWithAggregatesInput | VendingMachineScalarWhereWithAggregatesInput[]
     OR?: VendingMachineScalarWhereWithAggregatesInput[]
     NOT?: VendingMachineScalarWhereWithAggregatesInput | VendingMachineScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"VendingMachine"> | number
+    id?: StringWithAggregatesFilter<"VendingMachine"> | string
     name?: StringWithAggregatesFilter<"VendingMachine"> | string
     location?: StringWithAggregatesFilter<"VendingMachine"> | string
     ownerId?: IntWithAggregatesFilter<"VendingMachine"> | number
@@ -8381,7 +8361,7 @@ export namespace Prisma {
     NOT?: PhotoWhereInput | PhotoWhereInput[]
     id?: IntFilter<"Photo"> | number
     url?: StringFilter<"Photo"> | string
-    vendingMachineId?: IntFilter<"Photo"> | number
+    vendingMachineId?: StringFilter<"Photo"> | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
   }
 
@@ -8398,7 +8378,7 @@ export namespace Prisma {
     OR?: PhotoWhereInput[]
     NOT?: PhotoWhereInput | PhotoWhereInput[]
     url?: StringFilter<"Photo"> | string
-    vendingMachineId?: IntFilter<"Photo"> | number
+    vendingMachineId?: StringFilter<"Photo"> | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
   }, "id">
 
@@ -8419,7 +8399,7 @@ export namespace Prisma {
     NOT?: PhotoScalarWhereWithAggregatesInput | PhotoScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Photo"> | number
     url?: StringWithAggregatesFilter<"Photo"> | string
-    vendingMachineId?: IntWithAggregatesFilter<"Photo"> | number
+    vendingMachineId?: StringWithAggregatesFilter<"Photo"> | string
   }
 
   export type ProductWhereInput = {
@@ -8430,7 +8410,7 @@ export namespace Prisma {
     name?: StringFilter<"Product"> | string
     description?: StringNullableFilter<"Product"> | string | null
     photo?: StringNullableFilter<"Product"> | string | null
-    vendingMachineId?: IntFilter<"Product"> | number
+    vendingMachineId?: StringFilter<"Product"> | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
   }
 
@@ -8451,7 +8431,7 @@ export namespace Prisma {
     name?: StringFilter<"Product"> | string
     description?: StringNullableFilter<"Product"> | string | null
     photo?: StringNullableFilter<"Product"> | string | null
-    vendingMachineId?: IntFilter<"Product"> | number
+    vendingMachineId?: StringFilter<"Product"> | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
   }, "id">
 
@@ -8476,7 +8456,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Product"> | string
     description?: StringNullableWithAggregatesFilter<"Product"> | string | null
     photo?: StringNullableWithAggregatesFilter<"Product"> | string | null
-    vendingMachineId?: IntWithAggregatesFilter<"Product"> | number
+    vendingMachineId?: StringWithAggregatesFilter<"Product"> | string
   }
 
   export type PaymentMethodWhereInput = {
@@ -8486,7 +8466,7 @@ export namespace Prisma {
     id?: IntFilter<"PaymentMethod"> | number
     type?: EnumPaymentTypeFilter<"PaymentMethod"> | $Enums.PaymentType
     available?: BoolFilter<"PaymentMethod"> | boolean
-    vendingMachineId?: IntFilter<"PaymentMethod"> | number
+    vendingMachineId?: StringFilter<"PaymentMethod"> | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
   }
 
@@ -8505,7 +8485,7 @@ export namespace Prisma {
     NOT?: PaymentMethodWhereInput | PaymentMethodWhereInput[]
     type?: EnumPaymentTypeFilter<"PaymentMethod"> | $Enums.PaymentType
     available?: BoolFilter<"PaymentMethod"> | boolean
-    vendingMachineId?: IntFilter<"PaymentMethod"> | number
+    vendingMachineId?: StringFilter<"PaymentMethod"> | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
   }, "id">
 
@@ -8528,7 +8508,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"PaymentMethod"> | number
     type?: EnumPaymentTypeWithAggregatesFilter<"PaymentMethod"> | $Enums.PaymentType
     available?: BoolWithAggregatesFilter<"PaymentMethod"> | boolean
-    vendingMachineId?: IntWithAggregatesFilter<"PaymentMethod"> | number
+    vendingMachineId?: StringWithAggregatesFilter<"PaymentMethod"> | string
   }
 
   export type ReviewWhereInput = {
@@ -8539,7 +8519,7 @@ export namespace Prisma {
     rating?: IntFilter<"Review"> | number
     comment?: StringFilter<"Review"> | string
     userId?: IntFilter<"Review"> | number
-    vendingMachineId?: IntFilter<"Review"> | number
+    vendingMachineId?: StringFilter<"Review"> | string
     createdAt?: DateTimeFilter<"Review"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
@@ -8564,7 +8544,7 @@ export namespace Prisma {
     rating?: IntFilter<"Review"> | number
     comment?: StringFilter<"Review"> | string
     userId?: IntFilter<"Review"> | number
-    vendingMachineId?: IntFilter<"Review"> | number
+    vendingMachineId?: StringFilter<"Review"> | string
     createdAt?: DateTimeFilter<"Review"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
@@ -8592,7 +8572,7 @@ export namespace Prisma {
     rating?: IntWithAggregatesFilter<"Review"> | number
     comment?: StringWithAggregatesFilter<"Review"> | string
     userId?: IntWithAggregatesFilter<"Review"> | number
-    vendingMachineId?: IntWithAggregatesFilter<"Review"> | number
+    vendingMachineId?: StringWithAggregatesFilter<"Review"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Review"> | Date | string
   }
 
@@ -8651,6 +8631,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateInput = {
+    id?: string
     name: string
     location: string
     owner: UserCreateNestedOneWithoutMachinesInput
@@ -8661,7 +8642,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedCreateInput = {
-    id?: number
+    id?: string
     name: string
     location: string
     ownerId: number
@@ -8672,6 +8653,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     owner?: UserUpdateOneRequiredWithoutMachinesNestedInput
@@ -8682,7 +8664,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     ownerId?: IntFieldUpdateOperationsInput | number
@@ -8693,19 +8675,20 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateManyInput = {
-    id?: number
+    id?: string
     name: string
     location: string
     ownerId: number
   }
 
   export type VendingMachineUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
   }
 
   export type VendingMachineUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     ownerId?: IntFieldUpdateOperationsInput | number
@@ -8719,7 +8702,7 @@ export namespace Prisma {
   export type PhotoUncheckedCreateInput = {
     id?: number
     url: string
-    vendingMachineId: number
+    vendingMachineId: string
   }
 
   export type PhotoUpdateInput = {
@@ -8730,13 +8713,13 @@ export namespace Prisma {
   export type PhotoUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     url?: StringFieldUpdateOperationsInput | string
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
   }
 
   export type PhotoCreateManyInput = {
     id?: number
     url: string
-    vendingMachineId: number
+    vendingMachineId: string
   }
 
   export type PhotoUpdateManyMutationInput = {
@@ -8746,7 +8729,7 @@ export namespace Prisma {
   export type PhotoUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     url?: StringFieldUpdateOperationsInput | string
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProductCreateInput = {
@@ -8761,7 +8744,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     photo?: string | null
-    vendingMachineId: number
+    vendingMachineId: string
   }
 
   export type ProductUpdateInput = {
@@ -8776,7 +8759,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProductCreateManyInput = {
@@ -8784,7 +8767,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     photo?: string | null
-    vendingMachineId: number
+    vendingMachineId: string
   }
 
   export type ProductUpdateManyMutationInput = {
@@ -8798,7 +8781,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
   }
 
   export type PaymentMethodCreateInput = {
@@ -8811,7 +8794,7 @@ export namespace Prisma {
     id?: number
     type: $Enums.PaymentType
     available?: boolean
-    vendingMachineId: number
+    vendingMachineId: string
   }
 
   export type PaymentMethodUpdateInput = {
@@ -8824,14 +8807,14 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     available?: BoolFieldUpdateOperationsInput | boolean
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
   }
 
   export type PaymentMethodCreateManyInput = {
     id?: number
     type: $Enums.PaymentType
     available?: boolean
-    vendingMachineId: number
+    vendingMachineId: string
   }
 
   export type PaymentMethodUpdateManyMutationInput = {
@@ -8843,7 +8826,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     available?: BoolFieldUpdateOperationsInput | boolean
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ReviewCreateInput = {
@@ -8859,7 +8842,7 @@ export namespace Prisma {
     rating: number
     comment: string
     userId: number
-    vendingMachineId: number
+    vendingMachineId: string
     createdAt?: Date | string
   }
 
@@ -8876,7 +8859,7 @@ export namespace Prisma {
     rating?: IntFieldUpdateOperationsInput | number
     comment?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -8885,7 +8868,7 @@ export namespace Prisma {
     rating: number
     comment: string
     userId: number
-    vendingMachineId: number
+    vendingMachineId: string
     createdAt?: Date | string
   }
 
@@ -8900,7 +8883,7 @@ export namespace Prisma {
     rating?: IntFieldUpdateOperationsInput | number
     comment?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -9054,7 +9037,6 @@ export namespace Prisma {
   }
 
   export type VendingMachineAvgOrderByAggregateInput = {
-    id?: SortOrder
     ownerId?: SortOrder
   }
 
@@ -9073,7 +9055,6 @@ export namespace Prisma {
   }
 
   export type VendingMachineSumOrderByAggregateInput = {
-    id?: SortOrder
     ownerId?: SortOrder
   }
 
@@ -9090,7 +9071,6 @@ export namespace Prisma {
 
   export type PhotoAvgOrderByAggregateInput = {
     id?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type PhotoMaxOrderByAggregateInput = {
@@ -9107,7 +9087,6 @@ export namespace Prisma {
 
   export type PhotoSumOrderByAggregateInput = {
     id?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type StringNullableFilter<$PrismaModel = never> = {
@@ -9139,7 +9118,6 @@ export namespace Prisma {
 
   export type ProductAvgOrderByAggregateInput = {
     id?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type ProductMaxOrderByAggregateInput = {
@@ -9160,7 +9138,6 @@ export namespace Prisma {
 
   export type ProductSumOrderByAggregateInput = {
     id?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -9201,7 +9178,6 @@ export namespace Prisma {
 
   export type PaymentMethodAvgOrderByAggregateInput = {
     id?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type PaymentMethodMaxOrderByAggregateInput = {
@@ -9220,7 +9196,6 @@ export namespace Prisma {
 
   export type PaymentMethodSumOrderByAggregateInput = {
     id?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type EnumPaymentTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -9265,7 +9240,6 @@ export namespace Prisma {
     id?: SortOrder
     rating?: SortOrder
     userId?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type ReviewMaxOrderByAggregateInput = {
@@ -9290,7 +9264,6 @@ export namespace Prisma {
     id?: SortOrder
     rating?: SortOrder
     userId?: SortOrder
-    vendingMachineId?: SortOrder
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -9838,6 +9811,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateWithoutOwnerInput = {
+    id?: string
     name: string
     location: string
     products?: ProductCreateNestedManyWithoutVendingMachineInput
@@ -9847,7 +9821,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedCreateWithoutOwnerInput = {
-    id?: number
+    id?: string
     name: string
     location: string
     products?: ProductUncheckedCreateNestedManyWithoutVendingMachineInput
@@ -9876,7 +9850,7 @@ export namespace Prisma {
     id?: number
     rating: number
     comment: string
-    vendingMachineId: number
+    vendingMachineId: string
     createdAt?: Date | string
   }
 
@@ -9909,7 +9883,7 @@ export namespace Prisma {
     AND?: VendingMachineScalarWhereInput | VendingMachineScalarWhereInput[]
     OR?: VendingMachineScalarWhereInput[]
     NOT?: VendingMachineScalarWhereInput | VendingMachineScalarWhereInput[]
-    id?: IntFilter<"VendingMachine"> | number
+    id?: StringFilter<"VendingMachine"> | string
     name?: StringFilter<"VendingMachine"> | string
     location?: StringFilter<"VendingMachine"> | string
     ownerId?: IntFilter<"VendingMachine"> | number
@@ -9939,7 +9913,7 @@ export namespace Prisma {
     rating?: IntFilter<"Review"> | number
     comment?: StringFilter<"Review"> | string
     userId?: IntFilter<"Review"> | number
-    vendingMachineId?: IntFilter<"Review"> | number
+    vendingMachineId?: StringFilter<"Review"> | string
     createdAt?: DateTimeFilter<"Review"> | Date | string
   }
 
@@ -10097,7 +10071,7 @@ export namespace Prisma {
     name?: StringFilter<"Product"> | string
     description?: StringNullableFilter<"Product"> | string | null
     photo?: StringNullableFilter<"Product"> | string | null
-    vendingMachineId?: IntFilter<"Product"> | number
+    vendingMachineId?: StringFilter<"Product"> | string
   }
 
   export type PaymentMethodUpsertWithWhereUniqueWithoutVendingMachineInput = {
@@ -10123,7 +10097,7 @@ export namespace Prisma {
     id?: IntFilter<"PaymentMethod"> | number
     type?: EnumPaymentTypeFilter<"PaymentMethod"> | $Enums.PaymentType
     available?: BoolFilter<"PaymentMethod"> | boolean
-    vendingMachineId?: IntFilter<"PaymentMethod"> | number
+    vendingMachineId?: StringFilter<"PaymentMethod"> | string
   }
 
   export type PhotoUpsertWithWhereUniqueWithoutVendingMachineInput = {
@@ -10148,7 +10122,7 @@ export namespace Prisma {
     NOT?: PhotoScalarWhereInput | PhotoScalarWhereInput[]
     id?: IntFilter<"Photo"> | number
     url?: StringFilter<"Photo"> | string
-    vendingMachineId?: IntFilter<"Photo"> | number
+    vendingMachineId?: StringFilter<"Photo"> | string
   }
 
   export type ReviewUpsertWithWhereUniqueWithoutVendingMachineInput = {
@@ -10168,6 +10142,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateWithoutPhotosInput = {
+    id?: string
     name: string
     location: string
     owner: UserCreateNestedOneWithoutMachinesInput
@@ -10177,7 +10152,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedCreateWithoutPhotosInput = {
-    id?: number
+    id?: string
     name: string
     location: string
     ownerId: number
@@ -10203,6 +10178,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUpdateWithoutPhotosInput = {
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     owner?: UserUpdateOneRequiredWithoutMachinesNestedInput
@@ -10212,7 +10188,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedUpdateWithoutPhotosInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     ownerId?: IntFieldUpdateOperationsInput | number
@@ -10222,6 +10198,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateWithoutProductsInput = {
+    id?: string
     name: string
     location: string
     owner: UserCreateNestedOneWithoutMachinesInput
@@ -10231,7 +10208,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedCreateWithoutProductsInput = {
-    id?: number
+    id?: string
     name: string
     location: string
     ownerId: number
@@ -10257,6 +10234,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUpdateWithoutProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     owner?: UserUpdateOneRequiredWithoutMachinesNestedInput
@@ -10266,7 +10244,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedUpdateWithoutProductsInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     ownerId?: IntFieldUpdateOperationsInput | number
@@ -10276,6 +10254,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateWithoutPaymentMethodsInput = {
+    id?: string
     name: string
     location: string
     owner: UserCreateNestedOneWithoutMachinesInput
@@ -10285,7 +10264,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedCreateWithoutPaymentMethodsInput = {
-    id?: number
+    id?: string
     name: string
     location: string
     ownerId: number
@@ -10311,6 +10290,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUpdateWithoutPaymentMethodsInput = {
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     owner?: UserUpdateOneRequiredWithoutMachinesNestedInput
@@ -10320,7 +10300,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedUpdateWithoutPaymentMethodsInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     ownerId?: IntFieldUpdateOperationsInput | number
@@ -10350,6 +10330,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateWithoutReviewsInput = {
+    id?: string
     name: string
     location: string
     owner: UserCreateNestedOneWithoutMachinesInput
@@ -10359,7 +10340,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedCreateWithoutReviewsInput = {
-    id?: number
+    id?: string
     name: string
     location: string
     ownerId: number
@@ -10411,6 +10392,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUpdateWithoutReviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     owner?: UserUpdateOneRequiredWithoutMachinesNestedInput
@@ -10420,7 +10402,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedUpdateWithoutReviewsInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     ownerId?: IntFieldUpdateOperationsInput | number
@@ -10430,7 +10412,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineCreateManyOwnerInput = {
-    id?: number
+    id?: string
     name: string
     location: string
   }
@@ -10439,11 +10421,12 @@ export namespace Prisma {
     id?: number
     rating: number
     comment: string
-    vendingMachineId: number
+    vendingMachineId: string
     createdAt?: Date | string
   }
 
   export type VendingMachineUpdateWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     products?: ProductUpdateManyWithoutVendingMachineNestedInput
@@ -10453,7 +10436,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedUpdateWithoutOwnerInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     products?: ProductUncheckedUpdateManyWithoutVendingMachineNestedInput
@@ -10463,7 +10446,7 @@ export namespace Prisma {
   }
 
   export type VendingMachineUncheckedUpdateManyWithoutOwnerInput = {
-    id?: IntFieldUpdateOperationsInput | number
+    id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
   }
@@ -10479,7 +10462,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     rating?: IntFieldUpdateOperationsInput | number
     comment?: StringFieldUpdateOperationsInput | string
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10487,7 +10470,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     rating?: IntFieldUpdateOperationsInput | number
     comment?: StringFieldUpdateOperationsInput | string
-    vendingMachineId?: IntFieldUpdateOperationsInput | number
+    vendingMachineId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

@@ -19,7 +19,7 @@ router.get('/machines', async (req, res) => {
 
 // Get vending machine by ID
 router.get('/machines/:id', async (req, res) => {
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const machine = await prisma.vendingMachine.findUnique({
     where: { id },
     include: {
