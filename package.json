@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Vending machine information platform",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
+    "build": "cd frontend && npm ci && npm run build",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev",
-    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "clean": "rm -rf frontend/node_modules frontend/package-lock.json backend/node_modules backend/package-lock.json node_modules package-lock.json"
   },
   "workspaces": [
     "frontend",
