@@ -121,7 +121,7 @@ router.post('/machines', requireAuth, async (req, res) => {
 router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) => {
   try {
     const id = req.params.id;
-    const { name, location, description, isActive, products, paymentMethods } = req.body;
+    const { name, location, description, isActive, products = [], paymentMethods = [] } = req.body;
 
     const updateData: any = {
       ...(name && { name }),
@@ -130,9 +130,47 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
       ...(isActive !== undefined && { isActive }),
     };
 
+    // Handle products update - delete existing and create new ones
+    if (products.length > 0) {
+      // Delete existing products
+      await prisma.product.deleteMany({
+        where: { vendingMachineId: id }
+      });
+    }
+
+    // Handle payment methods update - delete existing and create new ones
+    if (paymentMethods.length > 0) {
+      // Delete existing payment methods
+      await prisma.paymentMethod.deleteMany({
+        where: { vendingMachineId: id }
+      });
+    }
+
     const machine = await prisma.vendingMachine.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...updateData,
+        ...(products.length > 0 && {
+          products: {
+            create: products.map((product: any) => ({
+              name: product.name,
+              description: product.description,
+              photo: product.photo,
+              price: product.price,
+              slotCode: product.slotCode,
+              isAvailable: product.isAvailable ?? true,
+            })),
+          },
+        }),
+        ...(paymentMethods.length > 0 && {
+          paymentMethods: {
+            create: paymentMethods.map((pm: any) => ({
+              type: pm.type,
+              available: pm.available ?? false,
+            })),
+          },
+        }),
+      },
       include: {
         products: true,
         paymentMethods: true,

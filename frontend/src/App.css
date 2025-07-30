@@ -1181,6 +1181,15 @@ html[data-theme='dark'] .status-badge.inactive {
   border-top: 1px solid var(--text-muted);
 }
 
+.form-actions-top {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  padding-top: 0;
+  padding-bottom: 2rem;
+  border-top: none;
+  border-bottom: 1px solid var(--text-muted);
+}
+
 .back-button {
   background: none;
   border: none;
@@ -1233,6 +1242,10 @@ html[data-theme='light'] {
 
   .form-actions {
     flex-direction: column-reverse;
+  }
+
+  .form-actions-top {
+    flex-direction: column;
   }
 
   .payment-methods-grid {

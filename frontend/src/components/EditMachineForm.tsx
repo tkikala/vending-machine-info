@@ -178,7 +178,10 @@ function EditMachineForm() {
           slotCode: p.slotCode,
           isAvailable: p.isAvailable
         })),
-        paymentMethods: paymentMethods.filter(pm => pm.available)
+        paymentMethods: paymentMethods.map(pm => ({
+          type: pm.type,
+          available: pm.available
+        }))
       };
 
       await updateVendingMachine(id, machineData);
@@ -229,6 +232,16 @@ function EditMachineForm() {
       <div className="form-container">
         <form onSubmit={handleSubmit} className="machine-form">
           {error && <div className="error-message">{error}</div>}
+          
+          {/* Top Save Actions */}
+          <div className="form-actions form-actions-top">
+            <button type="button" onClick={() => navigate('/admin')} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" disabled={loading} className="btn btn-primary">
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
 
           {/* Basic Information */}
           <div className="form-section">
