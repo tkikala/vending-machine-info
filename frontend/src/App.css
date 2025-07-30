@@ -580,6 +580,17 @@ html[data-theme='light'] .product-desc {
 .payment-emoji {
   margin-right: 0.5rem;
   display: inline-block;
+  width: 1.4em;
+  text-align: center;
+}
+
+.payment-logo {
+  height: 1.4em;
+  width: 1.4em;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  display: inline-block;
+  object-fit: contain;
 }
 
 @media (max-width: 900px) {
