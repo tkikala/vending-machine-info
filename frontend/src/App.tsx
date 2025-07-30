@@ -6,6 +6,8 @@ import MachinePage from './components/MachinePage';
 import LoginPage from './components/LoginPage';
 import AdminDashboard from './components/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import AddMachineForm from './components/AddMachineForm';
+import EditMachineForm from './components/EditMachineForm';
 
 function App() {
   return (
@@ -22,21 +24,21 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/admin/machines/new" 
+                <Route
+          path="/admin/machines/new"
           element={
             <ProtectedRoute>
-              <div>Add Machine Form (Coming Soon)</div>
+              <AddMachineForm />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/admin/machines/:id/edit" 
+        <Route
+          path="/admin/machines/:id/edit"
           element={
             <ProtectedRoute>
-              <div>Edit Machine Form (Coming Soon)</div>
+              <EditMachineForm />
             </ProtectedRoute>
-          } 
+          }
         />
       </Routes>
     </AuthProvider>
