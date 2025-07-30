@@ -21,11 +21,11 @@ interface GalleryManagerProps {
 function GalleryManager({ 
   initialGallery = [], 
   onGalleryChange, 
-  machineId, 
+  machineId: _machineId, 
   disabled = false 
 }: GalleryManagerProps) {
   const [gallery, setGallery] = useState<GalleryItem[]>(initialGallery);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, _setUploading] = useState(false);
 
   const handleFileSelect = async (files: File[]) => {
     const newItems: GalleryItem[] = files.map(file => ({

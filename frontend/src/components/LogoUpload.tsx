@@ -10,7 +10,7 @@ interface LogoUploadProps {
 function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(currentLogo || null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, _setUploading] = useState(false);
 
   const handleFileSelect = (files: File[]) => {
     const file = files[0];
