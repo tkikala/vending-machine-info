@@ -72,6 +72,7 @@ async function main() {
         create: [
           { type: PaymentType.COIN, available: true },
           { type: PaymentType.BANKNOTE, available: false },
+          { type: PaymentType.GIROCARD, available: true },
           { type: PaymentType.CREDIT_CARD, available: true },
         ],
       },
@@ -112,6 +113,7 @@ async function main() {
         create: [
           { type: PaymentType.COIN, available: true },
           { type: PaymentType.BANKNOTE, available: true },
+          { type: PaymentType.GIROCARD, available: true },
           { type: PaymentType.CREDIT_CARD, available: true },
         ],
       },
@@ -149,6 +151,7 @@ async function main() {
         create: [
           { type: PaymentType.COIN, available: false },
           { type: PaymentType.BANKNOTE, available: false },
+          { type: PaymentType.GIROCARD, available: true },
           { type: PaymentType.CREDIT_CARD, available: true },
         ],
       },

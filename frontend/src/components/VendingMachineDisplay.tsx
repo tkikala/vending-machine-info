@@ -3,19 +3,38 @@ import type { VendingMachine } from '../types';
 function PaymentIcon({ type, available }: { type: string; available: boolean }) {
   let icon = '';
   let label = '';
+  let isImageIcon = false;
+  
   if (type === 'COIN') {
     icon = '🪙';
     label = 'Coin';
   } else if (type === 'BANKNOTE') {
     icon = '💵';
     label = 'Banknote';
+  } else if (type === 'GIROCARD') {
+    icon = '/images/giro-card-logo.png';
+    label = 'Girocard';
+    isImageIcon = true;
   } else {
     icon = '💳';
     label = 'Credit Card';
   }
+  
   return (
     <span className="payment-icon">
-      <span className="payment-text">{icon} {label}</span>
+      <span className="payment-text">
+        {isImageIcon ? (
+          <>
+            <img src={icon} alt="Girocard" className="payment-logo" />
+            <span>{label}</span>
+          </>
+        ) : (
+          <>
+            <span className="payment-emoji">{icon}</span>
+            <span>{label}</span>
+          </>
+        )}
+      </span>
       <span className={`payment-status ${available ? 'available' : 'unavailable'}`}></span>
     </span>
   );

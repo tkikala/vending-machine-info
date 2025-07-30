@@ -51,6 +51,7 @@ export namespace $Enums {
   export const PaymentType: {
   COIN: 'COIN',
   BANKNOTE: 'BANKNOTE',
+  GIROCARD: 'GIROCARD',
   CREDIT_CARD: 'CREDIT_CARD'
 };
 
