@@ -46,6 +46,7 @@ function EditMachineForm() {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [logo, setLogo] = useState<string | undefined>(undefined);
+  const [logoFile, setLogoFile] = useState<File | undefined>(undefined);
 
   // Gallery
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -194,10 +195,11 @@ function EditMachineForm() {
 
       // Upload logo if it's a new file
       let logoUrl: string | undefined = logo;
-      if (logo && logo.startsWith('blob:')) {
-        // This is a new file upload - for now keep the blob URL
-        // In a production app, you'd upload to a proper file storage service
-        logoUrl = logo;
+      if (logoFile) {
+        console.log('Uploading new logo file...');
+        const logoUploadResult = await uploadSingleFile(logoFile);
+        logoUrl = logoUploadResult.file.url;
+        console.log('Logo uploaded successfully:', logoUrl);
       }
 
       // Handle gallery uploads
@@ -334,7 +336,10 @@ function EditMachineForm() {
              {/* Logo Upload */}
              <LogoUpload
                currentLogo={logo}
-               onLogoChange={setLogo}
+               onLogoChange={(logoUrl, file) => {
+                 setLogo(logoUrl);
+                 setLogoFile(file);
+               }}
                disabled={loading}
              />
            </div>

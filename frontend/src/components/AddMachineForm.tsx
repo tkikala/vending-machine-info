@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createVendingMachine, uploadSingleFile } from '../api';
+import { createVendingMachine, uploadSingleFile, uploadGalleryFiles } from '../api';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
 import LogoUpload from './LogoUpload';
@@ -41,6 +41,7 @@ function AddMachineForm() {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [logo, setLogo] = useState<string | undefined>(undefined);
+  const [logoFile, setLogoFile] = useState<File | undefined>(undefined);
 
   // Gallery
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -124,10 +125,11 @@ function AddMachineForm() {
 
       // Upload logo if selected
       let logoUrl: string | undefined = undefined;
-      if (logo && logo.startsWith('blob:')) {
-        // This is a new file upload - we need to handle logo file separately
-        // For now, we'll store the blob URL and handle upload differently
-        logoUrl = logo;
+      if (logoFile) {
+        console.log('Uploading logo file...');
+        const logoUploadResult = await uploadSingleFile(logoFile);
+        logoUrl = logoUploadResult.file.url;
+        console.log('Logo uploaded successfully:', logoUrl);
       } else if (logo) {
         logoUrl = logo; // Existing logo URL
       }
@@ -161,9 +163,9 @@ function AddMachineForm() {
         const galleryCaptions = gallery.filter(item => item.file).map(item => item.caption || '');
         
         if (galleryFiles.length > 0) {
-          // Note: We'll implement gallery upload after machine creation
-          // For now, we'll skip this since the API expects existing machine ID
-          console.log('Gallery files will be uploaded separately after machine creation');
+          console.log('Uploading gallery files for new machine:', machine.id);
+          await uploadGalleryFiles(machine.id, galleryFiles, galleryCaptions);
+          console.log('Gallery files uploaded successfully');
         }
       }
 
@@ -244,11 +246,14 @@ function AddMachineForm() {
             </div>
             
             {/* Logo Upload */}
-            <LogoUpload
-              currentLogo={logo}
-              onLogoChange={setLogo}
-              disabled={loading}
-            />
+                            <LogoUpload
+                  currentLogo={logo}
+                  onLogoChange={(logoUrl, file) => {
+                    setLogo(logoUrl);
+                    setLogoFile(file);
+                  }}
+                  disabled={loading}
+                />
           </div>
 
           {/* Products */}

@@ -67,7 +67,7 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
         <div className="machine-info-header">
           <img
             className="owner-logo-header"
-            src="/images/vending-machine-default.png"
+            src={machine.logo || "/images/vending-machine-default.png"}
             alt="Owner Logo"
           />
           <div className="machine-details">

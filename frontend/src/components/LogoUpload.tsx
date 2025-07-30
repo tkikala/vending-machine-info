@@ -3,7 +3,7 @@ import FileUpload from './FileUpload';
 
 interface LogoUploadProps {
   currentLogo?: string;
-  onLogoChange: (logoUrl: string | undefined) => void;
+  onLogoChange: (logoUrl: string | undefined, logoFile?: File) => void;
   disabled?: boolean;
 }
 
@@ -18,7 +18,7 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
       setLogoFile(file);
       const previewUrl = URL.createObjectURL(file);
       setLogoPreview(previewUrl);
-      onLogoChange(previewUrl); // Pass the preview URL for now, will be replaced with actual URL after upload
+      onLogoChange(previewUrl, file); // Pass both preview URL and file
     }
   };
 
@@ -28,7 +28,7 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
     }
     setLogoPreview(null);
     setLogoFile(null);
-    onLogoChange(undefined);
+    onLogoChange(undefined, undefined);
   };
 
   const formatFileSize = (bytes: number) => {

@@ -1,13 +1,21 @@
 import { Router } from 'express';
 import { uploadSingle, uploadGallery, getFileType, deleteFile } from './upload';
 import { requireAuth } from './auth';
+import { uploadLimiter } from './middleware/rateLimiter';
 import prisma from './prisma';
 import path from 'path';
+
+// Helper function to get server URL
+const getServerUrl = (req: any) => {
+  const protocol = req.protocol || 'http';
+  const host = req.get('host') || 'localhost:4000';
+  return `${protocol}://${host}`;
+};
 
 const uploadRouter = Router();
 
 // Upload single file (logo or general)
-uploadRouter.post('/single', requireAuth, uploadSingle, async (req, res) => {
+uploadRouter.post('/single', uploadLimiter, requireAuth, uploadSingle, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -19,7 +27,7 @@ uploadRouter.post('/single', requireAuth, uploadSingle, async (req, res) => {
       mimetype: req.file.mimetype,
       size: req.file.size,
       path: req.file.path,
-      url: `/uploads/${path.basename(path.dirname(req.file.path))}/${req.file.filename}`,
+      url: `${getServerUrl(req)}/uploads/${path.basename(path.dirname(req.file.path))}/${req.file.filename}`,
       fileType: getFileType(req.file.mimetype)
     };
 
@@ -34,7 +42,7 @@ uploadRouter.post('/single', requireAuth, uploadSingle, async (req, res) => {
 });
 
 // Upload gallery files for a specific machine
-uploadRouter.post('/gallery/:machineId', requireAuth, uploadGallery, async (req, res) => {
+uploadRouter.post('/gallery/:machineId', uploadLimiter, requireAuth, uploadGallery, async (req, res) => {
   try {
     const { machineId } = req.params;
     const files = req.files as Express.Multer.File[];
@@ -64,7 +72,7 @@ uploadRouter.post('/gallery/:machineId', requireAuth, uploadGallery, async (req,
 
     // Create photo records in database
     const photoPromises = files.map(file => {
-      const url = `/uploads/gallery/${file.filename}`;
+      const url = `${getServerUrl(req)}/uploads/gallery/${file.filename}`;
       return prisma.photo.create({
         data: {
           url,

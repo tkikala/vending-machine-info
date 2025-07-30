@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import prisma from './prisma';
 import { hashPassword, verifyPassword, createSession, requireAuth } from './auth';
+import { loginLimiter } from './middleware/rateLimiter';
 
 const authRouter = Router();
 
-// Login route
-authRouter.post('/login', async (req, res) => {
+// Login route with rate limiting
+authRouter.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
