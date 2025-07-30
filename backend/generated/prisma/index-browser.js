@@ -121,20 +121,30 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   password: 'password',
-  name: 'name'
+  name: 'name',
+  role: 'role',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.VendingMachineScalarFieldEnum = {
   id: 'id',
   name: 'name',
   location: 'location',
-  ownerId: 'ownerId'
-};
-
-exports.Prisma.PhotoScalarFieldEnum = {
-  id: 'id',
-  url: 'url',
-  vendingMachineId: 'vendingMachineId'
+  description: 'description',
+  isActive: 'isActive',
+  ownerId: 'ownerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.ProductScalarFieldEnum = {
@@ -142,7 +152,12 @@ exports.Prisma.ProductScalarFieldEnum = {
   name: 'name',
   description: 'description',
   photo: 'photo',
-  vendingMachineId: 'vendingMachineId'
+  price: 'price',
+  slotCode: 'slotCode',
+  isAvailable: 'isAvailable',
+  vendingMachineId: 'vendingMachineId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.PaymentMethodScalarFieldEnum = {
@@ -152,13 +167,23 @@ exports.Prisma.PaymentMethodScalarFieldEnum = {
   vendingMachineId: 'vendingMachineId'
 };
 
+exports.Prisma.PhotoScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  caption: 'caption',
+  vendingMachineId: 'vendingMachineId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.ReviewScalarFieldEnum = {
   id: 'id',
   rating: 'rating',
   comment: 'comment',
+  isApproved: 'isApproved',
   userId: 'userId',
   vendingMachineId: 'vendingMachineId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -170,6 +195,11 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.UserRole = exports.$Enums.UserRole = {
+  ADMIN: 'ADMIN',
+  OWNER: 'OWNER'
+};
+
 exports.PaymentType = exports.$Enums.PaymentType = {
   COIN: 'COIN',
   BANKNOTE: 'BANKNOTE',
@@ -179,10 +209,11 @@ exports.PaymentType = exports.$Enums.PaymentType = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Session: 'Session',
   VendingMachine: 'VendingMachine',
-  Photo: 'Photo',
   Product: 'Product',
   PaymentMethod: 'PaymentMethod',
+  Photo: 'Photo',
   Review: 'Review'
 };
 
