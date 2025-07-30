@@ -141,6 +141,7 @@ exports.Prisma.VendingMachineScalarFieldEnum = {
   name: 'name',
   location: 'location',
   description: 'description',
+  logo: 'logo',
   isActive: 'isActive',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
@@ -171,6 +172,9 @@ exports.Prisma.PhotoScalarFieldEnum = {
   id: 'id',
   url: 'url',
   caption: 'caption',
+  fileType: 'fileType',
+  originalName: 'originalName',
+  fileSize: 'fileSize',
   vendingMachineId: 'vendingMachineId',
   createdAt: 'createdAt'
 };

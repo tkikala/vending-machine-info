@@ -51,6 +51,7 @@ model VendingMachine {
   name           String
   location       String
   description    String?
+  logo           String?          // Added: Path to uploaded logo file
   isActive       Boolean          @default(true)
   ownerId        Int
   owner          User             @relation(fields: [ownerId], references: [id])
@@ -88,6 +89,9 @@ model Photo {
   id               Int              @id @default(autoincrement())
   url              String
   caption          String?
+  fileType         String           @default("image") // "image" or "video"
+  originalName     String?          // Original filename
+  fileSize         Int?             // File size in bytes
   vendingMachineId String
   vendingMachine   VendingMachine   @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
   createdAt        DateTime         @default(now())

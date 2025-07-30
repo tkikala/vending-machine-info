@@ -73,7 +73,7 @@ router.get('/admin/machines', requireAuth, requireAdmin, async (req, res) => {
 // Create vending machine (authenticated users)
 router.post('/machines', requireAuth, async (req, res) => {
   try {
-    const { name, location, description, products = [], paymentMethods = [] } = req.body;
+    const { name, location, description, logo, products = [], paymentMethods = [] } = req.body;
     
     if (!name || !location) {
       return res.status(400).json({ error: 'Name and location are required' });
@@ -84,6 +84,7 @@ router.post('/machines', requireAuth, async (req, res) => {
         name,
         location,
         description,
+        logo,
         ownerId: req.user.id,
         products: {
           create: products.map((product: any) => ({
@@ -121,12 +122,13 @@ router.post('/machines', requireAuth, async (req, res) => {
 router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) => {
   try {
     const id = req.params.id;
-    const { name, location, description, isActive, products = [], paymentMethods = [] } = req.body;
+    const { name, location, description, logo, isActive, products = [], paymentMethods = [] } = req.body;
 
     const updateData: any = {
       ...(name && { name }),
       ...(location && { location }),
       ...(description !== undefined && { description }),
+      ...(logo !== undefined && { logo }),
       ...(isActive !== undefined && { isActive }),
     };
 

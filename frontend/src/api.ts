@@ -183,3 +183,92 @@ export async function fetchMyMachines() {
   
   return res.json();
 } 
+
+// File Upload API
+export async function uploadSingleFile(file: File): Promise<any> {
+  try {
+    console.log('Uploading single file:', file.name);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API_BASE}/upload/single`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+
+    console.log('Upload response status:', res.status, res.statusText);
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'File upload failed');
+    }
+
+    const data = await res.json();
+    console.log('File uploaded successfully:', data.file.filename);
+    return data;
+  } catch (error) {
+    console.error('uploadSingleFile error:', error);
+    throw error;
+  }
+}
+
+export async function uploadGalleryFiles(machineId: string, files: File[], captions?: string[]): Promise<any> {
+  try {
+    console.log('Uploading gallery files for machine:', machineId, files.length, 'files');
+    
+    const formData = new FormData();
+    files.forEach((file, index) => {
+      formData.append('gallery', file);
+      if (captions && captions[index]) {
+        formData.append(`caption_${index}`, captions[index]);
+      }
+    });
+
+    const res = await fetch(`${API_BASE}/upload/gallery/${machineId}`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+
+    console.log('Gallery upload response status:', res.status, res.statusText);
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Gallery upload failed');
+    }
+
+    const data = await res.json();
+    console.log('Gallery uploaded successfully:', data.photos.length, 'items');
+    return data;
+  } catch (error) {
+    console.error('uploadGalleryFiles error:', error);
+    throw error;
+  }
+}
+
+export async function deleteGalleryItem(photoId: number): Promise<any> {
+  try {
+    console.log('Deleting gallery item:', photoId);
+    
+    const res = await fetch(`${API_BASE}/upload/gallery/${photoId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    console.log('Delete gallery item response status:', res.status, res.statusText);
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Failed to delete gallery item');
+    }
+
+    const data = await res.json();
+    console.log('Gallery item deleted successfully');
+    return data;
+  } catch (error) {
+    console.error('deleteGalleryItem error:', error);
+    throw error;
+  }
+} 

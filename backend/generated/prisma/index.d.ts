@@ -3864,6 +3864,7 @@ export namespace Prisma {
     name: string | null
     location: string | null
     description: string | null
+    logo: string | null
     isActive: boolean | null
     ownerId: number | null
     createdAt: Date | null
@@ -3875,6 +3876,7 @@ export namespace Prisma {
     name: string | null
     location: string | null
     description: string | null
+    logo: string | null
     isActive: boolean | null
     ownerId: number | null
     createdAt: Date | null
@@ -3886,6 +3888,7 @@ export namespace Prisma {
     name: number
     location: number
     description: number
+    logo: number
     isActive: number
     ownerId: number
     createdAt: number
@@ -3907,6 +3910,7 @@ export namespace Prisma {
     name?: true
     location?: true
     description?: true
+    logo?: true
     isActive?: true
     ownerId?: true
     createdAt?: true
@@ -3918,6 +3922,7 @@ export namespace Prisma {
     name?: true
     location?: true
     description?: true
+    logo?: true
     isActive?: true
     ownerId?: true
     createdAt?: true
@@ -3929,6 +3934,7 @@ export namespace Prisma {
     name?: true
     location?: true
     description?: true
+    logo?: true
     isActive?: true
     ownerId?: true
     createdAt?: true
@@ -4027,6 +4033,7 @@ export namespace Prisma {
     name: string
     location: string
     description: string | null
+    logo: string | null
     isActive: boolean
     ownerId: number
     createdAt: Date
@@ -4057,6 +4064,7 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     description?: boolean
+    logo?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
@@ -4074,6 +4082,7 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     description?: boolean
+    logo?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
@@ -4086,6 +4095,7 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     description?: boolean
+    logo?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
@@ -4098,13 +4108,14 @@ export namespace Prisma {
     name?: boolean
     location?: boolean
     description?: boolean
+    logo?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type VendingMachineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "location" | "description" | "isActive" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["vendingMachine"]>
+  export type VendingMachineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "location" | "description" | "logo" | "isActive" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["vendingMachine"]>
   export type VendingMachineInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     products?: boolean | VendingMachine$productsArgs<ExtArgs>
@@ -4134,6 +4145,7 @@ export namespace Prisma {
       name: string
       location: string
       description: string | null
+      logo: string | null
       isActive: boolean
       ownerId: number
       createdAt: Date
@@ -4570,6 +4582,7 @@ export namespace Prisma {
     readonly name: FieldRef<"VendingMachine", 'String'>
     readonly location: FieldRef<"VendingMachine", 'String'>
     readonly description: FieldRef<"VendingMachine", 'String'>
+    readonly logo: FieldRef<"VendingMachine", 'String'>
     readonly isActive: FieldRef<"VendingMachine", 'Boolean'>
     readonly ownerId: FieldRef<"VendingMachine", 'Int'>
     readonly createdAt: FieldRef<"VendingMachine", 'DateTime'>
@@ -7332,16 +7345,21 @@ export namespace Prisma {
 
   export type PhotoAvgAggregateOutputType = {
     id: number | null
+    fileSize: number | null
   }
 
   export type PhotoSumAggregateOutputType = {
     id: number | null
+    fileSize: number | null
   }
 
   export type PhotoMinAggregateOutputType = {
     id: number | null
     url: string | null
     caption: string | null
+    fileType: string | null
+    originalName: string | null
+    fileSize: number | null
     vendingMachineId: string | null
     createdAt: Date | null
   }
@@ -7350,6 +7368,9 @@ export namespace Prisma {
     id: number | null
     url: string | null
     caption: string | null
+    fileType: string | null
+    originalName: string | null
+    fileSize: number | null
     vendingMachineId: string | null
     createdAt: Date | null
   }
@@ -7358,6 +7379,9 @@ export namespace Prisma {
     id: number
     url: number
     caption: number
+    fileType: number
+    originalName: number
+    fileSize: number
     vendingMachineId: number
     createdAt: number
     _all: number
@@ -7366,16 +7390,21 @@ export namespace Prisma {
 
   export type PhotoAvgAggregateInputType = {
     id?: true
+    fileSize?: true
   }
 
   export type PhotoSumAggregateInputType = {
     id?: true
+    fileSize?: true
   }
 
   export type PhotoMinAggregateInputType = {
     id?: true
     url?: true
     caption?: true
+    fileType?: true
+    originalName?: true
+    fileSize?: true
     vendingMachineId?: true
     createdAt?: true
   }
@@ -7384,6 +7413,9 @@ export namespace Prisma {
     id?: true
     url?: true
     caption?: true
+    fileType?: true
+    originalName?: true
+    fileSize?: true
     vendingMachineId?: true
     createdAt?: true
   }
@@ -7392,6 +7424,9 @@ export namespace Prisma {
     id?: true
     url?: true
     caption?: true
+    fileType?: true
+    originalName?: true
+    fileSize?: true
     vendingMachineId?: true
     createdAt?: true
     _all?: true
@@ -7487,6 +7522,9 @@ export namespace Prisma {
     id: number
     url: string
     caption: string | null
+    fileType: string
+    originalName: string | null
+    fileSize: number | null
     vendingMachineId: string
     createdAt: Date
     _count: PhotoCountAggregateOutputType | null
@@ -7514,6 +7552,9 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     caption?: boolean
+    fileType?: boolean
+    originalName?: boolean
+    fileSize?: boolean
     vendingMachineId?: boolean
     createdAt?: boolean
     vendingMachine?: boolean | VendingMachineDefaultArgs<ExtArgs>
@@ -7523,6 +7564,9 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     caption?: boolean
+    fileType?: boolean
+    originalName?: boolean
+    fileSize?: boolean
     vendingMachineId?: boolean
     createdAt?: boolean
     vendingMachine?: boolean | VendingMachineDefaultArgs<ExtArgs>
@@ -7532,6 +7576,9 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     caption?: boolean
+    fileType?: boolean
+    originalName?: boolean
+    fileSize?: boolean
     vendingMachineId?: boolean
     createdAt?: boolean
     vendingMachine?: boolean | VendingMachineDefaultArgs<ExtArgs>
@@ -7541,11 +7588,14 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     caption?: boolean
+    fileType?: boolean
+    originalName?: boolean
+    fileSize?: boolean
     vendingMachineId?: boolean
     createdAt?: boolean
   }
 
-  export type PhotoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "url" | "caption" | "vendingMachineId" | "createdAt", ExtArgs["result"]["photo"]>
+  export type PhotoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "url" | "caption" | "fileType" | "originalName" | "fileSize" | "vendingMachineId" | "createdAt", ExtArgs["result"]["photo"]>
   export type PhotoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     vendingMachine?: boolean | VendingMachineDefaultArgs<ExtArgs>
   }
@@ -7565,6 +7615,9 @@ export namespace Prisma {
       id: number
       url: string
       caption: string | null
+      fileType: string
+      originalName: string | null
+      fileSize: number | null
       vendingMachineId: string
       createdAt: Date
     }, ExtArgs["result"]["photo"]>
@@ -7994,6 +8047,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Photo", 'Int'>
     readonly url: FieldRef<"Photo", 'String'>
     readonly caption: FieldRef<"Photo", 'String'>
+    readonly fileType: FieldRef<"Photo", 'String'>
+    readonly originalName: FieldRef<"Photo", 'String'>
+    readonly fileSize: FieldRef<"Photo", 'Int'>
     readonly vendingMachineId: FieldRef<"Photo", 'String'>
     readonly createdAt: FieldRef<"Photo", 'DateTime'>
   }
@@ -9594,6 +9650,7 @@ export namespace Prisma {
     name: 'name',
     location: 'location',
     description: 'description',
+    logo: 'logo',
     isActive: 'isActive',
     ownerId: 'ownerId',
     createdAt: 'createdAt',
@@ -9633,6 +9690,9 @@ export namespace Prisma {
     id: 'id',
     url: 'url',
     caption: 'caption',
+    fileType: 'fileType',
+    originalName: 'originalName',
+    fileSize: 'fileSize',
     vendingMachineId: 'vendingMachineId',
     createdAt: 'createdAt'
   };
@@ -9870,6 +9930,7 @@ export namespace Prisma {
     name?: StringFilter<"VendingMachine"> | string
     location?: StringFilter<"VendingMachine"> | string
     description?: StringNullableFilter<"VendingMachine"> | string | null
+    logo?: StringNullableFilter<"VendingMachine"> | string | null
     isActive?: BoolFilter<"VendingMachine"> | boolean
     ownerId?: IntFilter<"VendingMachine"> | number
     createdAt?: DateTimeFilter<"VendingMachine"> | Date | string
@@ -9886,6 +9947,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     description?: SortOrderInput | SortOrder
+    logo?: SortOrderInput | SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -9905,6 +9967,7 @@ export namespace Prisma {
     name?: StringFilter<"VendingMachine"> | string
     location?: StringFilter<"VendingMachine"> | string
     description?: StringNullableFilter<"VendingMachine"> | string | null
+    logo?: StringNullableFilter<"VendingMachine"> | string | null
     isActive?: BoolFilter<"VendingMachine"> | boolean
     ownerId?: IntFilter<"VendingMachine"> | number
     createdAt?: DateTimeFilter<"VendingMachine"> | Date | string
@@ -9921,6 +9984,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     description?: SortOrderInput | SortOrder
+    logo?: SortOrderInput | SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -9940,6 +10004,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"VendingMachine"> | string
     location?: StringWithAggregatesFilter<"VendingMachine"> | string
     description?: StringNullableWithAggregatesFilter<"VendingMachine"> | string | null
+    logo?: StringNullableWithAggregatesFilter<"VendingMachine"> | string | null
     isActive?: BoolWithAggregatesFilter<"VendingMachine"> | boolean
     ownerId?: IntWithAggregatesFilter<"VendingMachine"> | number
     createdAt?: DateTimeWithAggregatesFilter<"VendingMachine"> | Date | string
@@ -10087,6 +10152,9 @@ export namespace Prisma {
     id?: IntFilter<"Photo"> | number
     url?: StringFilter<"Photo"> | string
     caption?: StringNullableFilter<"Photo"> | string | null
+    fileType?: StringFilter<"Photo"> | string
+    originalName?: StringNullableFilter<"Photo"> | string | null
+    fileSize?: IntNullableFilter<"Photo"> | number | null
     vendingMachineId?: StringFilter<"Photo"> | string
     createdAt?: DateTimeFilter<"Photo"> | Date | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
@@ -10096,6 +10164,9 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     caption?: SortOrderInput | SortOrder
+    fileType?: SortOrder
+    originalName?: SortOrderInput | SortOrder
+    fileSize?: SortOrderInput | SortOrder
     vendingMachineId?: SortOrder
     createdAt?: SortOrder
     vendingMachine?: VendingMachineOrderByWithRelationInput
@@ -10108,6 +10179,9 @@ export namespace Prisma {
     NOT?: PhotoWhereInput | PhotoWhereInput[]
     url?: StringFilter<"Photo"> | string
     caption?: StringNullableFilter<"Photo"> | string | null
+    fileType?: StringFilter<"Photo"> | string
+    originalName?: StringNullableFilter<"Photo"> | string | null
+    fileSize?: IntNullableFilter<"Photo"> | number | null
     vendingMachineId?: StringFilter<"Photo"> | string
     createdAt?: DateTimeFilter<"Photo"> | Date | string
     vendingMachine?: XOR<VendingMachineScalarRelationFilter, VendingMachineWhereInput>
@@ -10117,6 +10191,9 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     caption?: SortOrderInput | SortOrder
+    fileType?: SortOrder
+    originalName?: SortOrderInput | SortOrder
+    fileSize?: SortOrderInput | SortOrder
     vendingMachineId?: SortOrder
     createdAt?: SortOrder
     _count?: PhotoCountOrderByAggregateInput
@@ -10133,6 +10210,9 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Photo"> | number
     url?: StringWithAggregatesFilter<"Photo"> | string
     caption?: StringNullableWithAggregatesFilter<"Photo"> | string | null
+    fileType?: StringWithAggregatesFilter<"Photo"> | string
+    originalName?: StringNullableWithAggregatesFilter<"Photo"> | string | null
+    fileSize?: IntNullableWithAggregatesFilter<"Photo"> | number | null
     vendingMachineId?: StringWithAggregatesFilter<"Photo"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Photo"> | Date | string
   }
@@ -10358,6 +10438,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10373,6 +10454,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -10388,6 +10470,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10403,6 +10486,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10418,6 +10502,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -10429,6 +10514,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10439,6 +10525,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10580,6 +10667,9 @@ export namespace Prisma {
   export type PhotoCreateInput = {
     url: string
     caption?: string | null
+    fileType?: string
+    originalName?: string | null
+    fileSize?: number | null
     createdAt?: Date | string
     vendingMachine: VendingMachineCreateNestedOneWithoutPhotosInput
   }
@@ -10588,6 +10678,9 @@ export namespace Prisma {
     id?: number
     url: string
     caption?: string | null
+    fileType?: string
+    originalName?: string | null
+    fileSize?: number | null
     vendingMachineId: string
     createdAt?: Date | string
   }
@@ -10595,6 +10688,9 @@ export namespace Prisma {
   export type PhotoUpdateInput = {
     url?: StringFieldUpdateOperationsInput | string
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    originalName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     vendingMachine?: VendingMachineUpdateOneRequiredWithoutPhotosNestedInput
   }
@@ -10603,6 +10699,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     url?: StringFieldUpdateOperationsInput | string
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    originalName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
     vendingMachineId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10611,6 +10710,9 @@ export namespace Prisma {
     id?: number
     url: string
     caption?: string | null
+    fileType?: string
+    originalName?: string | null
+    fileSize?: number | null
     vendingMachineId: string
     createdAt?: Date | string
   }
@@ -10618,6 +10720,9 @@ export namespace Prisma {
   export type PhotoUpdateManyMutationInput = {
     url?: StringFieldUpdateOperationsInput | string
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    originalName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -10625,6 +10730,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     url?: StringFieldUpdateOperationsInput | string
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    originalName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
     vendingMachineId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10993,6 +11101,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     description?: SortOrder
+    logo?: SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -11008,6 +11117,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     description?: SortOrder
+    logo?: SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -11019,6 +11129,7 @@ export namespace Prisma {
     name?: SortOrder
     location?: SortOrder
     description?: SortOrder
+    logo?: SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -11156,22 +11267,40 @@ export namespace Prisma {
     _max?: NestedEnumPaymentTypeFilter<$PrismaModel>
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type PhotoCountOrderByAggregateInput = {
     id?: SortOrder
     url?: SortOrder
     caption?: SortOrder
+    fileType?: SortOrder
+    originalName?: SortOrder
+    fileSize?: SortOrder
     vendingMachineId?: SortOrder
     createdAt?: SortOrder
   }
 
   export type PhotoAvgOrderByAggregateInput = {
     id?: SortOrder
+    fileSize?: SortOrder
   }
 
   export type PhotoMaxOrderByAggregateInput = {
     id?: SortOrder
     url?: SortOrder
     caption?: SortOrder
+    fileType?: SortOrder
+    originalName?: SortOrder
+    fileSize?: SortOrder
     vendingMachineId?: SortOrder
     createdAt?: SortOrder
   }
@@ -11180,12 +11309,32 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     caption?: SortOrder
+    fileType?: SortOrder
+    originalName?: SortOrder
+    fileSize?: SortOrder
     vendingMachineId?: SortOrder
     createdAt?: SortOrder
   }
 
   export type PhotoSumOrderByAggregateInput = {
     id?: SortOrder
+    fileSize?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type ReviewCountOrderByAggregateInput = {
@@ -11629,6 +11778,14 @@ export namespace Prisma {
     connect?: VendingMachineWhereUniqueInput
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type VendingMachineUpdateOneRequiredWithoutPhotosNestedInput = {
     create?: XOR<VendingMachineCreateWithoutPhotosInput, VendingMachineUncheckedCreateWithoutPhotosInput>
     connectOrCreate?: VendingMachineCreateOrConnectWithoutPhotosInput
@@ -11875,11 +12032,28 @@ export namespace Prisma {
     _max?: NestedEnumPaymentTypeFilter<$PrismaModel>
   }
 
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
   export type VendingMachineCreateWithoutOwnerInput = {
     id?: string
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11894,6 +12068,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11987,6 +12162,7 @@ export namespace Prisma {
     name?: StringFilter<"VendingMachine"> | string
     location?: StringFilter<"VendingMachine"> | string
     description?: StringNullableFilter<"VendingMachine"> | string | null
+    logo?: StringNullableFilter<"VendingMachine"> | string | null
     isActive?: BoolFilter<"VendingMachine"> | boolean
     ownerId?: IntFilter<"VendingMachine"> | number
     createdAt?: DateTimeFilter<"VendingMachine"> | Date | string
@@ -12201,6 +12377,9 @@ export namespace Prisma {
   export type PhotoCreateWithoutVendingMachineInput = {
     url: string
     caption?: string | null
+    fileType?: string
+    originalName?: string | null
+    fileSize?: number | null
     createdAt?: Date | string
   }
 
@@ -12208,6 +12387,9 @@ export namespace Prisma {
     id?: number
     url: string
     caption?: string | null
+    fileType?: string
+    originalName?: string | null
+    fileSize?: number | null
     createdAt?: Date | string
   }
 
@@ -12365,6 +12547,9 @@ export namespace Prisma {
     id?: IntFilter<"Photo"> | number
     url?: StringFilter<"Photo"> | string
     caption?: StringNullableFilter<"Photo"> | string | null
+    fileType?: StringFilter<"Photo"> | string
+    originalName?: StringNullableFilter<"Photo"> | string | null
+    fileSize?: IntNullableFilter<"Photo"> | number | null
     vendingMachineId?: StringFilter<"Photo"> | string
     createdAt?: DateTimeFilter<"Photo"> | Date | string
   }
@@ -12390,6 +12575,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12404,6 +12590,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -12434,6 +12621,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12448,6 +12636,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12462,6 +12651,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12476,6 +12666,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -12506,6 +12697,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12520,6 +12712,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12534,6 +12727,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12548,6 +12742,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -12578,6 +12773,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12592,6 +12788,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12636,6 +12833,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12650,6 +12848,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -12716,6 +12915,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12730,6 +12930,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12744,6 +12945,7 @@ export namespace Prisma {
     name: string
     location: string
     description?: string | null
+    logo?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12771,6 +12973,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12785,6 +12988,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12799,6 +13003,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12876,6 +13081,9 @@ export namespace Prisma {
     id?: number
     url: string
     caption?: string | null
+    fileType?: string
+    originalName?: string | null
+    fileSize?: number | null
     createdAt?: Date | string
   }
 
@@ -12944,6 +13152,9 @@ export namespace Prisma {
   export type PhotoUpdateWithoutVendingMachineInput = {
     url?: StringFieldUpdateOperationsInput | string
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    originalName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12951,6 +13162,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     url?: StringFieldUpdateOperationsInput | string
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    originalName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12958,6 +13172,9 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     url?: StringFieldUpdateOperationsInput | string
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    originalName?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSize?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
