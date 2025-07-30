@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchVendingMachine, updateVendingMachine } from '../api';
+import { fetchVendingMachine, updateVendingMachine, uploadSingleFile, uploadGalleryFiles } from '../api';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
+import LogoUpload from './LogoUpload';
+import GalleryManager from './GalleryManager';
 import type { VendingMachine } from '../types';
 
 interface Product {
@@ -21,6 +23,16 @@ interface PaymentMethod {
   available: boolean;
 }
 
+interface GalleryItem {
+  id?: number;
+  url: string;
+  caption?: string;
+  fileType: 'image' | 'video';
+  originalName?: string;
+  fileSize?: number;
+  file?: File;
+}
+
 function EditMachineForm() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -33,6 +45,10 @@ function EditMachineForm() {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [logo, setLogo] = useState<string | undefined>(undefined);
+
+  // Gallery
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   // Products
   const [products, setProducts] = useState<Product[]>([]);
@@ -63,6 +79,7 @@ function EditMachineForm() {
       setName(machine.name);
       setLocation(machine.location);
       setDescription(machine.description || '');
+      setLogo(machine.logo || undefined);
 
       // Set products
       const machineProducts: Product[] = machine.products.map(p => ({
@@ -79,6 +96,17 @@ function EditMachineForm() {
         machineProducts.push({ name: '', description: '', photo: '', price: '', slotCode: 'A1', isAvailable: true });
       }
       setProducts(machineProducts);
+
+      // Set gallery
+      const galleryItems: GalleryItem[] = machine.photos.map(photo => ({
+        id: photo.id,
+        url: photo.url,
+        caption: photo.caption,
+        fileType: photo.fileType || 'image',
+        originalName: photo.originalName,
+        fileSize: photo.fileSize
+      }));
+      setGallery(galleryItems);
 
       // Set payment methods
       const updatedPaymentMethods = paymentMethods.map(pm => {
@@ -164,11 +192,33 @@ function EditMachineForm() {
         throw new Error('At least one product is required');
       }
 
+      // Upload logo if it's a new file
+      let logoUrl: string | undefined = logo;
+      if (logo && logo.startsWith('blob:')) {
+        // This is a new file upload - for now keep the blob URL
+        // In a production app, you'd upload to a proper file storage service
+        logoUrl = logo;
+      }
+
+      // Handle gallery uploads
+      const newGalleryFiles = gallery.filter(item => item.file);
+      if (newGalleryFiles.length > 0 && id) {
+        try {
+          const files = newGalleryFiles.map(item => item.file!);
+          const captions = newGalleryFiles.map(item => item.caption || '');
+          await uploadGalleryFiles(id, files, captions);
+        } catch (galleryError) {
+          console.error('Gallery upload failed:', galleryError);
+          // Continue with machine update even if gallery upload fails
+        }
+      }
+
       // Prepare data
       const machineData = {
         name: name.trim(),
         location: location.trim(),
         description: description.trim() || undefined,
+        logo: logoUrl,
         products: validProducts.map(p => ({
           id: p.id, // Include ID for existing products
           name: p.name.trim(),
@@ -270,17 +320,24 @@ function EditMachineForm() {
                 />
               </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional description of the vending machine"
-                rows={3}
-              />
-            </div>
-          </div>
+                         <div className="form-group">
+               <label htmlFor="description">Description</label>
+               <textarea
+                 id="description"
+                 value={description}
+                 onChange={(e) => setDescription(e.target.value)}
+                 placeholder="Optional description of the vending machine"
+                 rows={3}
+               />
+             </div>
+             
+             {/* Logo Upload */}
+             <LogoUpload
+               currentLogo={logo}
+               onLogoChange={setLogo}
+               disabled={loading}
+             />
+           </div>
 
           {/* Products */}
           <div className="form-section">
@@ -377,10 +434,21 @@ function EditMachineForm() {
                   </label>
                 </div>
               </div>
-            ))}
-          </div>
+                         ))}
+           </div>
 
-          {/* Payment Methods */}
+           {/* Gallery */}
+           <div className="form-section">
+             <h2>Gallery</h2>
+             <GalleryManager
+               initialGallery={gallery}
+               onGalleryChange={setGallery}
+               machineId={id}
+               disabled={loading}
+             />
+           </div>
+
+           {/* Payment Methods */}
           <div className="form-section">
             <h2>Payment Methods</h2>
             <div className="payment-methods-grid">

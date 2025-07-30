@@ -1495,6 +1495,27 @@ html[data-theme='light'] {
   gap: 0.5rem;
 }
 
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.optional-text {
+  font-weight: normal;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.logo-help-text {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 /* Responsive Design for File Uploads */
 @media (max-width: 768px) {
   .file-upload-area {

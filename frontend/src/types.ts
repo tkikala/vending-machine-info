@@ -3,6 +3,7 @@ export type VendingMachine = {
   name: string;
   location: string;
   description?: string;
+  logo?: string;
   isActive: boolean;
   owner: { id: number; name: string; email?: string };
   products: Array<{
@@ -23,6 +24,9 @@ export type VendingMachine = {
     id: number;
     url: string;
     caption?: string;
+    fileType?: 'image' | 'video';
+    originalName?: string;
+    fileSize?: number;
   }>;
   reviews: Array<{
     id: number;
