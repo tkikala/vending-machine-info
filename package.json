@@ -1,0 +1,18 @@
+{
+  "name": "vending-machine-info",
+  "version": "1.0.0",
+  "description": "Vending machine information platform",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 

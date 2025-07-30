@@ -1,4 +1,6 @@
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = import.meta.env.PROD 
+  ? '/api' // Production: relative URLs (same domain)
+  : 'http://localhost:4000/api'; // Development: absolute URL
 
 export async function fetchVendingMachines() {
   try {
