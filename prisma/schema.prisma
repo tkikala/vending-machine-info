@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -24,7 +24,7 @@ enum UserRole {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   email     String   @unique
   password  String?  // Nullable for future SSO users
   name      String
@@ -39,7 +39,7 @@ model User {
 
 model Session {
   id        String   @id @default(uuid())
-  userId    Int
+  userId    String
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
@@ -53,7 +53,7 @@ model VendingMachine {
   description    String?
   logo           String?          // Added: Path to uploaded logo file
   isActive       Boolean          @default(true)
-  ownerId        Int
+  ownerId        String
   owner          User             @relation(fields: [ownerId], references: [id])
   products       Product[]
   paymentMethods PaymentMethod[]
@@ -64,7 +64,7 @@ model VendingMachine {
 }
 
 model Product {
-  id               Int              @id @default(autoincrement())
+  id               String           @id @default(uuid())
   name             String
   description      String?
   photo            String?
@@ -78,7 +78,7 @@ model Product {
 }
 
 model PaymentMethod {
-  id               Int            @id @default(autoincrement())
+  id               String         @id @default(uuid())
   type             PaymentType
   available        Boolean        @default(false)
   vendingMachineId String
@@ -86,7 +86,7 @@ model PaymentMethod {
 }
 
 model Photo {
-  id               Int              @id @default(autoincrement())
+  id               String           @id @default(uuid())
   url              String
   caption          String?
   fileType         String           @default("image") // "image" or "video"
@@ -98,11 +98,11 @@ model Photo {
 }
 
 model Review {
-  id               Int              @id @default(autoincrement())
+  id               String           @id @default(uuid())
   rating           Int
   comment          String
   isApproved       Boolean          @default(false)
-  userId           Int
+  userId           String
   vendingMachineId String
   user             User             @relation(fields: [userId], references: [id])
   vendingMachine   VendingMachine   @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)

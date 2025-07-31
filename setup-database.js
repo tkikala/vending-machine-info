@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('./generated/prisma');
 const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
@@ -9,6 +9,20 @@ async function setupDatabase() {
     await prisma.$connect();
     console.log('✅ Database connected successfully!');
 
+    console.log('📋 Creating database enums...');
+    
+    // Create UserRole enum
+    await prisma.$executeRaw`
+      CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'OWNER');
+    `;
+    console.log('✅ UserRole enum created');
+
+    // Create PaymentType enum
+    await prisma.$executeRaw`
+      CREATE TYPE "PaymentType" AS ENUM ('COIN', 'BANKNOTE', 'GIROCARD', 'CREDIT_CARD');
+    `;
+    console.log('✅ PaymentType enum created');
+
     console.log('📋 Creating database tables...');
     
     // Create User table
@@ -16,9 +30,9 @@ async function setupDatabase() {
       CREATE TABLE IF NOT EXISTS "User" (
         "id" TEXT NOT NULL,
         "email" TEXT NOT NULL,
-        "password" TEXT NOT NULL,
+        "password" TEXT,
         "name" TEXT NOT NULL,
-        "role" TEXT NOT NULL DEFAULT 'OWNER',
+        "role" "UserRole" NOT NULL DEFAULT 'OWNER',
         "isActive" BOOLEAN NOT NULL DEFAULT true,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -53,9 +67,9 @@ async function setupDatabase() {
         "name" TEXT NOT NULL,
         "location" TEXT NOT NULL,
         "description" TEXT,
+        "logo" TEXT,
         "isActive" BOOLEAN NOT NULL DEFAULT true,
         "ownerId" TEXT NOT NULL,
-        "logoUrl" TEXT,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL,
         CONSTRAINT "VendingMachine_pkey" PRIMARY KEY ("id")
@@ -69,11 +83,11 @@ async function setupDatabase() {
         "id" TEXT NOT NULL,
         "name" TEXT NOT NULL,
         "description" TEXT,
-        "price" DECIMAL(10,2) NOT NULL,
+        "photo" TEXT,
+        "price" DOUBLE PRECISION,
+        "slotCode" TEXT,
         "isAvailable" BOOLEAN NOT NULL DEFAULT true,
         "vendingMachineId" TEXT NOT NULL,
-        "slotCode" TEXT,
-        "imageUrl" TEXT,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL,
         CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
@@ -85,11 +99,9 @@ async function setupDatabase() {
     await prisma.$executeRaw`
       CREATE TABLE IF NOT EXISTS "PaymentMethod" (
         "id" TEXT NOT NULL,
-        "name" TEXT NOT NULL,
-        "isAvailable" BOOLEAN NOT NULL DEFAULT true,
+        "type" "PaymentType" NOT NULL,
+        "available" BOOLEAN NOT NULL DEFAULT false,
         "vendingMachineId" TEXT NOT NULL,
-        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" TIMESTAMP(3) NOT NULL,
         CONSTRAINT "PaymentMethod_pkey" PRIMARY KEY ("id")
       );
     `;
@@ -101,6 +113,9 @@ async function setupDatabase() {
         "id" TEXT NOT NULL,
         "url" TEXT NOT NULL,
         "caption" TEXT,
+        "fileType" TEXT NOT NULL DEFAULT 'image',
+        "originalName" TEXT,
+        "fileSize" INTEGER,
         "vendingMachineId" TEXT NOT NULL,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT "Photo_pkey" PRIMARY KEY ("id")
@@ -113,11 +128,12 @@ async function setupDatabase() {
       CREATE TABLE IF NOT EXISTS "Review" (
         "id" TEXT NOT NULL,
         "rating" INTEGER NOT NULL,
-        "comment" TEXT,
-        "authorName" TEXT NOT NULL,
+        "comment" TEXT NOT NULL,
         "isApproved" BOOLEAN NOT NULL DEFAULT false,
+        "userId" TEXT NOT NULL,
         "vendingMachineId" TEXT NOT NULL,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP(3) NOT NULL,
         CONSTRAINT "Review_pkey" PRIMARY KEY ("id")
       );
     `;
@@ -129,7 +145,7 @@ async function setupDatabase() {
     try {
       await prisma.$executeRaw`
         ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" 
-        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
       `;
     } catch (e) {
       console.log('⚠️ Session foreign key already exists');
@@ -147,7 +163,7 @@ async function setupDatabase() {
     try {
       await prisma.$executeRaw`
         ALTER TABLE "Product" ADD CONSTRAINT "Product_vendingMachineId_fkey" 
-        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE CASCADE ON UPDATE CASCADE;
       `;
     } catch (e) {
       console.log('⚠️ Product foreign key already exists');
@@ -156,7 +172,7 @@ async function setupDatabase() {
     try {
       await prisma.$executeRaw`
         ALTER TABLE "PaymentMethod" ADD CONSTRAINT "PaymentMethod_vendingMachineId_fkey" 
-        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE CASCADE ON UPDATE CASCADE;
       `;
     } catch (e) {
       console.log('⚠️ PaymentMethod foreign key already exists');
@@ -165,7 +181,7 @@ async function setupDatabase() {
     try {
       await prisma.$executeRaw`
         ALTER TABLE "Photo" ADD CONSTRAINT "Photo_vendingMachineId_fkey" 
-        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE CASCADE ON UPDATE CASCADE;
       `;
     } catch (e) {
       console.log('⚠️ Photo foreign key already exists');
@@ -174,10 +190,19 @@ async function setupDatabase() {
     try {
       await prisma.$executeRaw`
         ALTER TABLE "Review" ADD CONSTRAINT "Review_vendingMachineId_fkey" 
-        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+        FOREIGN KEY ("vendingMachineId") REFERENCES "VendingMachine"("id") ON DELETE CASCADE ON UPDATE CASCADE;
       `;
     } catch (e) {
       console.log('⚠️ Review foreign key already exists');
+    }
+
+    try {
+      await prisma.$executeRaw`
+        ALTER TABLE "Review" ADD CONSTRAINT "Review_userId_fkey" 
+        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+      `;
+    } catch (e) {
+      console.log('⚠️ Review userId foreign key already exists');
     }
 
     console.log('✅ Foreign key constraints added');
