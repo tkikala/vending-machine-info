@@ -4,12 +4,19 @@ const API_BASE = import.meta.env.PROD
 
 export async function fetchVendingMachines() {
   try {
-    const url = `${API_BASE}/machines`;
+    const timestamp = Date.now();
+    const url = `${API_BASE}/machines?t=${timestamp}`;
     console.log('🌐 Fetching vending machines from:', url);
     console.log('🌐 API_BASE:', API_BASE);
     console.log('🌐 import.meta.env.PROD:', import.meta.env.PROD);
     
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     console.log('📡 Response status:', res.status, res.statusText);
     console.log('📡 Response headers:', Object.fromEntries(res.headers.entries()));
     
@@ -32,7 +39,13 @@ export async function fetchVendingMachines() {
 export async function fetchVendingMachine(id: string) {
   try {
     console.log('Fetching vending machine:', id);
-    const res = await fetch(`${API_BASE}/machines/${id}`);
+    const res = await fetch(`${API_BASE}/machines/${id}`, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     console.log('Response status:', res.status, res.statusText);
     if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch vending machine`);
     const data = await res.json();
@@ -102,6 +115,11 @@ export async function getCurrentUser() {
     console.log('Checking current user session');
     const res = await fetch(`${API_BASE}/auth/me`, {
       credentials: 'include',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     });
     
     console.log('getCurrentUser response status:', res.status, res.statusText);
@@ -113,11 +131,11 @@ export async function getCurrentUser() {
       }
       const error = await res.json();
       console.error('getCurrentUser failed:', error);
-      throw new Error(error.error || 'Failed to get user');
+      throw new Error(error.error || 'Failed to get current user');
     }
     
     const data = await res.json();
-    console.log('Current user:', data.user.name, data.user.role);
+    console.log('Current user:', data.user?.name, data.user?.role);
     return data;
   } catch (error) {
     console.error('getCurrentUser error:', error);
