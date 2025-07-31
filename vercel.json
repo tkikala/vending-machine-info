@@ -12,6 +12,11 @@
     "api/**/*.ts": {
       "runtime": "@vercel/node@5.3.7",
       "maxDuration": 30
+    },
+    "api/upload/**/*.ts": {
+      "runtime": "@vercel/node@5.3.7",
+      "maxDuration": 60,
+      "maxRequestBodySize": "10mb"
     }
   }
 } 
