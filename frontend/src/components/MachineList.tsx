@@ -50,7 +50,7 @@ function MachineList() {
       <div className="header">
         <h1>Vending Machine Info</h1>
         <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
-        <div className="dark-toggle" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div className="dark-toggle" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
           <Link to="/login" style={{ 
             textDecoration: 'none', 
             color: 'var(--text-main)', 
