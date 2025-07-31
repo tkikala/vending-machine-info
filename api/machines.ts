@@ -13,13 +13,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      console.log('Machines endpoint called - testing Prisma client...');
+      console.log('Machines endpoint called - fetching machines...');
       
-      // Test Prisma client connection first
       try {
-        await prisma.$connect();
-        console.log('✅ Prisma client connected successfully');
-        
         // Simple test query
         const userCount = await prisma.user.count();
         console.log(`✅ User count: ${userCount}`);
@@ -51,8 +47,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           details: dbError.message,
           suggestion: 'Check your DATABASE_URL environment variable'
         });
-      } finally {
-        await prisma.$disconnect();
       }
     }
 

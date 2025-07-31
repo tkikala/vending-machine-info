@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "cd api && npm install && npx prisma generate && cd ../frontend && npm install && npx vite build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "functions": {
