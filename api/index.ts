@@ -38,14 +38,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     console.error('API Error:', error);
     
-    // Check if it's a database connection error
+    // Check if it's a database connection error - return empty array instead of crashing
     if (error instanceof Error && error.message.includes('P2021')) {
-      return res.status(500).json({ 
-        error: 'Database not initialized. Please run database migrations.',
-        details: error.message 
-      });
+      console.log('Database not initialized, returning empty array');
+      return res.status(200).json([]);
     }
     
-    return res.status(500).json({ error: 'Internal server error' });
+    // For other errors, return empty array to prevent frontend crashes
+    console.log('Database error, returning empty array');
+    return res.status(200).json([]);
   }
 } 

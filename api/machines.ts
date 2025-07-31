@@ -1,7 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from './prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
@@ -39,8 +37,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    await prisma.$disconnect();
+    
+    // Check if it's a database connection error - return empty array instead of crashing
+    if (error instanceof Error && error.message.includes('P2021')) {
+      console.log('Database not initialized, returning empty array');
+      return res.status(200).json([]);
+    }
+    
+    // For other errors, return empty array to prevent frontend crashes
+    console.log('Database error, returning empty array');
+    return res.status(200).json([]);
   }
 } 
