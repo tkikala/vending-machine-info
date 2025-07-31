@@ -58,7 +58,7 @@ function MachineList() {
             padding: '0.5rem 1rem', 
             borderRadius: '6px', 
             fontSize: '0.9rem',
-            marginRight: '1rem',
+            marginRight: '2rem',
             opacity: 0.8,
             transition: 'opacity 0.2s'
           }}>

@@ -12,14 +12,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const { id } = req.query;
+    
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ error: 'Invalid machine ID' });
+    }
+
     if (req.method === 'GET') {
-      const { id } = req.query;
       console.log('Individual machine endpoint called - fetching machine:', id);
       
-      if (!id || typeof id !== 'string') {
-        return res.status(400).json({ error: 'Invalid machine ID' });
-      }
-
       try {
         // Get the specific machine with all related data
         const machine = await prisma.vendingMachine.findUnique({
@@ -94,6 +95,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error('❌ Database error:', dbError);
         return res.status(500).json({
           error: 'Database connection failed',
+          details: dbError.message
+        });
+      }
+    }
+
+    if (req.method === 'PUT') {
+      console.log('Updating machine:', id);
+      
+      try {
+        const { name, location, description, isActive } = req.body;
+        
+        const machine = await prisma.vendingMachine.update({
+          where: { id },
+          data: {
+            name: name || undefined,
+            location: location || undefined,
+            description: description || undefined,
+            isActive: isActive !== undefined ? isActive : undefined
+          }
+        });
+
+        console.log(`✅ Updated machine: ${machine.name}`);
+        return res.status(200).json(machine);
+        
+      } catch (dbError: any) {
+        console.error('❌ Database error:', dbError);
+        return res.status(500).json({
+          error: 'Failed to update machine',
+          details: dbError.message
+        });
+      }
+    }
+
+    if (req.method === 'DELETE') {
+      console.log('Deleting machine:', id);
+      
+      try {
+        await prisma.vendingMachine.delete({
+          where: { id }
+        });
+
+        console.log(`✅ Deleted machine: ${id}`);
+        return res.status(200).json({ message: 'Machine deleted successfully' });
+        
+      } catch (dbError: any) {
+        console.error('❌ Database error:', dbError);
+        return res.status(500).json({
+          error: 'Failed to delete machine',
           details: dbError.message
         });
       }
