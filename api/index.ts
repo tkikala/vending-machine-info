@@ -2,6 +2,12 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Import routes and middleware
 import router from '../backend/src/routes';
 import uploadRouter from '../backend/src/upload-routes';
 import { apiLimiter } from '../backend/src/middleware/rateLimiter';

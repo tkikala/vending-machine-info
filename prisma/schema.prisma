@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentType {
+  COIN
+  BANKNOTE
+  GIROCARD
+  CREDIT_CARD
+}
+
+enum UserRole {
+  ADMIN
+  OWNER
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String?  // Nullable for future SSO users
+  name      String
+  role      UserRole @default(OWNER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  machines  VendingMachine[]
+  reviews   Review[]
+  sessions  Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VendingMachine {
+  id             String           @id @default(uuid())
+  name           String
+  location       String
+  description    String?
+  logo           String?          // Added: Path to uploaded logo file
+  isActive       Boolean          @default(true)
+  ownerId        Int
+  owner          User             @relation(fields: [ownerId], references: [id])
+  products       Product[]
+  paymentMethods PaymentMethod[]
+  photos         Photo[]
+  reviews        Review[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+}
+
+model Product {
+  id               Int              @id @default(autoincrement())
+  name             String
+  description      String?
+  photo            String?
+  price            Float?
+  slotCode         String?          // A1, B2, etc.
+  isAvailable      Boolean          @default(true)
+  vendingMachineId String
+  vendingMachine   VendingMachine   @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+}
+
+model PaymentMethod {
+  id               Int            @id @default(autoincrement())
+  type             PaymentType
+  available        Boolean        @default(false)
+  vendingMachineId String
+  vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
+}
+
+model Photo {
+  id               Int              @id @default(autoincrement())
+  url              String
+  caption          String?
+  fileType         String           @default("image") // "image" or "video"
+  originalName     String?          // Original filename
+  fileSize         Int?             // File size in bytes
+  vendingMachineId String
+  vendingMachine   VendingMachine   @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+}
+
+model Review {
+  id               Int              @id @default(autoincrement())
+  rating           Int
+  comment          String
+  isApproved       Boolean          @default(false)
+  userId           Int
+  vendingMachineId String
+  user             User             @relation(fields: [userId], references: [id])
+  vendingMachine   VendingMachine   @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+}
