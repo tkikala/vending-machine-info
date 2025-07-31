@@ -50,7 +50,7 @@ function MachineList() {
       <div className="header">
         <h1>Vending Machine Info</h1>
         <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
-        <div className="dark-toggle" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
           <Link to="/login" style={{ 
             textDecoration: 'none', 
             color: 'var(--text-main)', 
@@ -62,11 +62,12 @@ function MachineList() {
             transition: 'opacity 0.2s, transform 0.2s',
             border: '1px solid rgba(255,255,255,0.1)',
             fontWeight: '500',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            marginRight: '2rem'
           }}>
             🔐 Login
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginLeft: '2rem' }}>
             <DarkModeToggle mode={mode} setMode={setMode} />
           </div>
         </div>
