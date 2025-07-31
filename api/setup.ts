@@ -1,6 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -16,50 +15,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'POST') {
-      console.log('Setting up database...');
+      console.log('Testing database connection...');
 
-      // Create tables by running a simple query that will trigger schema creation
-      await prisma.$executeRaw`SELECT 1`;
-
-      // Check if admin user already exists
-      const existingAdmin = await prisma.user.findUnique({
-        where: { email: 't.kikala@gmail.com' }
-      });
-
-      if (!existingAdmin) {
-        console.log('Creating admin user...');
+      // Test database connection
+      try {
+        await prisma.$connect();
+        console.log('Database connection successful');
         
-        // Hash password
-        const adminPassword = await bcrypt.hash('gCJ4Dxr55dGYmhM', 12);
-        
-        // Create admin user
-        const admin = await prisma.user.create({
-          data: {
-            email: 't.kikala@gmail.com',
-            password: adminPassword,
-            name: 'Admin User',
-            role: 'ADMIN',
-            isActive: true,
-          },
+        return res.status(200).json({ 
+          message: 'Database connection successful!',
+          status: 'connected',
+          nextSteps: [
+            '1. Go to your Vercel database dashboard',
+            '2. Use the SQL editor to create tables',
+            '3. Or use Prisma Studio to manage the database',
+            '4. Admin credentials: t.kikala@gmail.com / gCJ4Dxr55dGYmhM'
+          ]
         });
-
-        console.log('Admin user created:', admin.email);
-      } else {
-        console.log('Admin user already exists');
+        
+      } catch (connectionError: any) {
+        console.error('Database connection failed:', connectionError);
+        return res.status(500).json({ 
+          error: 'Database connection failed',
+          details: connectionError.message,
+          suggestion: 'Check your DATABASE_URL environment variable'
+        });
       }
-
-      return res.status(200).json({ 
-        message: 'Database setup completed successfully!',
-        adminEmail: 't.kikala@gmail.com',
-        adminPassword: 'gCJ4Dxr55dGYmhM'
-      });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('Setup Error:', error);
     return res.status(500).json({ 
-      error: 'Database setup failed',
+      error: 'Setup failed',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   } finally {
