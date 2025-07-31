@@ -55,12 +55,14 @@ function MachineList() {
             textDecoration: 'none', 
             color: 'var(--text-main)', 
             background: 'var(--product-bg)', 
-            padding: '0.5rem 1rem', 
-            borderRadius: '6px', 
+            padding: '0.6rem 1.2rem', 
+            borderRadius: '8px', 
             fontSize: '0.9rem',
-            marginRight: '2rem',
-            opacity: 0.8,
-            transition: 'opacity 0.2s'
+            marginRight: '3rem',
+            opacity: 0.9,
+            transition: 'opacity 0.2s, transform 0.2s',
+            border: '1px solid rgba(255,255,255,0.1)',
+            fontWeight: '500'
           }}>
             🔐 Login
           </Link>
