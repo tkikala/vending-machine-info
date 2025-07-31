@@ -1,8 +1,9 @@
 module.exports = (req, res) => {
   res.status(200).json({ 
-    message: 'Root API working!', 
+    message: 'API directory working!', 
     timestamp: new Date().toISOString(),
     method: req.method,
-    url: req.url
+    url: req.url,
+    path: req.path
   });
 }; 
