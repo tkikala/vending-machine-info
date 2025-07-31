@@ -61,12 +61,12 @@ function MachineList() {
               <VendingMachineDisplay machine={m} />
             </Link>
 
-            <Gallery photos={m.photos} />
+            <Gallery photos={m.photos || []} />
 
             <div style={{ marginTop: '2rem' }}>
               <b>Reviews:</b>
               <ul className="reviews-list">
-                {m.reviews.map((r) => (
+                {(m.reviews || []).map((r) => (
                   <li key={r.id} className="review-item">
                     <b style={{ color: '#f59e42' }}>{r.rating}★</b> {r.comment}
                   </li>

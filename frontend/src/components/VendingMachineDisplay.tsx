@@ -47,11 +47,12 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
   const cols = [1, 2, 3, 4, 5, 6];
 
   let productIndex = 0;
+  const products = machine.products || [];
 
   for (let row of rows) {
     for (let col of cols) {
       const slotCode = `${row}${col}`;
-      const product = machine.products[productIndex];
+      const product = products[productIndex];
       slots.push({
         code: slotCode,
         product: product || null,
@@ -73,11 +74,11 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
           <div className="machine-details">
             <h3 style={{ margin: 0 }}>{machine.name}</h3>
             <div style={{ color: 'inherit', opacity: 0.8, fontSize: '0.9rem' }}>{machine.location}</div>
-            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Owner: {machine.owner.name}</div>
+            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Owner: {machine.owner?.name || 'Unknown'}</div>
           </div>
           <div className="payment-methods-header">
             <div style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.25rem' }}>Payment:</div>
-            {machine.paymentMethods.map((pm) => (
+            {(machine.paymentMethods || []).map((pm) => (
               <PaymentIcon key={pm.id} type={pm.type} available={pm.available} />
             ))}
           </div>
