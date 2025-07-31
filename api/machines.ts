@@ -13,9 +13,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      console.log('Machines endpoint called - fetching machines from database...');
+      console.log('Machines endpoint called - testing Prisma client...');
       
+      // Test Prisma client connection first
       try {
+        await prisma.$connect();
+        console.log('✅ Prisma client connected successfully');
+        
+        // Simple test query
+        const userCount = await prisma.user.count();
+        console.log(`✅ User count: ${userCount}`);
+        
         // Get all machines (public view) - only basic fields to avoid column issues
         const machines = await prisma.vendingMachine.findMany({
           where: { isActive: true },
@@ -33,22 +41,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
         });
 
-        console.log('Found machines:', machines.length);
+        console.log(`✅ Found machines: ${machines.length}`);
         return res.status(200).json(machines);
         
       } catch (dbError: any) {
-        console.error('Database error:', dbError);
+        console.error('❌ Database error:', dbError);
         return res.status(500).json({ 
           error: 'Database connection failed',
           details: dbError.message,
           suggestion: 'Check your DATABASE_URL environment variable'
         });
+      } finally {
+        await prisma.$disconnect();
       }
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('❌ API Error:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
