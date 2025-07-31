@@ -1,7 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
@@ -17,7 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET') {
       // For now, return a simple response indicating the endpoint exists
       // In a real app, this would check for authentication and return user data
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: 'Auth endpoint available',
         authenticated: false,
         user: null

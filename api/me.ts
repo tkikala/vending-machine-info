@@ -15,7 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET') {
       // For now, return a simple response indicating the endpoint exists
       // In a real app, this would check for authentication and return user data
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: 'User endpoint available',
         authenticated: false,
         user: null
