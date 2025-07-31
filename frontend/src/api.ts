@@ -4,15 +4,27 @@ const API_BASE = import.meta.env.PROD
 
 export async function fetchVendingMachines() {
   try {
-    console.log('Fetching vending machines from:', `${API_BASE}/machines`);
-    const res = await fetch(`${API_BASE}/machines`);
-    console.log('Response status:', res.status, res.statusText);
-    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch vending machines`);
+    const url = `${API_BASE}/machines`;
+    console.log('🌐 Fetching vending machines from:', url);
+    console.log('🌐 API_BASE:', API_BASE);
+    console.log('🌐 import.meta.env.PROD:', import.meta.env.PROD);
+    
+    const res = await fetch(url);
+    console.log('📡 Response status:', res.status, res.statusText);
+    console.log('📡 Response headers:', Object.fromEntries(res.headers.entries()));
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('❌ Response not ok:', errorText);
+      throw new Error(`HTTP ${res.status}: Failed to fetch vending machines - ${errorText}`);
+    }
+    
     const data = await res.json();
-    console.log('Fetched machines:', data.length, 'machines');
+    console.log('✅ Fetched machines:', data.length, 'machines');
+    console.log('✅ First machine:', data[0]);
     return data;
   } catch (error) {
-    console.error('fetchVendingMachines error:', error);
+    console.error('❌ fetchVendingMachines error:', error);
     throw error;
   }
 }

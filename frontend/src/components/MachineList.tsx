@@ -14,15 +14,37 @@ function MachineList() {
   const [mode, setMode] = useDarkMode();
 
   useEffect(() => {
+    console.log('🚀 MachineList component mounted');
+    console.log('🔍 Starting to fetch vending machines...');
+    
     fetchVendingMachines()
-      .then(setMachines)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        console.log('✅ fetchVendingMachines succeeded:', data);
+        setMachines(data);
+      })
+      .catch((e) => {
+        console.error('❌ fetchVendingMachines failed:', e);
+        setError(e.message);
+      })
+      .finally(() => {
+        console.log('🏁 fetchVendingMachines completed, setting loading to false');
+        setLoading(false);
+      });
   }, []);
 
-  if (loading) return <div className="header"><h1>Loading...</h1></div>;
-  if (error) return <div className="header"><h1>Error: {error}</h1></div>;
+  console.log('🔄 MachineList render - loading:', loading, 'error:', error, 'machines:', machines.length);
 
+  if (loading) {
+    console.log('⏳ Showing loading state');
+    return <div className="header"><h1>Loading...</h1></div>;
+  }
+  
+  if (error) {
+    console.log('❌ Showing error state:', error);
+    return <div className="header"><h1>Error: {error}</h1></div>;
+  }
+
+  console.log('✅ Rendering machines:', machines.length);
   return (
     <>
       <div className="header">
