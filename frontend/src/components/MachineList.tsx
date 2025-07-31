@@ -50,7 +50,7 @@ function MachineList() {
       <div className="header">
         <h1>Vending Machine Info</h1>
         <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
-        <div className="dark-toggle">
+        <div className="dark-toggle" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <Link to="/login" style={{ 
             textDecoration: 'none', 
             color: 'var(--text-main)', 
@@ -58,15 +58,17 @@ function MachineList() {
             padding: '0.6rem 1.2rem', 
             borderRadius: '8px', 
             fontSize: '0.9rem',
-            marginRight: '3rem',
             opacity: 0.9,
             transition: 'opacity 0.2s, transform 0.2s',
             border: '1px solid rgba(255,255,255,0.1)',
-            fontWeight: '500'
+            fontWeight: '500',
+            whiteSpace: 'nowrap'
           }}>
             🔐 Login
           </Link>
-          <DarkModeToggle mode={mode} setMode={setMode} />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <DarkModeToggle mode={mode} setMode={setMode} />
+          </div>
         </div>
       </div>
       {machines.map((m) => (

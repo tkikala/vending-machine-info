@@ -102,23 +102,108 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'PUT') {
       console.log('Updating machine:', id);
-      
+
       try {
-        const { name, location, description, isActive } = req.body;
-        
-        const machine = await prisma.vendingMachine.update({
-          where: { id },
-          data: {
-            name: name || undefined,
-            location: location || undefined,
-            description: description || undefined,
-            isActive: isActive !== undefined ? isActive : undefined
+        const { name, location, description, isActive, products, paymentMethods } = req.body;
+
+        // Start a transaction to update machine and related data
+        const result = await prisma.$transaction(async (tx) => {
+          // Update basic machine info
+          const machine = await tx.vendingMachine.update({
+            where: { id },
+            data: {
+              name: name || undefined,
+              location: location || undefined,
+              description: description || undefined,
+              isActive: isActive !== undefined ? isActive : undefined
+            }
+          });
+
+          // Handle products if provided
+          if (products && Array.isArray(products)) {
+            console.log('Updating products:', products.length);
+            
+            // Get existing products
+            const existingProducts = await tx.product.findMany({
+              where: { vendingMachineId: id }
+            });
+
+            // Update existing products
+            for (const product of products) {
+              if (product.id) {
+                // Update existing product
+                await tx.product.update({
+                  where: { id: product.id },
+                  data: {
+                    name: product.name,
+                    description: product.description || '',
+                    photo: product.photo || '',
+                    price: product.price ? parseFloat(product.price) : null,
+                    slotCode: product.slotCode || null,
+                    isAvailable: product.isAvailable !== undefined ? product.isAvailable : true
+                  }
+                });
+              } else {
+                // Create new product
+                await tx.product.create({
+                  data: {
+                    name: product.name,
+                    description: product.description || '',
+                    photo: product.photo || '',
+                    price: product.price ? parseFloat(product.price) : null,
+                    slotCode: product.slotCode || null,
+                    isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
+                    vendingMachineId: id
+                  }
+                });
+              }
+            }
+
+            // Delete products that are no longer in the list
+            const productIds = products.filter(p => p.id).map(p => p.id);
+            await tx.product.deleteMany({
+              where: {
+                vendingMachineId: id,
+                id: { notIn: productIds }
+              }
+            });
           }
+
+          // Handle payment methods if provided
+          if (paymentMethods && Array.isArray(paymentMethods)) {
+            console.log('Updating payment methods:', paymentMethods.length);
+            
+            // Get existing payment methods
+            const existingPaymentMethods = await tx.paymentMethod.findMany({
+              where: { vendingMachineId: id }
+            });
+
+            // Update existing payment methods
+            for (const pm of paymentMethods) {
+              const existing = existingPaymentMethods.find(epm => epm.type === pm.type);
+              if (existing) {
+                await tx.paymentMethod.update({
+                  where: { id: existing.id },
+                  data: { available: pm.available }
+                });
+              } else {
+                await tx.paymentMethod.create({
+                  data: {
+                    type: pm.type,
+                    available: pm.available,
+                    vendingMachineId: id
+                  }
+                });
+              }
+            }
+          }
+
+          return machine;
         });
 
-        console.log(`✅ Updated machine: ${machine.name}`);
-        return res.status(200).json(machine);
-        
+        console.log(`✅ Updated machine: ${result.name}`);
+        return res.status(200).json(result);
+
       } catch (dbError: any) {
         console.error('❌ Database error:', dbError);
         return res.status(500).json({

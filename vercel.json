@@ -2,9 +2,16 @@
   "buildCommand": "cd api && npm install && npx prisma generate && cd ../frontend && npm install && npx vite build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "functions": {
     "api/**/*.ts": {
-      "runtime": "@vercel/node@5.3.7"
+      "runtime": "@vercel/node@5.3.7",
+      "maxDuration": 30
     }
   }
 } 
