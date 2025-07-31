@@ -7,20 +7,21 @@
       "config": {
         "distDir": "dist"
       }
-    },
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "functions": {
+    "api/index.ts": {
+      "runtime": "@vercel/node@5.3.7"
+    }
+  },
+  "rewrites": [
     {
-      "src": "/api",
-      "dest": "/api/index.js"
+      "source": "/api",
+      "destination": "/api/index.ts"
     },
     {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/$1"
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
     }
   ]
 } 
