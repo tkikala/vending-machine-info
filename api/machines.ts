@@ -63,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const userCount = await prisma.user.count();
         console.log(`✅ User count: ${userCount}`);
         
-        // Get all machines (public view) - only basic fields to avoid column issues
+        // Get all machines with related data
         const machines = await prisma.vendingMachine.findMany({
           where: { isActive: true },
           select: {
@@ -76,6 +76,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             updatedAt: true,
             owner: {
               select: { id: true, name: true }
+            },
+            products: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                price: true,
+                slotCode: true,
+                isAvailable: true
+              }
+            },
+            paymentMethods: {
+              select: {
+                id: true,
+                type: true,
+                available: true
+              }
+            },
+            reviews: {
+              where: { isApproved: true },
+              select: {
+                id: true,
+                rating: true,
+                comment: true,
+                createdAt: true
+              }
             }
           }
         });
