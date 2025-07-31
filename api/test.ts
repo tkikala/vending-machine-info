@@ -1,10 +1,11 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async (req: VercelRequest, res: VercelResponse) => {
+export default function handler(req: VercelRequest, res: VercelResponse) {
   res.status(200).json({ 
-    message: 'API is working!', 
+    message: 'Test endpoint working!', 
     timestamp: new Date().toISOString(),
     method: req.method,
-    url: req.url 
+    url: req.url,
+    headers: req.headers
   });
-}; 
+} 
