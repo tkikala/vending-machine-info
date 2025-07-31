@@ -1,5 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from './prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
@@ -13,25 +15,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      // Get all machines (public view)
-      const machines = await prisma.vendingMachine.findMany({
-        where: { isActive: true },
-        include: {
-          products: {
-            where: { isAvailable: true }
-          },
-          paymentMethods: true,
-          photos: true,
-          reviews: {
-            where: { isApproved: true }
-          },
-          owner: {
-            select: { id: true, name: true }
+      console.log('API endpoint called - testing database connection...');
+      
+      // Test database connection first
+      try {
+        await prisma.$connect();
+        console.log('Database connected successfully');
+        
+        // Try a simple query to test the connection
+        const userCount = await prisma.user.count();
+        console.log('User count:', userCount);
+        
+        // Get all machines (public view)
+        const machines = await prisma.vendingMachine.findMany({
+          where: { isActive: true },
+          include: {
+            products: {
+              where: { isAvailable: true }
+            },
+            paymentMethods: true,
+            photos: true,
+            reviews: {
+              where: { isApproved: true }
+            },
+            owner: {
+              select: { id: true, name: true }
+            }
           }
-        }
-      });
+        });
 
-      return res.status(200).json(machines);
+        console.log('Found machines:', machines.length);
+        return res.status(200).json(machines);
+        
+      } catch (dbError: any) {
+        console.error('Database error:', dbError);
+        return res.status(500).json({ 
+          error: 'Database connection failed',
+          details: dbError.message,
+          suggestion: 'Check your DATABASE_URL environment variable'
+        });
+      }
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
@@ -47,5 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     
     return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    await prisma.$disconnect();
   }
 } 
