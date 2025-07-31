@@ -221,13 +221,18 @@ export async function uploadSingleFile(file: File): Promise<any> {
   try {
     console.log('Uploading single file:', file.name);
     
-    const formData = new FormData();
-    formData.append('file', file);
-
+    // Convert file to base64
+    const base64 = await fileToBase64(file);
+    
     const res = await fetch(`${API_BASE}/upload/single`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: formData
+      body: JSON.stringify({
+        file: base64,
+        filename: file.name,
+        contentType: file.type
+      })
     });
 
     console.log('Upload response status:', res.status, res.statusText);
@@ -250,18 +255,23 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
   try {
     console.log('Uploading gallery files for machine:', machineId, files.length, 'files');
     
-    const formData = new FormData();
-    files.forEach((file, index) => {
-      formData.append('gallery', file);
-      if (captions && captions[index]) {
-        formData.append(`caption_${index}`, captions[index]);
-      }
-    });
+    // Convert files to base64
+    const fileData = await Promise.all(
+      files.map(async (file) => ({
+        file: await fileToBase64(file),
+        filename: file.name,
+        contentType: file.type
+      }))
+    );
 
     const res = await fetch(`${API_BASE}/upload/gallery/${machineId}`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: formData
+      body: JSON.stringify({
+        files: fileData,
+        captions: captions || []
+      })
     });
 
     console.log('Gallery upload response status:', res.status, res.statusText);
@@ -278,6 +288,21 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
     console.error('uploadGalleryFiles error:', error);
     throw error;
   }
+}
+
+// Helper function to convert file to base64
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
+  });
 }
 
 export async function deleteGalleryItem(photoId: number): Promise<any> {
