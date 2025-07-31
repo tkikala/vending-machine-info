@@ -51,6 +51,19 @@ function MachineList() {
         <h1>Vending Machine Info</h1>
         <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
         <div className="dark-toggle">
+          <Link to="/login" style={{ 
+            textDecoration: 'none', 
+            color: 'var(--text-main)', 
+            background: 'var(--product-bg)', 
+            padding: '0.5rem 1rem', 
+            borderRadius: '6px', 
+            fontSize: '0.9rem',
+            marginRight: '1rem',
+            opacity: 0.8,
+            transition: 'opacity 0.2s'
+          }}>
+            🔐 Login
+          </Link>
           <DarkModeToggle mode={mode} setMode={setMode} />
         </div>
       </div>
