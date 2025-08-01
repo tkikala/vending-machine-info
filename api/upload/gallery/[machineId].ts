@@ -1,4 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { put } from '@vercel/blob';
 import prisma from '../../prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -40,37 +41,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         try {
+          // Convert base64 to buffer
+          const buffer = Buffer.from(fileData.file, 'base64');
+          
           // Generate unique filename
           const timestamp = Date.now() + i;
           const extension = fileData.filename.split('.').pop();
           const uniqueFilename = `gallery_${machineId}_${timestamp}.${extension}`;
 
-          // Calculate file size
-          const fileSizeInBytes = Math.ceil((fileData.file.length * 3) / 4);
+          // Upload to Vercel Blob Storage
+          const blob = await put(uniqueFilename, buffer, {
+            access: 'public',
+            contentType: fileData.contentType || 'image/jpeg'
+          });
 
           // Determine file type
           const fileType = fileData.contentType?.startsWith('video/') ? 'video' : 'image';
 
-          // Store file in database
-          const fileRecord = await prisma.file.create({
-            data: {
-              filename: uniqueFilename,
-              originalName: fileData.filename,
-              contentType: fileData.contentType || 'image/jpeg',
-              fileSize: fileSizeInBytes,
-              fileData: fileData.file, // Store base64 data
-              fileType: 'gallery'
-            }
-          });
-
           // Save to database (just metadata, not the file data)
           const photo = await prisma.photo.create({
             data: {
-              url: `/api/files/${fileRecord.id}`,
+              url: blob.url,
               caption: caption,
               fileType: fileType,
               originalName: fileData.filename,
-              fileSize: fileSizeInBytes,
+              fileSize: buffer.length,
               vendingMachineId: machineId
             }
           });
@@ -79,10 +74,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             id: photo.id,
             filename: uniqueFilename,
             originalName: fileData.filename,
-            url: photo.url,
+            url: blob.url,
             caption: photo.caption,
             fileType: photo.fileType,
-            size: fileSizeInBytes
+            size: buffer.length
           });
 
           console.log(`✅ Uploaded gallery file: ${uniqueFilename}`);
