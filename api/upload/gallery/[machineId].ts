@@ -1,7 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { put } from '@vercel/blob';
 import prisma from '../../prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -31,16 +29,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const { files, captions = [] } = req.body;
-      
-      // Use relative path for Vercel serverless environment
-      const uploadsDir = join('.', 'uploads', 'gallery', machineId);
-      console.log('📁 Gallery upload directory:', uploadsDir);
-      
-      if (!existsSync(uploadsDir)) {
-        console.log('📁 Creating gallery upload directory:', uploadsDir);
-        await mkdir(uploadsDir, { recursive: true });
-      }
-
       const uploadedFiles: any[] = [];
 
       // Process each file
@@ -52,40 +40,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           continue;
         }
 
-        // Generate unique filename
-        const timestamp = Date.now() + i;
-        const extension = fileData.filename.split('.').pop();
-        const uniqueFilename = `gallery_${timestamp}.${extension}`;
-        const filePath = join(uploadsDir, uniqueFilename);
+        try {
+          // Convert base64 to buffer
+          const buffer = Buffer.from(fileData.file, 'base64');
+          
+          // Generate unique filename
+          const timestamp = Date.now() + i;
+          const extension = fileData.filename.split('.').pop();
+          const uniqueFilename = `gallery_${machineId}_${timestamp}.${extension}`;
 
-        // Convert base64 to buffer and save
-        const buffer = Buffer.from(fileData.file, 'base64');
-        await writeFile(filePath, buffer);
+          // Upload to Vercel Blob Storage
+          const blob = await put(uniqueFilename, buffer, {
+            access: 'public',
+            contentType: fileData.contentType || 'image/jpeg'
+          });
 
-        // Determine file type
-        const fileType = fileData.contentType?.startsWith('video/') ? 'video' : 'image';
+          // Determine file type
+          const fileType = fileData.contentType?.startsWith('video/') ? 'video' : 'image';
 
-        // Save to database
-        const photo = await prisma.photo.create({
-          data: {
-            url: `/uploads/gallery/${machineId}/${uniqueFilename}`,
-            caption: caption,
-            fileType: fileType,
+          // Save to database (just metadata, not the file data)
+          const photo = await prisma.photo.create({
+            data: {
+              url: blob.url,
+              caption: caption,
+              fileType: fileType,
+              originalName: fileData.filename,
+              fileSize: buffer.length,
+              vendingMachineId: machineId
+            }
+          });
+
+          uploadedFiles.push({
+            id: photo.id,
+            filename: uniqueFilename,
             originalName: fileData.filename,
-            fileSize: buffer.length,
-            vendingMachineId: machineId
-          }
-        });
+            url: blob.url,
+            caption: photo.caption,
+            fileType: photo.fileType,
+            size: buffer.length
+          });
 
-        uploadedFiles.push({
-          id: photo.id,
-          filename: uniqueFilename,
-          originalName: fileData.filename,
-          url: photo.url,
-          caption: photo.caption,
-          fileType: photo.fileType,
-          size: buffer.length
-        });
+          console.log(`✅ Uploaded gallery file: ${uniqueFilename}`);
+        } catch (uploadError) {
+          console.error(`❌ Failed to upload file ${fileData.filename}:`, uploadError);
+          // Continue with other files
+        }
       }
       
       console.log(`✅ Uploaded ${uploadedFiles.length} gallery files`);
