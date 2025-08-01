@@ -45,6 +45,7 @@ function EditMachineForm() {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [coordinates, setCoordinates] = useState('');
   const [logo, setLogo] = useState<string | undefined>(undefined);
   const [logoFile, setLogoFile] = useState<File | undefined>(undefined);
 
@@ -80,6 +81,7 @@ function EditMachineForm() {
       setName(machine.name);
       setLocation(machine.location);
       setDescription(machine.description || '');
+      setCoordinates(machine.coordinates || '');
       setLogo(machine.logo || undefined);
 
       // Set products
@@ -220,6 +222,7 @@ function EditMachineForm() {
         name: name.trim(),
         location: location.trim(),
         description: description.trim() || undefined,
+        coordinates: coordinates.trim() || undefined,
         logo: logoUrl,
         products: validProducts.map(p => ({
           id: p.id, // Include ID for existing products
@@ -332,8 +335,22 @@ function EditMachineForm() {
                  rows={3}
                />
              </div>
-             
-             {/* Logo Upload */}
+            <div className="form-group">
+              <label htmlFor="coordinates">Google Maps Coordinates (Optional)</label>
+              <input
+                type="text"
+                id="coordinates"
+                value={coordinates}
+                onChange={(e) => setCoordinates(e.target.value)}
+                placeholder="52.5200,13.4050 (latitude,longitude)"
+                title="Enter coordinates in format: latitude,longitude (e.g., 52.5200,13.4050)"
+              />
+              <small style={{ color: '#888', fontSize: '0.8rem' }}>
+                Format: latitude,longitude (e.g., 52.5200,13.4050). Leave empty to use location name search.
+              </small>
+            </div>
+            
+            {/* Logo Upload */}
              <LogoUpload
                currentLogo={logo}
                onLogoChange={(logoUrl, file) => {

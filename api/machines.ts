@@ -28,6 +28,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name: true,
             location: true,
             description: true,
+            logo: true,
+            coordinates: true,
             isActive: true,
             createdAt: true,
             updatedAt: true,
@@ -79,7 +81,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Creating new vending machine...');
       
       try {
-        const { name, location, description, logo, products, paymentMethods } = req.body;
+        const { name, location, description, logo, coordinates, products, paymentMethods } = req.body;
         
         if (!name || !location) {
           return res.status(400).json({ error: 'Name and location are required' });
@@ -102,6 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               location,
               description: description || '',
               logo: logo || null,
+              coordinates: coordinates || null,
               ownerId: adminUser.id,
               isActive: true
             }
@@ -158,7 +161,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('❌ API Error:', error);
+    console.error('❌ Machines Error:', error);
     return res.status(500).json({
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'

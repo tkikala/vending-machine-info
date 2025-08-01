@@ -4,6 +4,7 @@ export type VendingMachine = {
   location: string;
   description?: string;
   logo?: string;
+  coordinates?: string;
   isActive: boolean;
   owner: { id: number; name: string; email?: string };
   products: Array<{

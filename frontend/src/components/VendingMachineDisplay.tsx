@@ -62,6 +62,20 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
     }
   }
 
+  // Function to handle location click
+  const handleLocationClick = () => {
+    if (machine.coordinates) {
+      // Open Google Maps with coordinates
+      const [lat, lng] = machine.coordinates.split(',');
+      const url = `https://www.google.com/maps?q=${lat.trim()},${lng.trim()}`;
+      window.open(url, '_blank');
+    } else {
+      // Fallback: search for location name
+      const url = `https://www.google.com/maps/search/${encodeURIComponent(machine.location)}`;
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <div className="vending-machine">
       <div className="vending-machine-header">
@@ -73,7 +87,28 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
           />
           <div className="machine-details">
             <h3 style={{ margin: 0 }}>{machine.name}</h3>
-            <div style={{ color: 'inherit', opacity: 0.8, fontSize: '0.9rem' }}>{machine.location}</div>
+            <div 
+              style={{ 
+                color: 'inherit', 
+                opacity: 0.8, 
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                textDecorationColor: 'rgba(255,255,255,0.3)',
+                transition: 'opacity 0.2s'
+              }}
+              onClick={handleLocationClick}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.8';
+                e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.3)';
+              }}
+            >
+              📍 {machine.location}
+            </div>
             <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Owner: {machine.owner?.name || 'Unknown'}</div>
           </div>
           <div className="payment-methods-header">
@@ -101,13 +136,18 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
                     <div className="product-placeholder">📦</div>
                   )}
                 </div>
-                <div className="product-name">{slot.product.name}</div>
-                <div className="product-desc">{slot.product.description}</div>
+                <div className="product-info">
+                  <div className="product-name">{slot.product.name}</div>
+                  {slot.product.description && (
+                    <div className="product-description">{slot.product.description}</div>
+                  )}
+                  {slot.product.price && (
+                    <div className="product-price">€{slot.product.price.toFixed(2)}</div>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="slot-empty">
-                <div className="empty-placeholder">Empty</div>
-              </div>
+              <div className="empty-slot">Empty</div>
             )}
           </div>
         ))}
