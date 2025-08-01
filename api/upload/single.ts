@@ -1,7 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import prisma from '../prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('🔍 Single file upload endpoint called');
@@ -70,46 +68,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // Use relative path for Vercel serverless environment
-      // This creates uploads in the project root which persists
-      const uploadsDir = join('.', 'uploads', 'logos');
-      console.log('📁 Upload directory:', uploadsDir);
-      
-      if (!existsSync(uploadsDir)) {
-        console.log('📁 Creating upload directory:', uploadsDir);
-        await mkdir(uploadsDir, { recursive: true });
-      }
-
       // Generate unique filename
       const timestamp = Date.now();
       const extension = filename.split('.').pop()?.toLowerCase() || 'jpg';
       const uniqueFilename = `logo_${timestamp}.${extension}`;
-      const filePath = join(uploadsDir, uniqueFilename);
 
       try {
-        // Convert base64 to buffer and save
-        const buffer = Buffer.from(file, 'base64');
-        await writeFile(filePath, buffer);
+        // Store file data in database as base64
+        const fileRecord = await prisma.file.create({
+          data: {
+            filename: uniqueFilename,
+            originalName: filename,
+            contentType: contentType || 'application/octet-stream',
+            fileSize: fileSizeInBytes,
+            fileData: file, // Store base64 data directly
+            fileType: 'logo'
+          }
+        });
 
-        // Return the file URL (this will be served by the uploads endpoint)
-        const fileUrl = `/uploads/logos/${uniqueFilename}`;
+        // Return the file URL (this will be served by the file serving endpoint)
+        const fileUrl = `/api/files/${fileRecord.id}`;
         
-        console.log(`✅ File uploaded: ${uniqueFilename} (${buffer.length} bytes) at ${filePath}`);
+        console.log(`✅ File uploaded and stored in database: ${uniqueFilename} (${fileSizeInBytes} bytes)`);
         return res.status(200).json({
           message: 'File uploaded successfully',
           file: {
+            id: fileRecord.id,
             filename: uniqueFilename,
             originalName: filename,
             url: fileUrl,
-            size: buffer.length,
+            size: fileSizeInBytes,
             contentType: contentType || 'application/octet-stream'
           }
         });
-      } catch (writeError) {
-        console.error('❌ File write error:', writeError);
+      } catch (dbError) {
+        console.error('❌ Database error:', dbError);
         return res.status(500).json({
-          error: 'Failed to save file',
-          details: writeError instanceof Error ? writeError.message : 'Unknown error'
+          error: 'Failed to save file to database',
+          details: dbError instanceof Error ? dbError.message : 'Unknown error'
         });
       }
     }

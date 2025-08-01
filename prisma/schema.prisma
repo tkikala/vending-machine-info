@@ -97,6 +97,18 @@ model Photo {
   createdAt        DateTime         @default(now())
 }
 
+model File {
+  id          String   @id @default(uuid())
+  filename    String
+  originalName String
+  contentType String
+  fileSize    Int
+  fileData    String   // Base64 encoded file data
+  fileType    String   // "logo", "gallery", etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
 model Review {
   id               String           @id @default(uuid())
   rating           Int
