@@ -86,11 +86,29 @@ function AdminDashboard() {
           {machines.map((machine) => (
             <div key={machine.id} className="machine-admin-card">
               <div className="machine-header">
-                <h3>{machine.name}</h3>
-                <div className="machine-status">
-                  <span className={`status-badge ${machine.isActive ? 'active' : 'inactive'}`}>
-                    {machine.isActive ? 'Active' : 'Inactive'}
-                  </span>
+                <div className="machine-logo-section">
+                  {machine.logo ? (
+                    <img 
+                      src={machine.logo} 
+                      alt={`${machine.name} logo`}
+                      className="machine-logo"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="machine-logo-placeholder">
+                      🏪
+                    </div>
+                  )}
+                </div>
+                <div className="machine-title-section">
+                  <h3>{machine.name}</h3>
+                  <div className="machine-status">
+                    <span className={`status-badge ${machine.isActive ? 'active' : 'inactive'}`}>
+                      {machine.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
                 </div>
               </div>
               

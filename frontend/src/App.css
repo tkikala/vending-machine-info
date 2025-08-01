@@ -901,15 +901,47 @@ html[data-theme='dark'] .machine-admin-card:hover {
 
 .machine-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.machine-logo-section {
+  flex-shrink: 0;
+}
+
+.machine-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--card-border);
+}
+
+.machine-logo-placeholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.machine-title-section {
+  flex: 1;
+  min-width: 0;
 }
 
 .machine-header h3 {
-  margin: 0;
+  margin: 0 0 0.5rem 0;
   color: var(--text-main);
   font-size: 1.1rem;
+  word-wrap: break-word;
 }
 
 .status-badge {

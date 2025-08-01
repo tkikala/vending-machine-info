@@ -23,6 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name: true,
             location: true,
             description: true,
+            logo: true,
             isActive: true,
             createdAt: true,
             updatedAt: true,

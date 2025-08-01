@@ -109,7 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Updating machine:', id);
 
       try {
-        const { name, location, description, isActive, products, paymentMethods } = req.body;
+        const { name, location, description, logo, isActive, products, paymentMethods } = req.body;
 
         // Start a transaction to update machine and related data
         const result = await prisma.$transaction(async (tx) => {
@@ -120,6 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               name: name || undefined,
               location: location || undefined,
               description: description || undefined,
+              logo: logo !== undefined ? logo : undefined,
               isActive: isActive !== undefined ? isActive : undefined
             }
           });

@@ -79,7 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Creating new vending machine...');
       
       try {
-        const { name, location, description, products, paymentMethods } = req.body;
+        const { name, location, description, logo, products, paymentMethods } = req.body;
         
         if (!name || !location) {
           return res.status(400).json({ error: 'Name and location are required' });
@@ -101,6 +101,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               name,
               location,
               description: description || '',
+              logo: logo || null,
               ownerId: adminUser.id,
               isActive: true
             }
