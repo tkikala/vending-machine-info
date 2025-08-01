@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FileUpload from './FileUpload';
 
 interface LogoUploadProps {
@@ -11,6 +11,13 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
   const [logoPreview, setLogoPreview] = useState<string | null>(currentLogo || null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [uploading, _setUploading] = useState(false);
+
+  // Update preview when currentLogo changes
+  useEffect(() => {
+    if (currentLogo) {
+      setLogoPreview(currentLogo);
+    }
+  }, [currentLogo]);
 
   const handleFileSelect = (files: File[]) => {
     const file = files[0];
@@ -36,6 +43,18 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
     return `${mb.toFixed(1)}MB`;
   };
 
+  const getLogoDisplayName = () => {
+    if (logoFile) {
+      return logoFile.name;
+    }
+    if (currentLogo) {
+      // Extract filename from URL
+      const urlParts = currentLogo.split('/');
+      return urlParts[urlParts.length - 1] || 'Current logo';
+    }
+    return 'Logo';
+  };
+
   return (
     <div className="logo-upload">
       <label className="form-label">
@@ -45,7 +64,14 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
       
       {logoPreview ? (
         <div className="logo-preview">
-          <img src={logoPreview} alt="Machine logo" />
+          <img 
+            src={logoPreview} 
+            alt="Machine logo" 
+            onError={(e) => {
+              console.error('Failed to load logo image:', logoPreview);
+              e.currentTarget.style.display = 'none';
+            }}
+          />
           <div className="logo-preview-info">
             <h5>Logo Selected</h5>
             {logoFile && (
@@ -53,8 +79,8 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
                 {logoFile.name} ({formatFileSize(logoFile.size)})
               </p>
             )}
-            {!logoFile && currentLogo && (
-              <p>Current logo</p>
+            {!logoFile && (
+              <p>{getLogoDisplayName()}</p>
             )}
           </div>
           <div className="logo-actions">
