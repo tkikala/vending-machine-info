@@ -19,6 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Uploading single file...');
       console.log('Request body keys:', Object.keys(req.body || {}));
       console.log('Content-Type:', req.headers['content-type']);
+      console.log('Content-Length:', req.headers['content-length']);
       
       // Check if we have file data
       if (!req.body) {
@@ -44,6 +45,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             hasFilename: !!filename,
             bodyKeys: Object.keys(req.body)
           }
+        });
+      }
+
+      // Validate that file is a valid base64 string
+      if (typeof file !== 'string' || !file.match(/^[A-Za-z0-9+/]*={0,2}$/)) {
+        console.log('❌ Invalid base64 data');
+        return res.status(400).json({ 
+          error: 'Invalid file data format. Expected base64 string.',
+          receivedType: typeof file
         });
       }
 
