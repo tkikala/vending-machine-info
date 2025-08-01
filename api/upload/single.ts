@@ -70,8 +70,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // Create uploads directory if it doesn't exist
-      const uploadsDir = join(process.cwd(), 'uploads', 'logos');
+      // Use /tmp directory for Vercel serverless environment
+      const uploadsDir = join('/tmp', 'uploads', 'logos');
       if (!existsSync(uploadsDir)) {
         await mkdir(uploadsDir, { recursive: true });
       }
@@ -87,7 +87,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const buffer = Buffer.from(file, 'base64');
         await writeFile(filePath, buffer);
 
-        // Return the file URL
+        // Return the file URL (this will be served by the uploads endpoint)
         const fileUrl = `/uploads/logos/${uniqueFilename}`;
         
         console.log(`✅ File uploaded: ${uniqueFilename} (${buffer.length} bytes)`);

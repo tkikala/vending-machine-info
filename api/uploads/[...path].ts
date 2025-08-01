@@ -13,10 +13,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Invalid file path' });
     }
 
-    const filePath = join(process.cwd(), 'uploads', ...path);
+    // Use /tmp directory for Vercel serverless environment
+    const filePath = join('/tmp', 'uploads', ...path);
     
     // Security check: ensure the path is within uploads directory
-    const normalizedPath = join(process.cwd(), 'uploads');
+    const normalizedPath = join('/tmp', 'uploads');
     if (!filePath.startsWith(normalizedPath)) {
       return res.status(403).json({ error: 'Access denied' });
     }
