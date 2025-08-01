@@ -85,6 +85,21 @@ CREATE TABLE "public"."Photo" (
 );
 
 -- CreateTable
+CREATE TABLE "public"."File" (
+    "id" TEXT NOT NULL,
+    "filename" TEXT NOT NULL,
+    "originalName" TEXT NOT NULL,
+    "contentType" TEXT NOT NULL,
+    "fileSize" INTEGER NOT NULL,
+    "fileData" TEXT NOT NULL,
+    "fileType" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "File_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "public"."Review" (
     "id" TEXT NOT NULL,
     "rating" INTEGER NOT NULL,
