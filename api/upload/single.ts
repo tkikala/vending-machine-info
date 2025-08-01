@@ -70,9 +70,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // Use project directory for persistent storage in Vercel
-      const uploadsDir = join(process.cwd(), 'uploads', 'logos');
+      // Use relative path for Vercel serverless environment
+      // This creates uploads in the project root which persists
+      const uploadsDir = join('.', 'uploads', 'logos');
+      console.log('📁 Upload directory:', uploadsDir);
+      
       if (!existsSync(uploadsDir)) {
+        console.log('📁 Creating upload directory:', uploadsDir);
         await mkdir(uploadsDir, { recursive: true });
       }
 
@@ -90,7 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Return the file URL (this will be served by the uploads endpoint)
         const fileUrl = `/uploads/logos/${uniqueFilename}`;
         
-        console.log(`✅ File uploaded: ${uniqueFilename} (${buffer.length} bytes)`);
+        console.log(`✅ File uploaded: ${uniqueFilename} (${buffer.length} bytes) at ${filePath}`);
         return res.status(200).json({
           message: 'File uploaded successfully',
           file: {

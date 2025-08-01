@@ -32,9 +32,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const { files, captions = [] } = req.body;
       
-      // Use project directory for persistent storage in Vercel
-      const uploadsDir = join(process.cwd(), 'uploads', 'gallery', machineId);
+      // Use relative path for Vercel serverless environment
+      const uploadsDir = join('.', 'uploads', 'gallery', machineId);
+      console.log('📁 Gallery upload directory:', uploadsDir);
+      
       if (!existsSync(uploadsDir)) {
+        console.log('📁 Creating gallery upload directory:', uploadsDir);
         await mkdir(uploadsDir, { recursive: true });
       }
 
