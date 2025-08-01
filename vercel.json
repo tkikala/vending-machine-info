@@ -11,14 +11,6 @@
   "functions": {
     "api/**/*.ts": {
       "runtime": "@vercel/node@5.3.7",
-      "maxDuration": 30
-    },
-    "api/upload/single.ts": {
-      "runtime": "@vercel/node@5.3.7",
-      "maxDuration": 60
-    },
-    "api/upload/gallery/[machineId].ts": {
-      "runtime": "@vercel/node@5.3.7",
       "maxDuration": 60
     }
   }
