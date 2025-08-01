@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { put } from '@vercel/blob';
+import prisma from '../prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('🔍 Single file upload endpoint called');
@@ -69,36 +69,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       try {
-        // Convert base64 to buffer
-        const buffer = Buffer.from(file, 'base64');
-        
         // Generate unique filename
         const timestamp = Date.now();
         const extension = filename.split('.').pop()?.toLowerCase() || 'jpg';
         const uniqueFilename = `logo_${timestamp}.${extension}`;
 
-        // Upload to Vercel Blob Storage
-        const blob = await put(uniqueFilename, buffer, {
-          access: 'public',
-          contentType: contentType || 'image/jpeg'
+        // Store file data in database as base64 (temporary solution)
+        const fileRecord = await prisma.file.create({
+          data: {
+            filename: uniqueFilename,
+            originalName: filename,
+            contentType: contentType || 'image/jpeg',
+            fileSize: fileSizeInBytes,
+            fileData: file, // Store base64 data directly
+            fileType: 'logo'
+          }
         });
 
-        console.log(`✅ File uploaded to Vercel Blob: ${uniqueFilename} (${buffer.length} bytes)`);
+        // Return the file URL (this will be served by the file serving endpoint)
+        const fileUrl = `/api/files/${fileRecord.id}`;
+
+        console.log(`✅ File uploaded and stored in database: ${uniqueFilename} (${fileSizeInBytes} bytes)`);
         return res.status(200).json({
           message: 'File uploaded successfully',
           file: {
+            id: fileRecord.id,
             filename: uniqueFilename,
             originalName: filename,
-            url: blob.url,
-            size: buffer.length,
+            url: fileUrl,
+            size: fileSizeInBytes,
             contentType: contentType || 'image/jpeg'
           }
         });
-      } catch (uploadError) {
-        console.error('❌ Upload error:', uploadError);
+      } catch (dbError) {
+        console.error('❌ Database error:', dbError);
         return res.status(500).json({
-          error: 'Failed to upload file to Vercel Blob Storage',
-          details: uploadError instanceof Error ? uploadError.message : 'Unknown error'
+          error: 'Failed to save file to database',
+          details: dbError instanceof Error ? dbError.message : 'Unknown error'
         });
       }
     }
