@@ -10,20 +10,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { path } = req.query;
     
     if (!path || !Array.isArray(path)) {
+      console.log('❌ Invalid path:', path);
       return res.status(400).json({ error: 'Invalid file path' });
     }
 
-    // Use /tmp directory for Vercel serverless environment
-    const filePath = join('/tmp', 'uploads', ...path);
+    // Use project directory for persistent storage in Vercel
+    const filePath = join(process.cwd(), 'uploads', ...path);
     
     // Security check: ensure the path is within uploads directory
-    const normalizedPath = join('/tmp', 'uploads');
+    const normalizedPath = join(process.cwd(), 'uploads');
     if (!filePath.startsWith(normalizedPath)) {
+      console.log('❌ Access denied - path outside uploads directory:', filePath);
       return res.status(403).json({ error: 'Access denied' });
     }
 
+    console.log('🔍 Looking for file:', filePath);
+
     // Check if file exists
     if (!existsSync(filePath)) {
+      console.log('❌ File not found:', filePath);
       return res.status(404).json({ error: 'File not found' });
     }
 
@@ -53,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Content-Length', fileBuffer.length);
     res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
     
-    console.log(`✅ Served file: ${filePath}`);
+    console.log(`✅ Served file: ${filePath} (${fileBuffer.length} bytes, ${contentType})`);
     return res.status(200).send(fileBuffer);
     
   } catch (error) {

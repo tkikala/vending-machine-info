@@ -70,8 +70,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // Use /tmp directory for Vercel serverless environment
-      const uploadsDir = join('/tmp', 'uploads', 'logos');
+      // Use project directory for persistent storage in Vercel
+      const uploadsDir = join(process.cwd(), 'uploads', 'logos');
       if (!existsSync(uploadsDir)) {
         await mkdir(uploadsDir, { recursive: true });
       }

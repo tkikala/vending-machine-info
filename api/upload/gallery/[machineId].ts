@@ -32,8 +32,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const { files, captions = [] } = req.body;
       
-      // Use /tmp directory for Vercel serverless environment
-      const uploadsDir = join('/tmp', 'uploads', 'gallery', machineId);
+      // Use project directory for persistent storage in Vercel
+      const uploadsDir = join(process.cwd(), 'uploads', 'gallery', machineId);
       if (!existsSync(uploadsDir)) {
         await mkdir(uploadsDir, { recursive: true });
       }
