@@ -31,6 +31,9 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
     }
   };
 
+  const icon = getIcon();
+  const isEmoji = typeof icon === 'string';
+
   return (
     <div style={{ 
       display: 'flex', 
@@ -45,14 +48,18 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        flexShrink: 0 // Prevent icon from shrinking
+        flexShrink: 0, // Prevent icon from shrinking
+        fontSize: isEmoji ? '16px' : 'auto', // Smaller font size for emojis
+        lineHeight: isEmoji ? '1' : 'auto' // Ensure emoji is centered
       }}>
-        {getIcon()}
+        {icon}
       </div>
       <span style={{ 
         fontSize: '14px',
         lineHeight: '1',
-        flexShrink: 0 // Prevent text from shrinking
+        flexShrink: 0, // Prevent text from shrinking
+        display: 'flex',
+        alignItems: 'center' // Center text vertically
       }}>
         {paymentMethod.name}
       </span>
@@ -82,6 +89,11 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
         if (response.ok) {
           const data = await response.json();
           console.log('✅ Payment methods fetched:', data);
+          
+          // Debug Girocard specifically
+          const girocard = data.find((pm: any) => pm.type === 'GIROCARD');
+          console.log('🔍 Girocard data:', girocard);
+          
           setAllPaymentMethods(data);
         } else {
           console.error('❌ Failed to fetch payment methods:', response.status);
@@ -165,6 +177,10 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
             )}
           </div>
           <div className="payment-methods-header">
+            {loading && <div style={{ color: 'var(--text-muted)' }}>Loading payment methods...</div>}
+            {!loading && allPaymentMethods.length === 0 && (
+              <div style={{ color: 'var(--text-muted)' }}>No payment methods available</div>
+            )}
             {!loading && allPaymentMethods.map((paymentMethod) => (
               <PaymentIcon 
                 key={paymentMethod.id} 
