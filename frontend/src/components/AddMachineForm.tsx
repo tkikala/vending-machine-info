@@ -137,273 +137,254 @@ function AddMachineForm() {
   };
 
   return (
-    <div className="add-machine-form">
-      <h2>Add New Vending Machine</h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-section">
-          <h3>Basic Information</h3>
-          
-          <div className="form-group">
-            <label htmlFor="name">Machine Name *</label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="location">Location *</label>
-            <input
-              type="text"
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="coordinates">Coordinates (optional)</label>
-            <input
-              type="text"
-              id="coordinates"
-              value={coordinates}
-              onChange={(e) => setCoordinates(e.target.value)}
-              placeholder="e.g., 52.5200,13.4050"
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              disabled={loading}
-            />
+    <div className="add-machine-page">
+      <div className="header">
+        <div className="header-content">
+          <div className="header-left">
+            <button onClick={() => navigate('/admin')} className="back-button">
+              ← Back to Dashboard
+            </button>
+            <h1>Add New Vending Machine</h1>
           </div>
         </div>
+      </div>
 
-        <div className="form-section">
-          <h3>Logo</h3>
-          <p style={{ color: '#888', marginBottom: '1rem' }}>
-            Upload a logo for your vending machine
-          </p>
-          <LogoUpload
-            onLogoChange={(logoUrl, file) => {
-              setLogoUrl(logoUrl);
-              setLogoFile(file);
-            }}
-            disabled={loading}
-          />
-        </div>
-
-        <div className="form-section">
-          <h3>Products</h3>
-          <p style={{ color: '#888', marginBottom: '1rem' }}>
-            Search for existing products or create new ones
-          </p>
+      <div className="form-container">
+        <form onSubmit={handleSubmit} className="machine-form">
+          {error && <div className="error-message">{error}</div>}
           
-          <div className="form-group">
-            <label>Add Products</label>
-            <ProductSearch
-              onProductSelect={handleProductSelect}
+          <div className="form-section">
+            <h2>Basic Information</h2>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="name">Machine Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Central Park Vending"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="location">Location *</label>
+                <input
+                  type="text"
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Central Park, Near Main Entrance"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional description of the vending machine"
+                rows={3}
+                disabled={loading}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="coordinates">Google Maps Coordinates (Optional)</label>
+              <input
+                type="text"
+                id="coordinates"
+                value={coordinates}
+                onChange={(e) => setCoordinates(e.target.value)}
+                placeholder="52.5200,13.4050 (latitude,longitude)"
+                title="Enter coordinates in format: latitude,longitude (e.g., 52.5200,13.4050)"
+                disabled={loading}
+              />
+              <small style={{ color: '#888', fontSize: '0.8rem' }}>
+                Format: latitude,longitude (e.g., 52.5200,13.4050). Leave empty to use location name search.
+              </small>
+            </div>
+            
+            <LogoUpload
+              onLogoChange={(logoUrl, file) => {
+                setLogoUrl(logoUrl);
+                setLogoFile(file);
+              }}
               disabled={loading}
             />
           </div>
 
-          {/* Selected Products List */}
-          {machineProducts.length > 0 && (
-            <div style={{ marginTop: '1rem' }}>
-              <h4>Selected Products ({machineProducts.length})</h4>
-              {machineProducts.map((mp) => (
-                <div key={mp.product.id} style={{ 
-                  border: '1px solid var(--text-muted)', 
-                  borderRadius: '8px', 
-                  padding: '1rem', 
-                  marginBottom: '1rem',
-                  backgroundColor: 'var(--card-bg)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
-                      {mp.product.photo && (
-                        <img 
-                          src={mp.product.photo} 
-                          alt={mp.product.name}
-                          style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
-                        />
-                      )}
-                      <div>
-                        <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{mp.product.name}</div>
-                        {mp.product.description && (
-                          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{mp.product.description}</div>
+          <div className="form-section">
+            <h2>Products</h2>
+            <p style={{ color: '#888', marginBottom: '1rem' }}>
+              Search for existing products or create new ones
+            </p>
+            
+            <div className="form-group">
+              <label>Add Products</label>
+              <ProductSearch
+                onProductSelect={handleProductSelect}
+                disabled={loading}
+              />
+            </div>
+
+            {machineProducts.length > 0 && (
+              <div style={{ marginTop: '1rem' }}>
+                <h4>Selected Products ({machineProducts.length})</h4>
+                {machineProducts.map((mp) => (
+                  <div key={mp.product.id} style={{ 
+                    border: '1px solid var(--text-muted)', 
+                    borderRadius: '8px', 
+                    padding: '1rem', 
+                    marginBottom: '1rem',
+                    backgroundColor: 'var(--card-bg)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+                        {mp.product.photo && (
+                          <img 
+                            src={mp.product.photo} 
+                            alt={mp.product.name}
+                            style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
+                          />
                         )}
-                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
-                            <input
-                              type="checkbox"
-                              checked={mp.isAvailable}
-                              onChange={() => toggleProductAvailability(mp.product.id)}
-                              disabled={loading}
-                            />
-                            Available
-                          </label>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <label style={{ color: 'var(--text-main)' }}>Price: €</label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={mp.price || ''}
-                              onChange={(e) => updateProductPrice(mp.product.id, parseFloat(e.target.value) || 0)}
-                              placeholder={mp.product.price?.toString() || 'Default'}
-                              style={{ 
-                                width: '80px', 
-                                padding: '0.25rem',
-                                backgroundColor: 'var(--bg)',
-                                color: 'var(--text-main)',
-                                border: '1px solid var(--text-muted)',
-                                borderRadius: '4px'
-                              }}
-                              disabled={loading}
-                            />
-                            {mp.product.price && !mp.price && (
-                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                (Default: €{mp.product.price.toFixed(2)})
-                              </span>
-                            )}
+                        <div>
+                          <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{mp.product.name}</div>
+                          {mp.product.description && (
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{mp.product.description}</div>
+                          )}
+                          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+                              <input
+                                type="checkbox"
+                                checked={mp.isAvailable}
+                                onChange={() => toggleProductAvailability(mp.product.id)}
+                                disabled={loading}
+                              />
+                              Available
+                            </label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <label style={{ color: 'var(--text-main)' }}>Price: €</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={mp.price || ''}
+                                onChange={(e) => updateProductPrice(mp.product.id, parseFloat(e.target.value) || 0)}
+                                placeholder={mp.product.price?.toString() || 'Default'}
+                                style={{ 
+                                  width: '80px', 
+                                  padding: '0.25rem',
+                                  backgroundColor: 'var(--bg)',
+                                  color: 'var(--text-main)',
+                                  border: '1px solid var(--text-muted)',
+                                  borderRadius: '4px'
+                                }}
+                                disabled={loading}
+                              />
+                              {mp.product.price && !mp.price && (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                  (Default: €{mp.product.price.toFixed(2)})
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => removeProduct(mp.product.id)}
+                        disabled={loading}
+                        style={{ 
+                          background: '#e74c3c', 
+                          color: 'white', 
+                          border: 'none', 
+                          padding: '0.5rem 1rem', 
+                          borderRadius: '4px', 
+                          cursor: 'pointer' 
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#c0392b'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = '#e74c3c'; }}
+                      >
+                        Remove
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeProduct(mp.product.id)}
-                      disabled={loading}
-                      style={{ 
-                        background: '#e74c3c', 
-                        color: 'white', 
-                        border: 'none', 
-                        padding: '0.5rem 1rem', 
-                        borderRadius: '4px', 
-                        cursor: 'pointer' 
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#c0392b'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = '#e74c3c'; }}
-                    >
-                      Remove
-                    </button>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="form-section">
+            <h2>Gallery</h2>
+            <GalleryManager
+              initialGallery={gallery}
+              onGalleryChange={setGallery}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-section">
+            <h2>Payment Methods</h2>
+            <p style={{ color: '#888', marginBottom: '1rem' }}>
+              Select which payment methods are accepted
+            </p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  checked={paymentMethods.coin}
+                  onChange={(e) => setPaymentMethods(prev => ({ ...prev, coin: e.target.checked }))}
+                  disabled={loading}
+                />
+                🪙 Coins
+              </label>
+              
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  checked={paymentMethods.banknote}
+                  onChange={(e) => setPaymentMethods(prev => ({ ...prev, banknote: e.target.checked }))}
+                  disabled={loading}
+                />
+                💶 Banknotes
+              </label>
+              
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  checked={paymentMethods.girocard}
+                  onChange={(e) => setPaymentMethods(prev => ({ ...prev, girocard: e.target.checked }))}
+                  disabled={loading}
+                />
+                💳 Girocard
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  checked={paymentMethods.creditCard}
+                  onChange={(e) => setPaymentMethods(prev => ({ ...prev, creditCard: e.target.checked }))}
+                  disabled={loading}
+                />
+                💳 Credit Card
+              </label>
             </div>
-          )}
-        </div>
-
-        <div className="form-section">
-          <h3>Payment Methods</h3>
-          <p style={{ color: '#888', marginBottom: '1rem' }}>
-            Select which payment methods are accepted
-          </p>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="checkbox"
-                checked={paymentMethods.coin}
-                onChange={(e) => setPaymentMethods(prev => ({ ...prev, coin: e.target.checked }))}
-                disabled={loading}
-              />
-              🪙 Coins
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="checkbox"
-                checked={paymentMethods.banknote}
-                onChange={(e) => setPaymentMethods(prev => ({ ...prev, banknote: e.target.checked }))}
-                disabled={loading}
-              />
-              💶 Banknotes
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="checkbox"
-                checked={paymentMethods.girocard}
-                onChange={(e) => setPaymentMethods(prev => ({ ...prev, girocard: e.target.checked }))}
-                disabled={loading}
-              />
-              💳 Girocard
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="checkbox"
-                checked={paymentMethods.creditCard}
-                onChange={(e) => setPaymentMethods(prev => ({ ...prev, creditCard: e.target.checked }))}
-                disabled={loading}
-              />
-              💳 Credit Card
-            </label>
           </div>
-        </div>
 
-        <div className="form-section">
-          <h3>Gallery</h3>
-          <p style={{ color: '#888', marginBottom: '1rem' }}>
-            Add photos and videos of your vending machine
-          </p>
-          <GalleryManager
-            initialGallery={gallery}
-            onGalleryChange={setGallery}
-            disabled={loading}
-          />
-        </div>
-
-        {error && (
-          <div style={{ color: '#e74c3c', marginBottom: '1rem', padding: '1rem', backgroundColor: '#fdf2f2', borderRadius: '4px' }}>
-            {error}
+          <div className="form-actions">
+            <button type="button" onClick={() => navigate('/admin')} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" disabled={loading} className="btn btn-primary">
+              {loading ? 'Creating...' : 'Create Machine'}
+            </button>
           </div>
-        )}
-
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-          <button
-            type="button"
-            onClick={() => navigate('/admin')}
-            disabled={loading}
-            style={{ 
-              background: '#6c757d', 
-              color: 'white', 
-              border: 'none', 
-              padding: '0.75rem 1.5rem', 
-              borderRadius: '4px', 
-              cursor: 'pointer' 
-            }}
-          >
-            Cancel
-          </button>
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{ 
-              background: '#007bff', 
-              color: 'white', 
-              border: 'none', 
-              padding: '0.75rem 1.5rem', 
-              borderRadius: '4px', 
-              cursor: 'pointer' 
-            }}
-          >
-            {loading ? 'Creating...' : 'Create Machine'}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

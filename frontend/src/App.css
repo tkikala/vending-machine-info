@@ -471,7 +471,7 @@ html[data-theme='light'] .vending-machine-header {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  align-items: flex-start;
+  align-items: flex-end;
   min-width: 100px;
 }
 
