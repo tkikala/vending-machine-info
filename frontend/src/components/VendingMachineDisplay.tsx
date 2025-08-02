@@ -12,9 +12,9 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
       case 'BANKNOTE':
         return '💵';
       case 'GIROCARD':
-        return (
+        return paymentMethod.icon ? (
           <img 
-            src="/girocard-logo.svg" 
+            src={paymentMethod.icon} 
             alt="Girocard" 
             style={{ 
               width: '20px', 
@@ -23,7 +23,7 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
               filter: isAvailable ? 'none' : 'grayscale(100%) opacity(50%)'
             }} 
           />
-        );
+        ) : '💳';
       case 'CREDIT_CARD':
         return '💳';
       default:
@@ -60,13 +60,17 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
   useEffect(() => {
     const fetchAllPaymentMethods = async () => {
       try {
+        console.log('🔍 Fetching all payment methods...');
         const response = await fetch('/api/payment-methods');
         if (response.ok) {
           const data = await response.json();
+          console.log('✅ Payment methods fetched:', data);
           setAllPaymentMethods(data);
+        } else {
+          console.error('❌ Failed to fetch payment methods:', response.status);
         }
       } catch (error) {
-        console.error('Failed to fetch payment methods:', error);
+        console.error('❌ Error fetching payment methods:', error);
       } finally {
         setLoading(false);
       }
