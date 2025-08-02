@@ -1,389 +1,363 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createVendingMachine, uploadSingleFile, uploadGalleryFiles } from '../api';
-import DarkModeToggle from './DarkModeToggle';
-import { useDarkMode } from '../hooks/useDarkMode';
+import { createVendingMachine } from '../api';
+import type { Product, MachineProduct } from '../types';
 import LogoUpload from './LogoUpload';
+import ProductSearch from './ProductSearch';
 import GalleryManager from './GalleryManager';
-import ProductPhotoUpload from './ProductPhotoUpload';
 
-interface Product {
-  name: string;
-  description: string;
-  photo: string;
-  price: number | '';
+interface MachineProductData {
+  product: Product;
   isAvailable: boolean;
-}
-
-interface PaymentMethod {
-  type: 'COIN' | 'BANKNOTE' | 'GIROCARD' | 'CREDIT_CARD';
-  available: boolean;
-}
-
-interface GalleryItem {
-  id?: number;
-  url: string;
-  caption?: string;
-  fileType: 'image' | 'video';
-  originalName?: string;
-  fileSize?: number;
-  file?: File;
 }
 
 function AddMachineForm() {
   const navigate = useNavigate();
-  const [mode, setMode] = useDarkMode();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  // Machine basic info
+  const [error, setError] = useState<string | null>(null);
+  
+  // Basic machine info
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [coordinates, setCoordinates] = useState('');
-  const [logo, setLogo] = useState<string | undefined>(undefined);
-  const [logoFile, setLogoFile] = useState<File | undefined>(undefined);
+  const [logoUrl, setLogoUrl] = useState<string | undefined>();
+  
+  // Products and payment methods
+  const [machineProducts, setMachineProducts] = useState<MachineProductData[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState({
+    coin: false,
+    banknote: false,
+    girocard: false
+  });
 
-  // Gallery
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
-
-  // Products
-  const [products, setProducts] = useState<Product[]>([
-    { name: '', description: '', photo: '', price: '', isAvailable: true }
-  ]);
-
-  // Payment methods
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    { type: 'COIN', available: false },
-    { type: 'BANKNOTE', available: false },
-    { type: 'GIROCARD', available: false },
-    { type: 'CREDIT_CARD', available: false }
-  ]);
-
-  const addProduct = () => {
-    setProducts([...products, { 
-      name: '', 
-      description: '', 
-      photo: '', 
-      price: '', 
-      isAvailable: true 
-    }]);
-  };
-
-  const removeProduct = (index: number) => {
-    if (products.length > 1) {
-      setProducts(products.filter((_, i) => i !== index));
+  const handleProductSelect = (product: Product, isAvailable: boolean) => {
+    // Check if product is already added
+    const existingIndex = machineProducts.findIndex(mp => mp.product.id === product.id);
+    
+    if (existingIndex >= 0) {
+      // Update existing product availability
+      setMachineProducts(prev => prev.map((mp, index) => 
+        index === existingIndex ? { ...mp, isAvailable } : mp
+      ));
+    } else {
+      // Add new product
+      setMachineProducts(prev => [...prev, { product, isAvailable }]);
     }
   };
 
-  const updateProduct = (index: number, field: keyof Product, value: any) => {
-    const updatedProducts = [...products];
-    updatedProducts[index] = { ...updatedProducts[index], [field]: value };
-    setProducts(updatedProducts);
+  const removeProduct = (productId: string) => {
+    setMachineProducts(prev => prev.filter(mp => mp.product.id !== productId));
   };
 
-  const updatePaymentMethod = (type: PaymentMethod['type'], available: boolean) => {
-    setPaymentMethods(prev => 
-      prev.map(pm => pm.type === type ? { ...pm, available } : pm)
-    );
+  const toggleProductAvailability = (productId: string) => {
+    setMachineProducts(prev => prev.map(mp => 
+      mp.product.id === productId 
+        ? { ...mp, isAvailable: !mp.isAvailable }
+        : mp
+    ));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!name.trim() || !location.trim()) {
+      setError('Name and location are required');
+      return;
+    }
+
+    if (machineProducts.length === 0) {
+      setError('At least one product is required');
+      return;
+    }
+
     setLoading(true);
-    setError('');
+    setError(null);
 
     try {
-      // Validate required fields
-      if (!name.trim() || !location.trim()) {
-        throw new Error('Name and location are required');
-      }
-
-      // Validate at least one product
-      const validProducts = products.filter(p => p.name.trim());
-      if (validProducts.length === 0) {
-        throw new Error('At least one product is required');
-      }
-
-      // Upload logo if selected
-      let logoUrl: string | undefined = undefined;
-      if (logoFile) {
-        console.log('Uploading logo file...');
-        const logoUploadResult = await uploadSingleFile(logoFile);
-        logoUrl = logoUploadResult.file.url;
-        console.log('Logo uploaded successfully:', logoUrl);
-      } else if (logo) {
-        logoUrl = logo; // Existing logo URL
-      }
-
-      // Prepare machine data
       const machineData = {
         name: name.trim(),
         location: location.trim(),
         description: description.trim() || undefined,
         coordinates: coordinates.trim() || undefined,
         logo: logoUrl || undefined,
-        products: validProducts.map(p => ({
-          name: p.name.trim(),
-          description: p.description.trim() || undefined,
-          photo: p.photo.trim() || undefined,
-          price: p.price === '' ? undefined : Number(p.price),
-          isAvailable: p.isAvailable
+        products: machineProducts.map(mp => ({
+          productId: mp.product.id,
+          isAvailable: mp.isAvailable
         })),
-        paymentMethods: paymentMethods.map(pm => ({
-          type: pm.type,
-          available: pm.available
-        }))
+        paymentMethods: Object.entries(paymentMethods)
+          .filter(([_, available]) => available)
+          .map(([type, _]) => type.toUpperCase())
       };
 
-      // Create the machine first
       const machine = await createVendingMachine(machineData);
-      
-      // Upload gallery files if any
-      if (gallery.length > 0) {
-        const galleryFiles = gallery.filter(item => item.file).map(item => item.file!);
-        const galleryCaptions = gallery.filter(item => item.file).map(item => item.caption || '');
-        
-        if (galleryFiles.length > 0) {
-          console.log('Uploading gallery files for new machine:', machine.id);
-          await uploadGalleryFiles(machine.id, galleryFiles, galleryCaptions);
-          console.log('Gallery files uploaded successfully');
-        }
-      }
-
-      navigate('/admin');
+      console.log('✅ Machine created:', machine.id);
+      navigate(`/machine/${machine.id}`);
     } catch (err: any) {
-      setError(err.message || 'Failed to create vending machine');
+      setError(err.message || 'Failed to create machine');
+      console.error('❌ Create machine error:', err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="add-machine-page">
+    <div className="add-machine-form">
       <div className="header">
         <div className="header-content">
           <div className="header-left">
-            <button onClick={() => navigate('/admin')} className="back-button">
-              ← Back to Dashboard
+            <button 
+              onClick={() => navigate('/admin')} 
+              className="back-button"
+              disabled={loading}
+            >
+              ← Back
             </button>
-            <h1>Add New Vending Machine</h1>
+            <div>
+              <h1>Add New Vending Machine</h1>
+              <p style={{ color: '#888', fontWeight: 500 }}>
+                Create a new vending machine with products and payment methods
+              </p>
+            </div>
           </div>
           <div className="header-right">
-            <DarkModeToggle mode={mode} setMode={setMode} />
+            <button 
+              onClick={handleSubmit}
+              disabled={loading}
+              className="save-button"
+            >
+              {loading ? 'Creating...' : 'Create Machine'}
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="form-container">
-        <form onSubmit={handleSubmit} className="machine-form">
-          {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="form">
+        {/* Basic Information */}
+        <div className="form-section">
+          <h3>Basic Information</h3>
           
-          {/* Top Save Actions */}
-          <div className="form-actions form-actions-top">
-            <button type="button" onClick={() => navigate('/admin')} className="btn btn-secondary">
-              Cancel
-            </button>
-            <button type="submit" disabled={loading} className="btn btn-primary">
-              {loading ? 'Creating...' : 'Create Vending Machine'}
-            </button>
-          </div>
-
-          {/* Basic Information */}
-          <div className="form-section">
-            <h2>Basic Information</h2>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="name">Machine Name *</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Central Park Vending"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="location">Location *</label>
-                <input
-                  type="text"
-                  id="location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Central Park, Near Main Entrance"
-                  required
-                />
-              </div>
-            </div>
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional description of the vending machine"
-                rows={3}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="coordinates">Google Maps Coordinates (Optional)</label>
-              <input
-                type="text"
-                id="coordinates"
-                value={coordinates}
-                onChange={(e) => setCoordinates(e.target.value)}
-                placeholder="52.5200,13.4050 (latitude,longitude)"
-                title="Enter coordinates in format: latitude,longitude (e.g., 52.5200,13.4050)"
-              />
-              <small style={{ color: '#888', fontSize: '0.8rem' }}>
-                Format: latitude,longitude (e.g., 52.5200,13.4050). Leave empty to use location name search.
-              </small>
-            </div>
-            
-            {/* Logo Upload */}
-                            <LogoUpload
-                  currentLogo={logo}
-                  onLogoChange={(logoUrl, file) => {
-                    setLogo(logoUrl);
-                    setLogoFile(file);
-                  }}
-                  disabled={loading}
-                />
-          </div>
-
-          {/* Products */}
-          <div className="form-section">
-            <div className="section-header">
-              <h2>Products</h2>
-              <button type="button" onClick={addProduct} className="btn btn-secondary">
-                + Add Product
-              </button>
-            </div>
-            
-            {products.map((product, index) => (
-              <div key={index} className="product-form">
-                <div className="product-header">
-                  <h3>Product {index + 1}</h3>
-                  {products.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeProduct(index)}
-                      className="btn btn-danger"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Product Name *</label>
-                    <input
-                      type="text"
-                      value={product.name}
-                      onChange={(e) => updateProduct(index, 'name', e.target.value)}
-                      placeholder="Coca Cola"
-                      required={index === 0}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Price (€)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={product.price}
-                      onChange={(e) => updateProduct(index, 'price', e.target.value === '' ? '' : parseFloat(e.target.value))}
-                      placeholder="2.50"
-                    />
-                  </div>
-                </div>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Description</label>
-                    <input
-                      type="text"
-                      value={product.description}
-                      onChange={(e) => updateProduct(index, 'description', e.target.value)}
-                      placeholder="Refreshing cola drink"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Photo URL</label>
-                    <ProductPhotoUpload
-                      currentPhoto={product.photo}
-                      onPhotoChange={(photoUrl, file) => updateProduct(index, 'photo', photoUrl)}
-                      disabled={loading}
-                    />
-                  </div>
-                </div>
-                
-                <div className="form-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={product.isAvailable}
-                      onChange={(e) => updateProduct(index, 'isAvailable', e.target.checked)}
-                    />
-                    Available for purchase
-                  </label>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Gallery */}
-          <div className="form-section">
-            <h2>Gallery</h2>
-            <GalleryManager
-              initialGallery={gallery}
-              onGalleryChange={setGallery}
+          <div className="form-group">
+            <label htmlFor="name">Machine Name *</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter machine name"
+              required
               disabled={loading}
             />
           </div>
 
-          {/* Payment Methods */}
-          <div className="form-section">
-            <h2>Payment Methods</h2>
-            <div className="payment-methods-grid">
-              {paymentMethods.map((pm) => (
-                <div key={pm.type} className="payment-method-item">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={pm.available}
-                      onChange={(e) => updatePaymentMethod(pm.type, e.target.checked)}
-                    />
-                    <span className="payment-method-name">
-                      {pm.type === 'COIN' && '🪙 Coin'}
-                      {pm.type === 'BANKNOTE' && '💵 Banknote'}
-                      {pm.type === 'GIROCARD' && (
-                        <>
-                          <img src="/images/giro-card-logo.png" alt="Girocard" className="payment-logo" />
-                          Girocard
-                        </>
+          <div className="form-group">
+            <label htmlFor="location">Location *</label>
+            <input
+              type="text"
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Enter location"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="coordinates">Google Maps Coordinates (Optional)</label>
+            <input
+              type="text"
+              id="coordinates"
+              value={coordinates}
+              onChange={(e) => setCoordinates(e.target.value)}
+              placeholder="52.5200,13.4050 (latitude,longitude)"
+              title="Enter coordinates in format: latitude,longitude (e.g., 52.5200,13.4050)"
+              disabled={loading}
+            />
+            <small style={{ color: '#888', fontSize: '0.8rem' }}>
+              Format: latitude,longitude (e.g., 52.5200,13.4050). Leave empty to use location name search.
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter description"
+              rows={3}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Machine Logo</label>
+            <LogoUpload
+              currentLogo={logoUrl}
+              onLogoChange={setLogoUrl}
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        {/* Products */}
+        <div className="form-section">
+          <h3>Products</h3>
+          <p style={{ color: '#888', marginBottom: '1rem' }}>
+            Search for existing products or create new ones
+          </p>
+          
+          <div className="form-group">
+            <label>Add Products</label>
+            <ProductSearch
+              onProductSelect={handleProductSelect}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Selected Products List */}
+          {machineProducts.length > 0 && (
+            <div style={{ marginTop: '1rem' }}>
+              <h4>Selected Products ({machineProducts.length})</h4>
+              {machineProducts.map((mp) => (
+                <div key={mp.product.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '1rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  marginBottom: '0.5rem',
+                  background: 'var(--bg-secondary)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                    {mp.product.photo && (
+                      <img 
+                        src={mp.product.photo} 
+                        alt={mp.product.name}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          objectFit: 'cover',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    )}
+                    <div>
+                      <div style={{ fontWeight: 500, color: 'var(--text-main)' }}>
+                        {mp.product.name}
+                      </div>
+                      {mp.product.description && (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                          {mp.product.description}
+                        </div>
                       )}
-                      {pm.type === 'CREDIT_CARD' && '💳 Credit Card'}
-                    </span>
-                  </label>
+                      {mp.product.price && (
+                        <div style={{ fontSize: '0.9rem', color: 'var(--primary-color)', fontWeight: 500 }}>
+                          €{mp.product.price.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={mp.isAvailable}
+                        onChange={() => toggleProductAvailability(mp.product.id)}
+                        disabled={loading}
+                      />
+                      Available
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => removeProduct(mp.product.id)}
+                      disabled={loading}
+                      style={{
+                        background: '#e74c3c',
+                        color: 'white',
+                        border: 'none',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#c0392b';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#e74c3c';
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Submit */}
-          <div className="form-actions">
-            <button type="button" onClick={() => navigate('/admin')} className="btn btn-secondary">
-              Cancel
-            </button>
-            <button type="submit" disabled={loading} className="btn btn-primary">
-              {loading ? 'Creating...' : 'Create Vending Machine'}
-            </button>
+        {/* Payment Methods */}
+        <div className="form-section">
+          <h3>Payment Methods</h3>
+          
+          <div className="payment-methods">
+            <label className="payment-method">
+              <input
+                type="checkbox"
+                checked={paymentMethods.coin}
+                onChange={(e) => setPaymentMethods(prev => ({ ...prev, coin: e.target.checked }))}
+                disabled={loading}
+              />
+              <span className="payment-icon">🪙</span>
+              Coin
+            </label>
+            
+            <label className="payment-method">
+              <input
+                type="checkbox"
+                checked={paymentMethods.banknote}
+                onChange={(e) => setPaymentMethods(prev => ({ ...prev, banknote: e.target.checked }))}
+                disabled={loading}
+              />
+              <span className="payment-icon">💶</span>
+              Banknote
+            </label>
+            
+            <label className="payment-method">
+              <input
+                type="checkbox"
+                checked={paymentMethods.girocard}
+                onChange={(e) => setPaymentMethods(prev => ({ ...prev, girocard: e.target.checked }))}
+                disabled={loading}
+              />
+              <span className="payment-icon">💳</span>
+              Girocard
+            </label>
           </div>
-        </form>
-      </div>
+        </div>
+
+        {/* Gallery */}
+        <div className="form-section">
+          <h3>Gallery</h3>
+          <p style={{ color: '#888', marginBottom: '1rem' }}>
+            Add photos and videos of your vending machine
+          </p>
+          <GalleryManager
+            initialGallery={[]}
+            onGalleryChange={() => {}}
+            disabled={loading}
+          />
+        </div>
+      </form>
     </div>
   );
 }

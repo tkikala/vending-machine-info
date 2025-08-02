@@ -222,9 +222,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Deleting machine:', id);
 
       try {
-        await prisma.vendingMachine.update({
-          where: { id },
-          data: { isActive: false }
+        // Actually delete the machine and all related data
+        await prisma.$transaction(async (tx) => {
+          // Delete related data first (due to foreign key constraints)
+          await tx.review.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          await tx.photo.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          await tx.paymentMethod.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          await tx.product.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          // Finally delete the machine
+          await tx.vendingMachine.delete({
+            where: { id }
+          });
         });
 
         console.log(`✅ Deleted machine: ${id}`);

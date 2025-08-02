@@ -1,3 +1,24 @@
+export type Product = {
+  id: string;
+  name: string;
+  description?: string;
+  photo?: string;
+  price?: number;
+  isAvailable: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MachineProduct = {
+  id: string;
+  vendingMachineId: string;
+  productId: string;
+  isAvailable: boolean;
+  product: Product;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type VendingMachine = {
   id: string;
   name: string;
@@ -7,14 +28,7 @@ export type VendingMachine = {
   coordinates?: string;
   isActive: boolean;
   owner: { id: number; name: string; email?: string };
-  products: Array<{
-    id: number;
-    name: string;
-    description?: string;
-    photo?: string;
-    price?: number;
-    isAvailable: boolean;
-  }>;
+  products: MachineProduct[];
   paymentMethods: Array<{
     id: number;
     type: string;

@@ -1,3 +1,5 @@
+import type { VendingMachine, Product } from './types';
+
 const API_BASE = import.meta.env.PROD 
   ? '/api' // Production: relative URLs (same domain)
   : 'http://localhost:4000/api'; // Development: absolute URL
@@ -366,6 +368,61 @@ export async function deleteGalleryItem(photoId: number): Promise<any> {
     return data;
   } catch (error) {
     console.error('deleteGalleryItem error:', error);
+    throw error;
+  }
+} 
+
+// Product management API
+export async function searchProducts(query: string): Promise<Product[]> {
+  try {
+    console.log('Searching products:', query);
+    const res = await fetch(`${API_BASE}/products?search=${encodeURIComponent(query)}`, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Failed to search products');
+    }
+    
+    const data = await res.json();
+    console.log('Found products:', data.length);
+    return data;
+  } catch (error) {
+    console.error('searchProducts error:', error);
+    throw error;
+  }
+}
+
+export async function createProduct(productData: {
+  name: string;
+  description?: string;
+  photo?: string;
+  price?: number;
+}): Promise<Product> {
+  try {
+    console.log('Creating product:', productData.name);
+    const res = await fetch(`${API_BASE}/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(productData)
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Failed to create product');
+    }
+    
+    const data = await res.json();
+    console.log('Created product:', data.name);
+    return data;
+  } catch (error) {
+    console.error('createProduct error:', error);
     throw error;
   }
 } 

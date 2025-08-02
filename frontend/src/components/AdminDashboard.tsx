@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchAllMachines, deleteVendingMachine } from '../api';
+import { fetchAllMachines, deleteVendingMachine, updateVendingMachine } from '../api';
 import type { VendingMachine } from '../types';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -29,8 +29,22 @@ function AdminDashboard() {
     }
   }
 
+  async function handleDeactivate(id: string, name: string, currentStatus: boolean) {
+    const action = currentStatus ? 'deactivate' : 'activate';
+    if (!confirm(`Are you sure you want to ${action} "${name}"?`)) return;
+
+    try {
+      await updateVendingMachine(id, { isActive: !currentStatus });
+      setMachines(prev => prev.map(m => 
+        m.id === id ? { ...m, isActive: !currentStatus } : m
+      ));
+    } catch (err: any) {
+      alert(err.message || `Failed to ${action} machine`);
+    }
+  }
+
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!confirm(`Are you sure you want to PERMANENTLY DELETE "${name}"? This action cannot be undone!`)) return;
 
     try {
       await deleteVendingMachine(id);
@@ -127,12 +141,20 @@ function AdminDashboard() {
                   Edit
                 </Link>
                 {isAdmin && (
-                  <button 
-                    onClick={() => handleDelete(machine.id, machine.name)}
-                    className="btn btn-danger"
-                  >
-                    Delete
-                  </button>
+                  <>
+                    <button 
+                      onClick={() => handleDeactivate(machine.id, machine.name, machine.isActive)}
+                      className={`btn ${machine.isActive ? 'btn-warning' : 'btn-success'}`}
+                    >
+                      {machine.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(machine.id, machine.name)}
+                      className="btn btn-danger"
+                    >
+                      Delete
+                    </button>
+                  </>
                 )}
               </div>
             </div>

@@ -13,14 +13,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      console.log('Machines endpoint called - fetching machines...');
+      console.log('🔍 Fetching all machines...');
       
       try {
-        // Simple test query
-        const userCount = await prisma.user.count();
-        console.log(`✅ User count: ${userCount}`);
-        
-        // Get all machines with related data
         const machines = await prisma.vendingMachine.findMany({
           where: { isActive: true },
           select: {
@@ -39,11 +34,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             products: {
               select: {
                 id: true,
-                name: true,
-                description: true,
-                photo: true,
-                price: true,
-                isAvailable: true
+                isAvailable: true,
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    photo: true,
+                    price: true,
+                    isAvailable: true
+                  }
+                }
               }
             },
             paymentMethods: {
@@ -53,19 +54,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 available: true
               }
             },
+            photos: {
+              select: {
+                id: true,
+                url: true,
+                caption: true,
+                fileType: true,
+                originalName: true,
+                fileSize: true
+              }
+            },
             reviews: {
-              where: { isApproved: true },
               select: {
                 id: true,
                 rating: true,
                 comment: true,
-                createdAt: true
+                isApproved: true,
+                user: {
+                  select: { id: true, name: true }
+                }
               }
             }
           }
         });
 
-        console.log(`✅ Found machines: ${machines.length}`);
+        console.log(`✅ Found ${machines.length} machines`);
         return res.status(200).json(machines);
         
       } catch (dbError: any) {
@@ -78,27 +91,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
-      console.log('Creating new vending machine...');
+      console.log('Creating new machine...');
       
       try {
         const { name, location, description, logo, coordinates, products, paymentMethods } = req.body;
         
-        if (!name || !location) {
-          return res.status(400).json({ error: 'Name and location are required' });
+        if (!name || !name.trim()) {
+          return res.status(400).json({ error: 'Machine name is required' });
         }
 
-        // For now, use the admin user as owner
-        const adminUser = await prisma.user.findUnique({
-          where: { email: 't.kikala@gmail.com' }
+        if (!location || !location.trim()) {
+          return res.status(400).json({ error: 'Machine location is required' });
+        }
+
+        // Get admin user (assuming first admin user)
+        const adminUser = await prisma.user.findFirst({
+          where: { role: 'ADMIN', isActive: true }
         });
 
         if (!adminUser) {
-          return res.status(500).json({ error: 'Admin user not found' });
+          return res.status(500).json({ error: 'No admin user found' });
         }
 
         // Create machine with related data in a transaction
-        const result = await prisma.$transaction(async (tx) => {
-          const machine = await tx.vendingMachine.create({
+        const machine = await prisma.$transaction(async (tx) => {
+          // Create the machine
+          const newMachine = await tx.vendingMachine.create({
             data: {
               name,
               location,
@@ -110,44 +128,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
           });
 
-          // Create products if provided
+          // Create machine-product relationships
           if (products && Array.isArray(products)) {
-            console.log('Creating products:', products.length);
-            for (const product of products) {
-              if (product.name && product.name.trim()) {
-                await tx.product.create({
+            for (const productData of products) {
+              if (productData.productId) {
+                await tx.machineProduct.create({
                   data: {
-                    name: product.name.trim(),
-                    description: product.description || '',
-                    photo: product.photo || '',
-                    price: product.price ? parseFloat(product.price) : null,
-                    isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
-                    vendingMachineId: machine.id
+                    vendingMachineId: newMachine.id,
+                    productId: productData.productId,
+                    isAvailable: productData.isAvailable !== undefined ? productData.isAvailable : true
                   }
                 });
               }
             }
           }
 
-          // Create payment methods if provided
+          // Create payment methods
           if (paymentMethods && Array.isArray(paymentMethods)) {
-            console.log('Creating payment methods:', paymentMethods.length);
-            for (const pm of paymentMethods) {
+            for (const paymentType of paymentMethods) {
               await tx.paymentMethod.create({
                 data: {
-                  type: pm.type,
-                  available: pm.available,
-                  vendingMachineId: machine.id
+                  type: paymentType,
+                  available: true,
+                  vendingMachineId: newMachine.id
                 }
               });
             }
           }
 
-          return machine;
+          return newMachine;
         });
 
-        console.log(`✅ Created machine: ${result.name}`);
-        return res.status(201).json(result);
+        console.log(`✅ Created machine: ${machine.id}`);
+        return res.status(201).json(machine);
         
       } catch (dbError: any) {
         console.error('❌ Database error:', dbError);
