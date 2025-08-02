@@ -2,11 +2,10 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from '../prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log(`🔍 [${req.method}] /api/machines/[id] called with query:`, req.query);
+  console.log('🔍 Machine endpoint called');
   
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
@@ -17,17 +16,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { id } = req.query;
     
     if (!id || typeof id !== 'string') {
-      console.log('❌ Invalid machine ID:', id);
-      return res.status(400).json({ error: 'Invalid machine ID' });
+      return res.status(400).json({ error: 'Machine ID is required' });
     }
 
-    console.log('🔍 Processing request for machine ID:', id);
-
     if (req.method === 'GET') {
-      console.log('Individual machine endpoint called - fetching machine:', id);
+      console.log('Fetching machine:', id);
       
       try {
-        // Get the specific machine with all related data
         const machine = await prisma.vendingMachine.findUnique({
           where: { 
             id: id,
@@ -49,11 +44,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             products: {
               select: {
                 id: true,
-                name: true,
-                description: true,
-                price: true,
                 isAvailable: true,
-                photo: true
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    photo: true,
+                    price: true,
+                    isAvailable: true
+                  }
+                }
               }
             },
             paymentMethods: {
@@ -74,14 +75,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               }
             },
             reviews: {
-              where: { isApproved: true },
               select: {
                 id: true,
                 rating: true,
                 comment: true,
-                createdAt: true,
+                isApproved: true,
                 user: {
-                  select: { name: true }
+                  select: { id: true, name: true }
                 }
               }
             }
@@ -89,8 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
 
         if (!machine) {
-          console.log('❌ Machine not found:', id);
-          return res.status(404).json({ error: 'Vending machine not found' });
+          return res.status(404).json({ error: 'Machine not found' });
         }
 
         console.log(`✅ Found machine: ${machine.name}`);
@@ -107,14 +106,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'PUT') {
       console.log('Updating machine:', id);
-
+      
       try {
         const { name, location, description, logo, coordinates, isActive, products, paymentMethods } = req.body;
-  
-        // Start a transaction to update machine and related data
-        const result = await prisma.$transaction(async (tx) => {
-          // Update basic machine info
-          const machine = await tx.vendingMachine.update({
+        
+        // Update machine with related data in a transaction
+        const machine = await prisma.$transaction(async (tx) => {
+          // Update the machine
+          const updatedMachine = await tx.vendingMachine.update({
             where: { id },
             data: {
               name: name || undefined,
@@ -125,90 +124,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               isActive: isActive !== undefined ? isActive : undefined
             }
           });
-  
-          // Handle products if provided
+
+          // Update machine-product relationships
           if (products && Array.isArray(products)) {
-            console.log('Updating products:', products.length);
-            
-            // Get existing products
-            const existingProducts = await tx.product.findMany({
+            // Delete existing relationships
+            await tx.machineProduct.deleteMany({
               where: { vendingMachineId: id }
             });
-  
-            // Update existing products
-            for (const product of products) {
-              if (product.id) {
-                // Update existing product
-                await tx.product.update({
-                  where: { id: product.id },
+
+            // Create new relationships
+            for (const productData of products) {
+              if (productData.productId) {
+                await tx.machineProduct.create({
                   data: {
-                    name: product.name,
-                    description: product.description || '',
-                    photo: product.photo || '',
-                    price: product.price ? parseFloat(product.price) : null,
-                    isAvailable: product.isAvailable !== undefined ? product.isAvailable : true
-                  }
-                });
-              } else {
-                // Create new product
-                await tx.product.create({
-                  data: {
-                    name: product.name,
-                    description: product.description || '',
-                    photo: product.photo || '',
-                    price: product.price ? parseFloat(product.price) : null,
-                    isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
-                    vendingMachineId: id
+                    vendingMachineId: id,
+                    productId: productData.productId,
+                    isAvailable: productData.isAvailable !== undefined ? productData.isAvailable : true
                   }
                 });
               }
             }
-  
-            // Delete products that are no longer in the list
-            const productIds = products.filter(p => p.id).map(p => p.id);
-            await tx.product.deleteMany({
-              where: {
-                vendingMachineId: id,
-                id: { notIn: productIds }
-              }
-            });
           }
-  
-          // Handle payment methods if provided
+
+          // Update payment methods
           if (paymentMethods && Array.isArray(paymentMethods)) {
-            console.log('Updating payment methods:', paymentMethods.length);
-            
-            // Get existing payment methods
-            const existingPaymentMethods = await tx.paymentMethod.findMany({
+            // Delete existing payment methods
+            await tx.paymentMethod.deleteMany({
               where: { vendingMachineId: id }
             });
-  
-            // Update existing payment methods
-            for (const pm of paymentMethods) {
-              const existing = existingPaymentMethods.find(epm => epm.type === pm.type);
-              if (existing) {
-                await tx.paymentMethod.update({
-                  where: { id: existing.id },
-                  data: { available: pm.available }
-                });
-              } else {
-                await tx.paymentMethod.create({
-                  data: {
-                    type: pm.type,
-                    available: pm.available,
-                    vendingMachineId: id
-                  }
-                });
-              }
+
+            // Create new payment methods
+            for (const paymentType of paymentMethods) {
+              await tx.paymentMethod.create({
+                data: {
+                  type: paymentType,
+                  available: true,
+                  vendingMachineId: id
+                }
+              });
             }
           }
-  
-          return machine;
+
+          return updatedMachine;
         });
-  
-        console.log(`✅ Updated machine: ${result.name}`);
-        return res.status(200).json(result);
-  
+
+        console.log(`✅ Updated machine: ${machine.name}`);
+        return res.status(200).json(machine);
+        
       } catch (dbError: any) {
         console.error('❌ Database error:', dbError);
         return res.status(500).json({
@@ -237,7 +199,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             where: { vendingMachineId: id }
           });
           
-          await tx.product.deleteMany({
+          await tx.machineProduct.deleteMany({
             where: { vendingMachineId: id }
           });
           
