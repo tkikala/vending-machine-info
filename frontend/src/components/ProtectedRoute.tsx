@@ -1,28 +1,29 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LoadingSpinner from './LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
 }
 
-function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const { user, loading } = useAuth();
-  const location = useLocation();
 
   if (loading) {
-    return <div className="header"><h1>Loading...</h1></div>;
+    return <LoadingSpinner />;
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requireAdmin && user.role !== 'ADMIN') {
-    return <div className="header"><h1>Access Denied - Admin privileges required</h1></div>;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
-}
+};
 
 export default ProtectedRoute; 

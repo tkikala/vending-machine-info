@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchVendingMachine } from '../api';
 import type { VendingMachine } from '../types';
@@ -6,6 +6,7 @@ import VendingMachineDisplay from './VendingMachineDisplay';
 import DarkModeToggle from './DarkModeToggle';
 import Gallery from './Gallery';
 import { useDarkMode } from '../hooks/useDarkMode';
+import LoadingSpinner from './LoadingSpinner';
 
 function MachinePage() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +24,7 @@ function MachinePage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="header"><h1>Loading...</h1></div>;
+  if (loading) return <LoadingSpinner />;
   if (error) return <div className="header"><h1>Error: {error}</h1></div>;
   if (!machine) return <div className="header"><h1>Machine not found</h1></div>;
 

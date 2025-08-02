@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchVendingMachine, updateVendingMachine, uploadSingleFile, uploadGalleryFiles } from '../api';
 import type { VendingMachine, Product, MachineProduct } from '../types';
 import LogoUpload from './LogoUpload';
 import ProductSearch from './ProductSearch';
 import GalleryManager from './GalleryManager';
+import LoadingSpinner from './LoadingSpinner';
 
 interface MachineProductData {
   product: Product;
@@ -211,17 +212,8 @@ function EditMachineForm() {
 
   if (loadingMachine) {
     return (
-      <div className="add-machine-page">
-        <div className="header">
-          <div className="header-content">
-            <div className="header-left">
-              <button onClick={() => navigate('/admin')} className="back-button">
-                ← Back to Dashboard
-              </button>
-              <h1>Loading...</h1>
-            </div>
-          </div>
-        </div>
+      <div className="header">
+        <LoadingSpinner />
       </div>
     );
   }

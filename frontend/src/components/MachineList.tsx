@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchVendingMachines } from '../api';
 import type { VendingMachine } from '../types';
@@ -6,6 +6,7 @@ import VendingMachineDisplay from './VendingMachineDisplay';
 import DarkModeToggle from './DarkModeToggle';
 import Gallery from './Gallery';
 import { useDarkMode } from '../hooks/useDarkMode';
+import LoadingSpinner from './LoadingSpinner';
 
 function MachineList() {
   const [machines, setMachines] = useState<VendingMachine[]>([]);
@@ -36,7 +37,7 @@ function MachineList() {
 
   if (loading) {
     console.log('⏳ Showing loading state');
-    return <div className="header"><h1>Loading...</h1></div>;
+    return <LoadingSpinner />;
   }
   
   if (error) {

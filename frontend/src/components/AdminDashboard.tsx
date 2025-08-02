@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchAllMachines, deleteVendingMachine, updateVendingMachine } from '../api';
 import type { VendingMachine } from '../types';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
+import LoadingSpinner from './LoadingSpinner';
 
 function AdminDashboard() {
   const [machines, setMachines] = useState<VendingMachine[]>([]);
@@ -62,7 +63,7 @@ function AdminDashboard() {
     }
   }
 
-  if (loading) return <div className="header"><h1>Loading...</h1></div>;
+  if (loading) return <LoadingSpinner />;
   if (error) return <div className="header"><h1>Error: {error}</h1></div>;
 
   return (
