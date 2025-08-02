@@ -1,46 +1,96 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { VendingMachine } from '../types';
 
-function PaymentIcon({ paymentMethod }: { paymentMethod: any }) {
-  const { paymentMethodType, available } = paymentMethod;
-  
+function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAvailable: boolean }) {
   const getIcon = () => {
-    return paymentMethodType.icon || '💳';
+    const type = paymentMethod.type;
+    const name = paymentMethod.name;
+    
+    switch (type) {
+      case 'COIN':
+        return '🪙';
+      case 'BANKNOTE':
+        return '💵';
+      case 'GIROCARD':
+        return (
+          <img 
+            src="/girocard-logo.png" 
+            alt="Girocard" 
+            style={{ 
+              width: '20px', 
+              height: '20px', 
+              objectFit: 'contain',
+              filter: isAvailable ? 'none' : 'grayscale(100%) opacity(50%)'
+            }} 
+          />
+        );
+      case 'CREDIT_CARD':
+        return '💳';
+      default:
+        return '💳';
+    }
   };
 
   return (
-    <div className="payment-icon">
-      <span className="payment-text">{paymentMethodType.name}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span 
-          style={{ 
-            fontSize: '1.2rem'
-          }}
-          title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
-        >
-          {getIcon()}
-        </span>
-        <div 
-          className={`payment-status ${available ? 'available' : 'unavailable'}`}
-          title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
-        />
-      </div>
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '8px',
+      opacity: isAvailable ? 1 : 0.6
+    }}>
+      <span style={{ fontSize: '20px' }}>{getIcon()}</span>
+      <span style={{ fontSize: '14px' }}>{paymentMethod.name}</span>
+      <div 
+        className={`payment-status ${isAvailable ? 'available' : 'unavailable'}`}
+        style={{
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          backgroundColor: isAvailable ? '#4CAF50' : '#f44336'
+        }}
+      />
     </div>
   );
 }
 
 function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
+  const [allPaymentMethods, setAllPaymentMethods] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAllPaymentMethods = async () => {
+      try {
+        const response = await fetch('/api/payment-methods');
+        if (response.ok) {
+          const data = await response.json();
+          setAllPaymentMethods(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch payment methods:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllPaymentMethods();
+  }, []);
+
   const machineProducts = machine.products || [];
 
   const handleLocationClick = () => {
     if (machine.coordinates) {
       // Open Google Maps with coordinates
-      window.open(`https://www.google.com/maps?q=${machine.coordinates}`, '_blank');
+      window.open(`https://www.google.com/maps?q=${encodeURIComponent(machine.coordinates)}`, '_blank');
     } else {
       // Open Google Maps with location name
       window.open(`https://www.google.com/maps/search/${encodeURIComponent(machine.location)}`, '_blank');
     }
   };
+
+  // Create a map of available payment methods for this machine
+  const availablePaymentMethods = new Set(
+    machine.paymentMethods?.map(pm => pm.paymentMethodType.type) || []
+  );
 
   return (
     <div className="vending-machine">
@@ -94,8 +144,12 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
             )}
           </div>
           <div className="payment-methods-header">
-            {machine.paymentMethods?.map((pm) => (
-              <PaymentIcon key={pm.id} paymentMethod={pm} />
+            {!loading && allPaymentMethods.map((paymentMethod) => (
+              <PaymentIcon 
+                key={paymentMethod.id} 
+                paymentMethod={paymentMethod}
+                isAvailable={availablePaymentMethods.has(paymentMethod.type)}
+              />
             ))}
           </div>
         </div>
