@@ -5,13 +5,13 @@ import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
 import LogoUpload from './LogoUpload';
 import GalleryManager from './GalleryManager';
+import ProductPhotoUpload from './ProductPhotoUpload';
 
 interface Product {
   name: string;
   description: string;
   photo: string;
   price: number | '';
-  slotCode: string;
   isAvailable: boolean;
 }
 
@@ -49,7 +49,7 @@ function AddMachineForm() {
 
   // Products
   const [products, setProducts] = useState<Product[]>([
-    { name: '', description: '', photo: '', price: '', slotCode: 'A1', isAvailable: true }
+    { name: '', description: '', photo: '', price: '', isAvailable: true }
   ]);
 
   // Payment methods
@@ -61,13 +61,11 @@ function AddMachineForm() {
   ]);
 
   const addProduct = () => {
-    const nextSlot = generateNextSlotCode();
     setProducts([...products, { 
       name: '', 
       description: '', 
       photo: '', 
       price: '', 
-      slotCode: nextSlot, 
       isAvailable: true 
     }]);
   };
@@ -88,23 +86,6 @@ function AddMachineForm() {
     setPaymentMethods(prev => 
       prev.map(pm => pm.type === type ? { ...pm, available } : pm)
     );
-  };
-
-  const generateNextSlotCode = () => {
-    const rows = ['A', 'B', 'C', 'D', 'E'];
-    const cols = [1, 2, 3, 4, 5, 6];
-    
-    const usedSlots = products.map(p => p.slotCode);
-    
-    for (let row of rows) {
-      for (let col of cols) {
-        const slotCode = `${row}${col}`;
-        if (!usedSlots.includes(slotCode)) {
-          return slotCode;
-        }
-      }
-    }
-    return 'A1'; // Fallback
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,7 +128,6 @@ function AddMachineForm() {
           description: p.description.trim() || undefined,
           photo: p.photo.trim() || undefined,
           price: p.price === '' ? undefined : Number(p.price),
-          slotCode: p.slotCode,
           isAvailable: p.isAvailable
         })),
         paymentMethods: paymentMethods.map(pm => ({
@@ -308,21 +288,6 @@ function AddMachineForm() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Slot Code</label>
-                    <select
-                      value={product.slotCode}
-                      onChange={(e) => updateProduct(index, 'slotCode', e.target.value)}
-                    >
-                      {['A', 'B', 'C', 'D', 'E'].map(row =>
-                        [1, 2, 3, 4, 5, 6].map(col => (
-                          <option key={`${row}${col}`} value={`${row}${col}`}>
-                            {row}{col}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                  </div>
-                  <div className="form-group">
                     <label>Price (€)</label>
                     <input
                       type="number"
@@ -347,11 +312,10 @@ function AddMachineForm() {
                   </div>
                   <div className="form-group">
                     <label>Photo URL</label>
-                    <input
-                      type="url"
-                      value={product.photo}
-                      onChange={(e) => updateProduct(index, 'photo', e.target.value)}
-                      placeholder="https://example.com/product.jpg"
+                    <ProductPhotoUpload
+                      currentPhoto={product.photo}
+                      onPhotoChange={(photoUrl, file) => updateProduct(index, 'photo', photoUrl)}
+                      disabled={loading}
                     />
                   </div>
                 </div>

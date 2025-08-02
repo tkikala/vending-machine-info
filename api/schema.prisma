@@ -69,7 +69,6 @@ model Product {
   description      String?
   photo            String?
   price            Float?
-  slotCode         String?          // A1, B2, etc.
   isAvailable      Boolean          @default(true)
   vendingMachineId String
   vendingMachine   VendingMachine   @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)

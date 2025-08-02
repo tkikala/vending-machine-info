@@ -52,7 +52,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 name: true,
                 description: true,
                 price: true,
-                slotCode: true,
                 isAvailable: true,
                 photo: true
               }
@@ -147,7 +146,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     description: product.description || '',
                     photo: product.photo || '',
                     price: product.price ? parseFloat(product.price) : null,
-                    slotCode: product.slotCode || null,
                     isAvailable: product.isAvailable !== undefined ? product.isAvailable : true
                   }
                 });
@@ -159,7 +157,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     description: product.description || '',
                     photo: product.photo || '',
                     price: product.price ? parseFloat(product.price) : null,
-                    slotCode: product.slotCode || null,
                     isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
                     vendingMachineId: id
                   }

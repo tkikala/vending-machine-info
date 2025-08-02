@@ -84,12 +84,6 @@ function LoginPage() {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-
-          <div className="demo-credentials">
-            <h4>Demo Credentials:</h4>
-            <p><strong>Admin:</strong> admin@vendingmachine.com / admin123</p>
-            <p><strong>Owner:</strong> owner@example.com / password123</p>
-          </div>
         </div>
       </div>
     </div>

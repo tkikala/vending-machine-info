@@ -13,7 +13,6 @@ export type VendingMachine = {
     description?: string;
     photo?: string;
     price?: number;
-    slotCode?: string;
     isAvailable: boolean;
   }>;
   paymentMethods: Array<{

@@ -255,6 +255,21 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
   try {
     console.log('Uploading gallery files for machine:', machineId, files.length, 'files');
     
+    // Validate files before upload
+    if (files.length === 0) {
+      throw new Error('No files to upload');
+    }
+    
+    if (files.length > 10) {
+      throw new Error('Maximum 10 files allowed per upload');
+    }
+    
+    // Check file sizes
+    const oversizedFiles = files.filter(file => file.size > 4 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      throw new Error(`Files too large: ${oversizedFiles.map(f => f.name).join(', ')}. Maximum 4MB per file.`);
+    }
+    
     // Convert files to base64
     const fileData = await Promise.all(
       files.map(async (file) => ({
@@ -283,6 +298,13 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
 
     const data = await res.json();
     console.log('Gallery uploaded successfully:', data.photos.length, 'items');
+    
+    // Show warnings if there were partial failures
+    if (data.errors && data.errors.length > 0) {
+      console.warn('Gallery upload completed with errors:', data.errors);
+      // You might want to show these errors to the user
+    }
+    
     return data;
   } catch (error) {
     console.error('uploadGalleryFiles error:', error);

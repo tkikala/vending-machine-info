@@ -41,26 +41,8 @@ function PaymentIcon({ type, available }: { type: string; available: boolean }) 
 }
 
 function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
-  // Create a 5x6 grid (5 rows, 6 columns) for vending machine slots
-  const slots = [];
-  const rows = ['A', 'B', 'C', 'D', 'E'];
-  const cols = [1, 2, 3, 4, 5, 6];
-
-  let productIndex = 0;
+  // Create a simple grid for vending machine products
   const products = machine.products || [];
-
-  for (let row of rows) {
-    for (let col of cols) {
-      const slotCode = `${row}${col}`;
-      const product = products[productIndex];
-      slots.push({
-        code: slotCode,
-        product: product || null,
-        isEmpty: !product,
-      });
-      productIndex++;
-    }
-  }
 
   // Function to handle location click
   const handleLocationClick = () => {
@@ -120,35 +102,29 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
         </div>
       </div>
       <div className="vending-machine-display">
-        {slots.map((slot) => (
+        {products.map((product, index) => (
           <div 
-            key={slot.code} 
+            key={product.id || index} 
             className="vending-slot"
-            style={{ display: slot.isEmpty ? 'none' : 'flex' }}
           >
-            <div className="slot-code">{slot.code}</div>
-            {slot.product ? (
-              <div className="slot-product">
-                <div className="product-image">
-                  {slot.product.photo ? (
-                    <img src={slot.product.photo} alt={slot.product.name} />
-                  ) : (
-                    <div className="product-placeholder">📦</div>
-                  )}
-                </div>
-                <div className="product-info">
-                  <div className="product-name">{slot.product.name}</div>
-                  {slot.product.description && (
-                    <div className="product-description">{slot.product.description}</div>
-                  )}
-                  {slot.product.price && (
-                    <div className="product-price">€{slot.product.price.toFixed(2)}</div>
-                  )}
-                </div>
+            <div className="slot-product">
+              <div className="product-image">
+                {product.photo ? (
+                  <img src={product.photo} alt={product.name} />
+                ) : (
+                  <div className="product-placeholder">📦</div>
+                )}
               </div>
-            ) : (
-              <div className="empty-slot">Empty</div>
-            )}
+              <div className="product-info">
+                <div className="product-name">{product.name}</div>
+                {product.description && (
+                  <div className="product-description">{product.description}</div>
+                )}
+                {product.price && (
+                  <div className="product-price">€{product.price.toFixed(2)}</div>
+                )}
+              </div>
+            </div>
           </div>
         ))}
       </div>

@@ -29,24 +29,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const { files, captions = [] } = req.body;
+      
+      // Validate number of files
+      if (files.length > 10) {
+        return res.status(400).json({ error: 'Maximum 10 files allowed per upload' });
+      }
+
       const uploadedFiles: any[] = [];
+      const errors: string[] = [];
 
       // Process each file
       for (let i = 0; i < files.length; i++) {
         const fileData = files[i];
         const caption = captions[i] || '';
         
-        if (!fileData.file || !fileData.filename) {
+        if (!fileData || !fileData.file || !fileData.filename) {
+          errors.push(`File ${i + 1}: Invalid file data`);
           continue;
         }
 
         try {
+          // Validate file size (4MB limit for Vercel Blob free tier)
+          const fileSizeInBytes = Math.ceil((fileData.file.length * 3) / 4); // Approximate size for base64
+          if (fileSizeInBytes > 4 * 1024 * 1024) {
+            errors.push(`File ${fileData.filename}: File size exceeds 4MB limit`);
+            continue;
+          }
+
           // Convert base64 to buffer
           const buffer = Buffer.from(fileData.file, 'base64');
           
           // Generate unique filename
           const timestamp = Date.now() + i;
-          const extension = fileData.filename.split('.').pop();
+          const extension = fileData.filename.split('.').pop()?.toLowerCase() || 'jpg';
           const uniqueFilename = `gallery_${machineId}_${timestamp}.${extension}`;
 
           // Upload to Vercel Blob Storage
@@ -83,14 +98,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.log(`✅ Uploaded gallery file: ${uniqueFilename}`);
         } catch (uploadError) {
           console.error(`❌ Failed to upload file ${fileData.filename}:`, uploadError);
-          // Continue with other files
+          errors.push(`File ${fileData.filename}: ${uploadError instanceof Error ? uploadError.message : 'Upload failed'}`);
         }
       }
       
       console.log(`✅ Uploaded ${uploadedFiles.length} gallery files`);
+      
+      // Return response with both successes and errors
       return res.status(200).json({
-        message: 'Gallery files uploaded successfully',
-        photos: uploadedFiles
+        message: `Gallery upload completed. ${uploadedFiles.length} files uploaded successfully.`,
+        photos: uploadedFiles,
+        errors: errors.length > 0 ? errors : undefined
       });
     }
 
@@ -98,7 +116,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     console.error('❌ Gallery Upload Error:', error);
     return res.status(500).json({
-      error: 'Internal server error',
+      error: 'Failed to upload gallery files',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
