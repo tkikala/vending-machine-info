@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { VendingMachine } from '../types';
+import type { VendingMachine, Product } from '../types';
 
 function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAvailable: boolean }) {
   const getIcon = () => {
@@ -127,7 +127,7 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
 
   // Create a map of available payment methods for this machine
   const availablePaymentMethods = new Set(
-    machine.paymentMethods?.filter(pm => pm.available).map(pm => pm.type) || []
+    machine.paymentMethods?.map(pm => pm.type) || []
   );
 
   return (
