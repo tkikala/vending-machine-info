@@ -113,7 +113,7 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
     fetchAllPaymentMethods();
   }, []);
 
-  const machineProducts = machine.products || [];
+  const products = machine.products || [];
 
   const handleLocationClick = () => {
     if (machine.coordinates) {
@@ -197,15 +197,10 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
         </div>
       </div>
       <div className="vending-machine-display">
-        {machineProducts.map((machineProduct, index) => {
-          const product = machineProduct.product;
-          const displayPrice = machineProduct.price !== null && machineProduct.price !== undefined 
-            ? machineProduct.price 
-            : product.price;
-          
+        {products.map((product: Product, index: number) => {
           return (
             <div 
-              key={machineProduct.id || index} 
+              key={product.id || index} 
               className="vending-slot"
             >
               <div className="slot-product">
@@ -220,8 +215,8 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
                 {product.description && (
                   <div className="product-desc">{product.description}</div>
                 )}
-                {displayPrice && (
-                  <div className="product-price">€{displayPrice.toFixed(2)}</div>
+                {product.price && (
+                  <div className="product-price">€{product.price.toFixed(2)}</div>
                 )}
               </div>
             </div>

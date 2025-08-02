@@ -58,7 +58,7 @@ export type VendingMachine = {
   coordinates?: string;
   isActive: boolean;
   owner: { id: string; name: string; email?: string };
-  products: MachineProduct[];
+  products: Product[];
   paymentMethods: MachinePaymentMethod[];
   photos: Array<{
     id: string;
