@@ -112,28 +112,8 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
   try {
     const { name, location, description, logo, products = [], paymentMethods = [] } = req.body;
 
-    // Process payment methods to get the correct paymentMethodTypeId
-    const processedPaymentMethods = await Promise.all(
-      paymentMethods.map(async (pm: any) => {
-        // Handle both old format (pm.type) and new format (pm.paymentMethodTypeId)
-        let paymentMethodTypeId;
-        if (pm.paymentMethodTypeId) {
-          // New format
-          paymentMethodTypeId = pm.paymentMethodTypeId;
-        } else if (pm.type) {
-          // Old format - find the payment method type by type
-          const paymentMethodType = await prisma.paymentMethodType.findUnique({
-            where: { type: pm.type }
-          });
-          paymentMethodTypeId = paymentMethodType?.id;
-        }
-        
-        return {
-          paymentMethodTypeId: paymentMethodTypeId,
-          available: pm.available ?? false,
-        };
-      })
-    );
+    // Get all available payment method types
+    const allPaymentMethodTypes = await prisma.paymentMethodType.findMany();
 
     const machine = await prisma.vendingMachine.create({
       data: {
@@ -153,7 +133,10 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
           })),
         },
         paymentMethods: {
-          create: processedPaymentMethods,
+          create: allPaymentMethodTypes.map((pmType) => ({
+            paymentMethodTypeId: pmType.id,
+            available: false, // Default to false, will be updated based on frontend data
+          })),
         },
       },
       include: {
@@ -164,7 +147,37 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
       },
     });
 
-    res.status(201).json(machine);
+    // Update payment method availability based on frontend data
+    if (paymentMethods.length > 0) {
+      for (const pm of paymentMethods) {
+        if (pm.type) {
+          await prisma.machinePaymentMethod.updateMany({
+            where: {
+              vendingMachineId: machine.id,
+              paymentMethodType: {
+                type: pm.type
+              }
+            },
+            data: {
+              available: pm.available ?? false
+            }
+          });
+        }
+      }
+    }
+
+    // Fetch the updated machine with correct payment method data
+    const updatedMachine = await prisma.vendingMachine.findUnique({
+      where: { id: machine.id },
+      include: {
+        products: true,
+        paymentMethods: { include: { paymentMethodType: true } },
+        photos: true,
+        owner: { select: { id: true, name: true } },
+      },
+    });
+
+    res.status(201).json(updatedMachine);
   } catch (error) {
     console.error('Create machine error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -199,30 +212,36 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
       await prisma.machinePaymentMethod.deleteMany({
         where: { vendingMachineId: id }
       });
-    }
 
-    // Process payment methods to get the correct paymentMethodTypeId
-    const processedPaymentMethods = await Promise.all(
-      paymentMethods.map(async (pm: any) => {
-        // Handle both old format (pm.type) and new format (pm.paymentMethodTypeId)
-        let paymentMethodTypeId;
-        if (pm.paymentMethodTypeId) {
-          // New format
-          paymentMethodTypeId = pm.paymentMethodTypeId;
-        } else if (pm.type) {
-          // Old format - find the payment method type by type
-          const paymentMethodType = await prisma.paymentMethodType.findUnique({
-            where: { type: pm.type }
+      // Get all available payment method types
+      const allPaymentMethodTypes = await prisma.paymentMethodType.findMany();
+
+      // Create payment methods for all types
+      await prisma.machinePaymentMethod.createMany({
+        data: allPaymentMethodTypes.map((pmType) => ({
+          vendingMachineId: id,
+          paymentMethodTypeId: pmType.id,
+          available: false, // Default to false
+        }))
+      });
+
+      // Update availability based on frontend data
+      for (const pm of paymentMethods) {
+        if (pm.type) {
+          await prisma.machinePaymentMethod.updateMany({
+            where: {
+              vendingMachineId: id,
+              paymentMethodType: {
+                type: pm.type
+              }
+            },
+            data: {
+              available: pm.available ?? false
+            }
           });
-          paymentMethodTypeId = paymentMethodType?.id;
         }
-        
-        return {
-          paymentMethodTypeId: paymentMethodTypeId,
-          available: pm.available ?? false,
-        };
-      })
-    );
+      }
+    }
 
     const machine = await prisma.vendingMachine.update({
       where: { id },
@@ -238,11 +257,6 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
               slotCode: product.slotCode,
               isAvailable: product.isAvailable ?? true,
             })),
-          },
-        }),
-        ...(paymentMethods.length > 0 && {
-          paymentMethods: {
-            create: processedPaymentMethods,
           },
         }),
       },
