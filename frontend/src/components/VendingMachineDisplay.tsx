@@ -9,16 +9,18 @@ function PaymentIcon({ paymentMethod }: { paymentMethod: any }) {
   };
 
   return (
-    <span 
-      style={{ 
-        opacity: available ? 1 : 0.3,
-        fontSize: '1.2rem',
-        marginRight: '0.5rem'
-      }}
-      title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
-    >
-      {getIcon()}
-    </span>
+    <div className="payment-icon">
+      <span className="payment-text">{paymentMethodType.name}</span>
+      <span 
+        style={{ 
+          opacity: available ? 1 : 0.3,
+          fontSize: '1.2rem'
+        }}
+        title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
+      >
+        {getIcon()}
+      </span>
+    </div>
   );
 }
 
@@ -38,36 +40,50 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
   return (
     <div className="vending-machine">
       <div className="vending-machine-header">
-        <div className="machine-info">
-          {machine.logo && (
-            <div className="machine-logo">
-              <img src={machine.logo} alt="Machine logo" />
-            </div>
-          )}
+        <div className="machine-info-header">
+          <div className="machine-photo-header">
+            {machine.logo && (
+              <img 
+                src={machine.logo} 
+                alt={`${machine.name} logo`}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
+          </div>
           <div className="machine-details">
-            <h2>{machine.name}</h2>
+            <h3 style={{ margin: 0 }}>{machine.name}</h3>
             <div 
-              className="location"
-              onClick={handleLocationClick}
               style={{
+                color: 'inherit', 
+                opacity: 0.8, 
+                fontSize: '0.9rem',
                 cursor: 'pointer',
-                color: '#007bff',
                 textDecoration: 'underline',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
+                textDecorationColor: 'rgba(255,255,255,0.3)',
+                transition: 'opacity 0.2s'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#0056b3'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#007bff'; }}
+              onClick={handleLocationClick}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.8';
+                e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.3)';
+              }}
             >
               📍 {machine.location}
             </div>
             {machine.description && (
-              <p className="machine-description">{machine.description}</p>
+              <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.25rem' }}>
+                {machine.description}
+              </div>
             )}
           </div>
         </div>
-        <div className="payment-methods">
+        <div className="payment-methods-header">
           {machine.paymentMethods?.map((pm) => (
             <PaymentIcon key={pm.id} paymentMethod={pm} />
           ))}
@@ -93,15 +109,13 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
                     <div className="product-placeholder">📦</div>
                   )}
                 </div>
-                <div className="product-info">
-                  <div className="product-name">{product.name}</div>
-                  {product.description && (
-                    <div className="product-description">{product.description}</div>
-                  )}
-                  {displayPrice && (
-                    <div className="product-price">€{displayPrice.toFixed(2)}</div>
-                  )}
-                </div>
+                <div className="product-name">{product.name}</div>
+                {product.description && (
+                  <div className="product-desc">{product.description}</div>
+                )}
+                {displayPrice && (
+                  <div className="product-price">€{displayPrice.toFixed(2)}</div>
+                )}
               </div>
             </div>
           );

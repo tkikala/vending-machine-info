@@ -553,14 +553,20 @@ html[data-theme='light'] .product-name {
 }
 
 .product-desc {
-  font-size: 0.7rem;
-  color: #bdc3c7;
-  line-height: 1.1;
-  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.product-price {
+  font-size: 0.9rem;
+  color: var(--payment-available);
+  font-weight: 500;
+  margin-top: 0.25rem;
 }
 
 html[data-theme='light'] .product-desc {
-  color: #4b5563;
+  color: var(--text-muted);
 }
 
 .slot-empty {
