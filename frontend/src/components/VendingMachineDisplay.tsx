@@ -14,7 +14,7 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
       case 'GIROCARD':
         return (
           <img 
-            src="/girocard-logo.png" 
+            src="/girocard-logo.svg" 
             alt="Girocard" 
             style={{ 
               width: '20px', 
