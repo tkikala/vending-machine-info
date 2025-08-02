@@ -93,11 +93,11 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
               </div>
             )}
           </div>
-        </div>
-        <div className="payment-methods-header">
-          {machine.paymentMethods?.map((pm) => (
-            <PaymentIcon key={pm.id} paymentMethod={pm} />
-          ))}
+          <div className="payment-methods-header">
+            {machine.paymentMethods?.map((pm) => (
+              <PaymentIcon key={pm.id} paymentMethod={pm} />
+            ))}
+          </div>
         </div>
       </div>
       <div className="vending-machine-display">
