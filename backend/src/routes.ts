@@ -112,6 +112,29 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
   try {
     const { name, location, description, logo, products = [], paymentMethods = [] } = req.body;
 
+    // Process payment methods to get the correct paymentMethodTypeId
+    const processedPaymentMethods = await Promise.all(
+      paymentMethods.map(async (pm: any) => {
+        // Handle both old format (pm.type) and new format (pm.paymentMethodTypeId)
+        let paymentMethodTypeId;
+        if (pm.paymentMethodTypeId) {
+          // New format
+          paymentMethodTypeId = pm.paymentMethodTypeId;
+        } else if (pm.type) {
+          // Old format - find the payment method type by type
+          const paymentMethodType = await prisma.paymentMethodType.findUnique({
+            where: { type: pm.type }
+          });
+          paymentMethodTypeId = paymentMethodType?.id;
+        }
+        
+        return {
+          paymentMethodTypeId: paymentMethodTypeId,
+          available: pm.available ?? false,
+        };
+      })
+    );
+
     const machine = await prisma.vendingMachine.create({
       data: {
         name,
@@ -130,10 +153,7 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
           })),
         },
         paymentMethods: {
-          create: paymentMethods.map((pm: any) => ({
-            paymentMethodTypeId: pm.paymentMethodTypeId,
-            available: pm.available ?? false,
-          })),
+          create: processedPaymentMethods,
         },
       },
       include: {
@@ -181,6 +201,29 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
       });
     }
 
+    // Process payment methods to get the correct paymentMethodTypeId
+    const processedPaymentMethods = await Promise.all(
+      paymentMethods.map(async (pm: any) => {
+        // Handle both old format (pm.type) and new format (pm.paymentMethodTypeId)
+        let paymentMethodTypeId;
+        if (pm.paymentMethodTypeId) {
+          // New format
+          paymentMethodTypeId = pm.paymentMethodTypeId;
+        } else if (pm.type) {
+          // Old format - find the payment method type by type
+          const paymentMethodType = await prisma.paymentMethodType.findUnique({
+            where: { type: pm.type }
+          });
+          paymentMethodTypeId = paymentMethodType?.id;
+        }
+        
+        return {
+          paymentMethodTypeId: paymentMethodTypeId,
+          available: pm.available ?? false,
+        };
+      })
+    );
+
     const machine = await prisma.vendingMachine.update({
       where: { id },
       data: {
@@ -199,10 +242,7 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
         }),
         ...(paymentMethods.length > 0 && {
           paymentMethods: {
-            create: paymentMethods.map((pm: any) => ({
-              paymentMethodTypeId: pm.paymentMethodTypeId,
-              available: pm.available ?? false,
-            })),
+            create: processedPaymentMethods,
           },
         }),
       },
