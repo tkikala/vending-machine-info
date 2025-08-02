@@ -188,7 +188,16 @@ function EditMachineForm() {
         })),
         paymentMethods: Object.entries(paymentMethods)
           .filter(([_, available]) => available)
-          .map(([type, _]) => type.toUpperCase())
+          .map(([type, _]) => {
+            // Map frontend keys to backend enum values
+            switch (type) {
+              case 'coin': return 'COIN';
+              case 'banknote': return 'BANKNOTE';
+              case 'girocard': return 'GIROCARD';
+              case 'creditCard': return 'CREDIT_CARD';
+              default: return type.toUpperCase();
+            }
+          })
       };
 
       await updateVendingMachine(id, machineData);
@@ -328,11 +337,11 @@ function EditMachineForm() {
                 <h4>Selected Products ({machineProducts.length})</h4>
                 {machineProducts.map((mp) => (
                   <div key={mp.product.id} style={{ 
-                    border: '1px solid #ddd', 
+                    border: '1px solid var(--text-muted)', 
                     borderRadius: '8px', 
                     padding: '1rem', 
                     marginBottom: '1rem',
-                    backgroundColor: '#f9f9f9'
+                    backgroundColor: 'var(--card-bg)'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
@@ -344,12 +353,12 @@ function EditMachineForm() {
                           />
                         )}
                         <div>
-                          <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>{mp.product.name}</div>
+                          <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{mp.product.name}</div>
                           {mp.product.description && (
-                            <div style={{ color: '#666', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{mp.product.description}</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{mp.product.description}</div>
                           )}
                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
                               <input
                                 type="checkbox"
                                 checked={mp.isAvailable}
@@ -359,7 +368,7 @@ function EditMachineForm() {
                               Available
                             </label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <label>Price: €</label>
+                              <label style={{ color: 'var(--text-main)' }}>Price: €</label>
                               <input
                                 type="number"
                                 step="0.01"
@@ -367,11 +376,18 @@ function EditMachineForm() {
                                 value={mp.price || ''}
                                 onChange={(e) => updateProductPrice(mp.product.id, parseFloat(e.target.value) || 0)}
                                 placeholder={mp.product.price?.toString() || 'Default'}
-                                style={{ width: '80px', padding: '0.25rem' }}
+                                style={{ 
+                                  width: '80px', 
+                                  padding: '0.25rem',
+                                  backgroundColor: 'var(--bg)',
+                                  color: 'var(--text-main)',
+                                  border: '1px solid var(--text-muted)',
+                                  borderRadius: '4px'
+                                }}
                                 disabled={loading}
                               />
                               {mp.product.price && !mp.price && (
-                                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                   (Default: €{mp.product.price.toFixed(2)})
                                 </span>
                               )}

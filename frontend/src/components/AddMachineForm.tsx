@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createVendingMachine } from '../api';
+import { createVendingMachine, uploadSingleFile, uploadGalleryFiles } from '../api';
 import type { Product, MachineProduct } from '../types';
 import LogoUpload from './LogoUpload';
 import ProductSearch from './ProductSearch';
@@ -22,7 +22,12 @@ function AddMachineForm() {
   const [description, setDescription] = useState('');
   const [coordinates, setCoordinates] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | undefined>();
+  const [logoFile, setLogoFile] = useState<File | undefined>(undefined);
   
+  // Gallery
+  const [gallery, setGallery] = useState<any[]>([]);
+
+  // Products
   const [machineProducts, setMachineProducts] = useState<MachineProductData[]>([]);
   const [paymentMethods, setPaymentMethods] = useState({
     coin: false,
@@ -68,6 +73,20 @@ function AddMachineForm() {
     setError(null);
 
     try {
+      // Upload logo if it's a new file
+      let logoUrl: string | undefined = undefined;
+      if (logoFile) {
+        console.log('Uploading new logo file...');
+        try {
+          const logoUploadResult = await uploadSingleFile(logoFile);
+          logoUrl = logoUploadResult.file.url;
+          console.log('Logo uploaded successfully:', logoUrl);
+        } catch (logoError) {
+          console.error('Logo upload failed:', logoError);
+          throw new Error('Failed to upload logo. Please try again.');
+        }
+      }
+
       const machineData = {
         name: name.trim(),
         location: location.trim(),
@@ -81,10 +100,34 @@ function AddMachineForm() {
         })),
         paymentMethods: Object.entries(paymentMethods)
           .filter(([_, available]) => available)
-          .map(([type, _]) => type.toUpperCase())
+          .map(([type, _]) => {
+            // Map frontend keys to backend enum values
+            switch (type) {
+              case 'coin': return 'COIN';
+              case 'banknote': return 'BANKNOTE';
+              case 'girocard': return 'GIROCARD';
+              case 'creditCard': return 'CREDIT_CARD';
+              default: return type.toUpperCase();
+            }
+          })
       };
 
-      await createVendingMachine(machineData);
+      const createdMachine = await createVendingMachine(machineData);
+
+      // Handle gallery uploads after machine creation
+      const newGalleryFiles = gallery.filter(item => item.file);
+      if (newGalleryFiles.length > 0 && createdMachine.id) {
+        try {
+          const files = newGalleryFiles.map(item => item.file!);
+          const captions = newGalleryFiles.map(item => item.caption || '');
+          await uploadGalleryFiles(createdMachine.id, files, captions);
+          console.log('Gallery files uploaded successfully');
+        } catch (galleryError) {
+          console.error('Gallery upload failed:', galleryError);
+          // Continue even if gallery upload fails
+        }
+      }
+
       navigate('/admin');
     } catch (err: any) {
       setError(err.message || 'Failed to create machine');
@@ -155,7 +198,10 @@ function AddMachineForm() {
             Upload a logo for your vending machine
           </p>
           <LogoUpload
-            onLogoChange={setLogoUrl}
+            onLogoChange={(logoUrl, file) => {
+              setLogoUrl(logoUrl);
+              setLogoFile(file);
+            }}
             disabled={loading}
           />
         </div>
@@ -180,11 +226,11 @@ function AddMachineForm() {
               <h4>Selected Products ({machineProducts.length})</h4>
               {machineProducts.map((mp) => (
                 <div key={mp.product.id} style={{ 
-                  border: '1px solid #ddd', 
+                  border: '1px solid var(--text-muted)', 
                   borderRadius: '8px', 
                   padding: '1rem', 
                   marginBottom: '1rem',
-                  backgroundColor: '#f9f9f9'
+                  backgroundColor: 'var(--card-bg)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
@@ -196,12 +242,12 @@ function AddMachineForm() {
                         />
                       )}
                       <div>
-                        <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>{mp.product.name}</div>
+                        <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{mp.product.name}</div>
                         {mp.product.description && (
-                          <div style={{ color: '#666', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{mp.product.description}</div>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{mp.product.description}</div>
                         )}
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
                             <input
                               type="checkbox"
                               checked={mp.isAvailable}
@@ -211,7 +257,7 @@ function AddMachineForm() {
                             Available
                           </label>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <label>Price: €</label>
+                            <label style={{ color: 'var(--text-main)' }}>Price: €</label>
                             <input
                               type="number"
                               step="0.01"
@@ -219,11 +265,18 @@ function AddMachineForm() {
                               value={mp.price || ''}
                               onChange={(e) => updateProductPrice(mp.product.id, parseFloat(e.target.value) || 0)}
                               placeholder={mp.product.price?.toString() || 'Default'}
-                              style={{ width: '80px', padding: '0.25rem' }}
+                              style={{ 
+                                width: '80px', 
+                                padding: '0.25rem',
+                                backgroundColor: 'var(--bg)',
+                                color: 'var(--text-main)',
+                                border: '1px solid var(--text-muted)',
+                                borderRadius: '4px'
+                              }}
                               disabled={loading}
                             />
                             {mp.product.price && !mp.price && (
-                              <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                 (Default: €{mp.product.price.toFixed(2)})
                               </span>
                             )}
@@ -307,8 +360,8 @@ function AddMachineForm() {
             Add photos and videos of your vending machine
           </p>
           <GalleryManager
-            initialGallery={[]}
-            onGalleryChange={() => {}}
+            initialGallery={gallery}
+            onGalleryChange={setGallery}
             disabled={loading}
           />
         </div>
