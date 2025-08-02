@@ -55,14 +55,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // Validate file size (max 10MB)
+      // Validate file size (max 3MB to account for Vercel's 4.5MB payload limit)
       const fileSizeInBytes = Math.ceil((file.length * 3) / 4);
-      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+      const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
       
       if (fileSizeInBytes > maxSizeInBytes) {
         console.log('❌ File too large:', fileSizeInBytes, 'bytes');
         return res.status(400).json({ 
-          error: 'File too large. Maximum size is 10MB',
+          error: 'File too large. Maximum size is 3MB',
           receivedSize: fileSizeInBytes,
           maxSize: maxSizeInBytes
         });

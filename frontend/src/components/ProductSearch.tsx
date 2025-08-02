@@ -105,9 +105,11 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
           style={{
             flex: 1,
             padding: '0.75rem',
-            border: '1px solid #ddd',
+            border: '1px solid var(--text-muted)',
             borderRadius: '4px',
-            fontSize: '1rem'
+            fontSize: '1rem',
+            backgroundColor: 'var(--bg)',
+            color: 'var(--text-main)'
           }}
         />
         {loading && (
@@ -115,7 +117,7 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
             display: 'flex', 
             alignItems: 'center', 
             padding: '0 1rem',
-            color: '#666'
+            color: 'var(--text-muted)'
           }}>
             Searching...
           </div>
@@ -128,10 +130,10 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
           top: '100%',
           left: 0,
           right: 0,
-          backgroundColor: 'white',
-          border: '1px solid #ddd',
+          backgroundColor: 'var(--card-bg)',
+          border: '1px solid var(--text-muted)',
           borderRadius: '4px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
           zIndex: 1000,
           maxHeight: '300px',
           overflowY: 'auto'
@@ -145,22 +147,23 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                   style={{
                     padding: '0.75rem',
                     cursor: 'pointer',
-                    borderBottom: '1px solid #eee',
+                    borderBottom: '1px solid var(--text-muted)',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    color: 'var(--text-main)'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f5f5f5'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'white'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--product-bg)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--card-bg)'; }}
                 >
                   <div>
-                    <div style={{ fontWeight: 'bold' }}>{product.name}</div>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{product.name}</div>
                     {product.description && (
-                      <div style={{ fontSize: '0.9rem', color: '#666' }}>{product.description}</div>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{product.description}</div>
                     )}
                   </div>
                   {product.price && (
-                    <div style={{ fontWeight: 'bold', color: '#007bff' }}>€{product.price.toFixed(2)}</div>
+                    <div style={{ fontWeight: 'bold', color: 'var(--payment-available)' }}>€{product.price.toFixed(2)}</div>
                   )}
                 </div>
               ))}
@@ -173,13 +176,13 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
               style={{
                 padding: '0.75rem',
                 cursor: 'pointer',
-                backgroundColor: '#f8f9fa',
-                borderTop: '1px solid #eee',
-                color: '#007bff',
+                backgroundColor: 'var(--product-bg)',
+                borderTop: '1px solid var(--text-muted)',
+                color: 'var(--payment-available)',
                 fontWeight: 'bold'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#e9ecef'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--review-bg)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--product-bg)'; }}
             >
               + Add as new product
             </div>
@@ -188,10 +191,10 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
           {showCreateForm && (
             <div style={{
               padding: '1rem',
-              borderTop: '1px solid #eee',
-              backgroundColor: '#f8f9fa'
+              borderTop: '1px solid var(--text-muted)',
+              backgroundColor: 'var(--product-bg)'
             }}>
-              <h4 style={{ margin: '0 0 1rem 0' }}>Create New Product</h4>
+              <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)' }}>Create New Product</h4>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <input
@@ -202,8 +205,10 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                   disabled={loading}
                   style={{
                     padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
+                    border: '1px solid var(--text-muted)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg)',
+                    color: 'var(--text-main)'
                   }}
                 />
                 
@@ -215,9 +220,11 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                   rows={2}
                   style={{
                     padding: '0.5rem',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--text-muted)',
                     borderRadius: '4px',
-                    resize: 'vertical'
+                    resize: 'vertical',
+                    backgroundColor: 'var(--bg)',
+                    color: 'var(--text-main)'
                   }}
                 />
                 
@@ -231,8 +238,10 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                   disabled={loading}
                   style={{
                     padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
+                    border: '1px solid var(--text-muted)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg)',
+                    color: 'var(--text-main)'
                   }}
                 />
                 
@@ -244,8 +253,10 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                   disabled={loading}
                   style={{
                     padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
+                    border: '1px solid var(--text-muted)',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--bg)',
+                    color: 'var(--text-main)'
                   }}
                 />
                 
@@ -257,7 +268,7 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                     style={{
                       flex: 1,
                       padding: '0.5rem',
-                      backgroundColor: '#007bff',
+                      backgroundColor: 'var(--payment-available)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '4px',
@@ -275,7 +286,7 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                     disabled={loading}
                     style={{
                       padding: '0.5rem 1rem',
-                      backgroundColor: '#6c757d',
+                      backgroundColor: 'var(--text-muted)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '4px',

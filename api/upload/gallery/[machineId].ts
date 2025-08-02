@@ -49,10 +49,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         try {
-          // Validate file size (4MB limit for Vercel Blob free tier)
+          // Validate file size (3MB limit to account for Vercel's 4.5MB payload limit)
           const fileSizeInBytes = Math.ceil((fileData.file.length * 3) / 4); // Approximate size for base64
-          if (fileSizeInBytes > 4 * 1024 * 1024) {
-            errors.push(`File ${fileData.filename}: File size exceeds 4MB limit`);
+          if (fileSizeInBytes > 3 * 1024 * 1024) {
+            errors.push(`File ${fileData.filename}: File size exceeds 3MB limit`);
             continue;
           }
 

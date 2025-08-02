@@ -97,7 +97,7 @@ function GalleryManager({
           onFileSelect={handleFileSelect}
           multiple={true}
           maxFiles={10}
-          maxSize={50}
+          maxSize={3}
           label="Add Photos & Videos"
           disabled={disabled || uploading}
         />
