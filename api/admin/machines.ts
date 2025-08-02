@@ -33,8 +33,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             products: {
               select: {
                 id: true,
-                name: true,
-                isAvailable: true
+                isAvailable: true,
+                product: {
+                  select: {
+                    id: true,
+                    name: true,
+                    isAvailable: true
+                  }
+                }
               }
             },
             paymentMethods: {
