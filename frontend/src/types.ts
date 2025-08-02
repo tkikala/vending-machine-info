@@ -43,11 +43,10 @@ export type PaymentMethodType = {
 export type MachinePaymentMethod = {
   id: string;
   vendingMachineId: string;
-  paymentMethodTypeId: string;
+  type: 'COIN' | 'BANKNOTE' | 'GIROCARD' | 'CREDIT_CARD';
   available: boolean;
-  paymentMethodType: PaymentMethodType;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type VendingMachine = {
