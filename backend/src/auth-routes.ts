@@ -35,7 +35,7 @@ authRouter.post('/login', loginLimiter, async (req, res) => {
     }
 
     // Create session
-    const session = await createSession(user.id);
+    const session = await createSession(Number(user.id));
 
     // Set secure cookie
     res.cookie('sessionToken', session.token, {
