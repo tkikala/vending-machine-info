@@ -47,20 +47,20 @@ model Session {
 }
 
 model VendingMachine {
-  id             String          @id @default(uuid())
+  id             String                 @id @default(uuid())
   name           String
   location       String
   description    String?
   logo           String? // Added: Path to uploaded logo file
-  isActive       Boolean         @default(true)
+  isActive       Boolean                @default(true)
   ownerId        Int
-  owner          User            @relation(fields: [ownerId], references: [id])
+  owner          User                   @relation(fields: [ownerId], references: [id])
   products       Product[]
-  paymentMethods PaymentMethod[]
+  paymentMethods MachinePaymentMethod[]
   photos         Photo[]
   reviews        Review[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @default(now()) @updatedAt
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @default(now()) @updatedAt
 }
 
 model Product {
@@ -77,12 +77,28 @@ model Product {
   updatedAt        DateTime       @default(now()) @updatedAt
 }
 
-model PaymentMethod {
-  id               Int            @id @default(autoincrement())
-  type             PaymentType
-  available        Boolean        @default(false)
-  vendingMachineId String
-  vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
+model PaymentMethodType {
+  id          String                 @id @default(uuid())
+  type        PaymentType            @unique
+  name        String
+  icon        String?
+  description String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @default(now()) @updatedAt
+  machines    MachinePaymentMethod[]
+}
+
+model MachinePaymentMethod {
+  id                  String            @id @default(uuid())
+  vendingMachineId    String
+  paymentMethodTypeId String
+  available           Boolean           @default(false)
+  vendingMachine      VendingMachine    @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
+  paymentMethodType   PaymentMethodType @relation(fields: [paymentMethodTypeId], references: [id], onDelete: Cascade)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @default(now()) @updatedAt
+
+  @@unique([vendingMachineId, paymentMethodTypeId])
 }
 
 model Photo {

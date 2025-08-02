@@ -127,16 +127,7 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
 
   // Create a map of available payment methods for this machine
   const availablePaymentMethods = new Set(
-    machine.paymentMethods?.map(pm => {
-      // Handle both simple structure (local) and many-to-many structure (Vercel)
-      if (pm.paymentMethodType) {
-        // Vercel structure: pm.paymentMethodType.type
-        return pm.paymentMethodType.type;
-      } else {
-        // Local structure: pm.type
-        return pm.type;
-      }
-    }) || []
+    machine.paymentMethods?.map(pm => pm.paymentMethodType.type) || []
   );
 
   return (

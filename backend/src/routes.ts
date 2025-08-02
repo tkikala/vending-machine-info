@@ -11,44 +11,11 @@ router.use('/auth', authRouter);
 // Get all payment methods (public)
 router.get('/payment-methods', async (req, res) => {
   try {
-    const paymentMethods = [
-      {
-        id: '1',
-        type: 'COIN',
-        name: 'Coins',
-        description: 'Cash coins',
-        icon: '🪙',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        type: 'BANKNOTE',
-        name: 'Banknotes',
-        description: 'Cash banknotes',
-        icon: '💵',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '3',
-        type: 'GIROCARD',
-        name: 'Girocard',
-        description: 'German debit card',
-        icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyQzIgMTcuNTIgNi40OCAyMiAxMiAyMkMxNy41MiAyMiAyMiAxNy41MiAyMiAxMkMyMiA2LjQ4IDE3LjUyIDIgMTIgMloiIGZpbGw9IiMwMDAwMDAiLz4KPHBhdGggZD0iTTE2IDEySDhWMTBIMTZWMTRIMFYxNkgxNlYxMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '4',
-        type: 'CREDIT_CARD',
-        name: 'Creditcard',
-        description: 'Credit card',
-        icon: '💳',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
+    const paymentMethods = await prisma.paymentMethodType.findMany({
+      orderBy: [
+        { type: 'asc' }
+      ]
+    });
     res.json(paymentMethods);
   } catch (error) {
     console.error('Get payment methods error:', error);
@@ -63,7 +30,7 @@ router.get('/machines', async (req, res) => {
       where: { isActive: true },
       include: {
         products: { where: { isAvailable: true } },
-        paymentMethods: true,
+        paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { where: { isApproved: true }, include: { user: { select: { id: true, name: true } } } },
         owner: { select: { id: true, name: true } },
@@ -84,7 +51,7 @@ router.get('/machines/:id', async (req, res) => {
       where: { id, isActive: true },
       include: {
         products: { where: { isAvailable: true } },
-        paymentMethods: true,
+        paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { where: { isApproved: true }, include: { user: { select: { id: true, name: true } } } },
         owner: { select: { id: true, name: true } },
@@ -104,28 +71,46 @@ router.get('/admin/machines', requireAuth, requireAdmin, async (req, res) => {
     const machines = await prisma.vendingMachine.findMany({
       include: {
         products: true,
-        paymentMethods: true,
+        paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { include: { user: { select: { id: true, name: true } } } },
-        owner: { select: { id: true, name: true, email: true } },
+        owner: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
     res.json(machines);
   } catch (error) {
-    console.error('Admin get machines error:', error);
+    console.error('Get admin machines error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Create vending machine (authenticated users)
-router.post('/machines', requireAuth, async (req, res) => {
+// Get vending machine by ID (admin)
+router.get('/admin/machines/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const machine = await prisma.vendingMachine.findUnique({
+      where: { id },
+      include: {
+        products: true,
+        paymentMethods: { include: { paymentMethodType: true } },
+        photos: true,
+        reviews: { include: { user: { select: { id: true, name: true } } } },
+        owner: { select: { id: true, name: true } },
+      },
+    });
+    if (!machine) return res.status(404).json({ error: 'Machine not found' });
+    res.json(machine);
+  } catch (error) {
+    console.error('Get admin machine error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create new vending machine (owner or admin)
+router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
   try {
     const { name, location, description, logo, products = [], paymentMethods = [] } = req.body;
-    
-    if (!name || !location) {
-      return res.status(400).json({ error: 'Name and location are required' });
-    }
 
     const machine = await prisma.vendingMachine.create({
       data: {
@@ -146,14 +131,14 @@ router.post('/machines', requireAuth, async (req, res) => {
         },
         paymentMethods: {
           create: paymentMethods.map((pm: any) => ({
-            type: pm.type,
+            paymentMethodTypeId: pm.paymentMethodTypeId,
             available: pm.available ?? false,
           })),
         },
       },
       include: {
         products: true,
-        paymentMethods: true,
+        paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         owner: { select: { id: true, name: true } },
       },
@@ -191,7 +176,7 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
     // Handle payment methods update - delete existing and create new ones
     if (paymentMethods.length > 0) {
       // Delete existing payment methods
-      await prisma.paymentMethod.deleteMany({
+      await prisma.machinePaymentMethod.deleteMany({
         where: { vendingMachineId: id }
       });
     }
@@ -215,7 +200,7 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
         ...(paymentMethods.length > 0 && {
           paymentMethods: {
             create: paymentMethods.map((pm: any) => ({
-              type: pm.type,
+              paymentMethodTypeId: pm.paymentMethodTypeId,
               available: pm.available ?? false,
             })),
           },
@@ -223,7 +208,7 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
       },
       include: {
         products: true,
-        paymentMethods: true,
+        paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         owner: { select: { id: true, name: true } },
       },
@@ -255,7 +240,7 @@ router.get('/my-machines', requireAuth, async (req, res) => {
       where: { ownerId: req.user.id },
       include: {
         products: true,
-        paymentMethods: true,
+        paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { include: { user: { select: { id: true, name: true } } } },
       },
