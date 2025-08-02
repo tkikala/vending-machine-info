@@ -270,42 +270,60 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
       throw new Error(`Files too large: ${oversizedFiles.map(f => f.name).join(', ')}. Maximum 4MB per file.`);
     }
     
-    // Convert files to base64
-    const fileData = await Promise.all(
-      files.map(async (file) => ({
-        file: await fileToBase64(file),
-        filename: file.name,
-        contentType: file.type
-      }))
-    );
-
-    const res = await fetch(`${API_BASE}/upload/gallery/${machineId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        files: fileData,
-        captions: captions || []
-      })
-    });
-
-    console.log('Gallery upload response status:', res.status, res.statusText);
+    // Upload files one by one to avoid payload size limits
+    const uploadedFiles = [];
+    const errors = [];
     
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || 'Gallery upload failed');
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const caption = captions?.[i] || '';
+      
+      try {
+        console.log(`Uploading file ${i + 1}/${files.length}: ${file.name}`);
+        
+        // Convert single file to base64
+        const fileData = {
+          file: await fileToBase64(file),
+          filename: file.name,
+          contentType: file.type
+        };
+
+        const res = await fetch(`${API_BASE}/upload/gallery/${machineId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            files: [fileData],
+            captions: [caption]
+          })
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || `Failed to upload ${file.name}`);
+        }
+
+        const data = await res.json();
+        if (data.photos && data.photos.length > 0) {
+          uploadedFiles.push(data.photos[0]);
+          console.log(`✅ Uploaded: ${file.name}`);
+        }
+      } catch (error) {
+        console.error(`❌ Failed to upload ${file.name}:`, error);
+        errors.push(`${file.name}: ${error instanceof Error ? error.message : 'Upload failed'}`);
+      }
     }
-
-    const data = await res.json();
-    console.log('Gallery uploaded successfully:', data.photos.length, 'items');
     
-    // Show warnings if there were partial failures
-    if (data.errors && data.errors.length > 0) {
-      console.warn('Gallery upload completed with errors:', data.errors);
-      // You might want to show these errors to the user
+    console.log(`✅ Gallery upload completed. ${uploadedFiles.length} files uploaded successfully.`);
+    
+    if (errors.length > 0) {
+      console.warn('Gallery upload completed with errors:', errors);
     }
     
-    return data;
+    return {
+      photos: uploadedFiles,
+      errors: errors.length > 0 ? errors : undefined
+    };
   } catch (error) {
     console.error('uploadGalleryFiles error:', error);
     throw error;

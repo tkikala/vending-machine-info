@@ -30,15 +30,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const { files, captions = [] } = req.body;
       
-      // Validate number of files
-      if (files.length > 10) {
-        return res.status(400).json({ error: 'Maximum 10 files allowed per upload' });
+      // Validate number of files (now handling single files)
+      if (files.length > 1) {
+        return res.status(400).json({ error: 'Maximum 1 file per request' });
       }
 
       const uploadedFiles: any[] = [];
       const errors: string[] = [];
 
-      // Process each file
+      // Process each file (should be only one now)
       for (let i = 0; i < files.length; i++) {
         const fileData = files[i];
         const caption = captions[i] || '';

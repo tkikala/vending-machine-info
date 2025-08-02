@@ -41,6 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 id: true,
                 name: true,
                 description: true,
+                photo: true,
                 price: true,
                 isAvailable: true
               }
