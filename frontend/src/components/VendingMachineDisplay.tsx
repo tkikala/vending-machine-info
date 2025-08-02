@@ -38,7 +38,7 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
     <div style={{ 
       display: 'flex', 
       alignItems: 'center', 
-      gap: '4px', // Reduced from 8px to 4px
+      gap: '2px', // Reduced from 4px to 2px for much tighter spacing
       opacity: isAvailable ? 1 : 0.6,
       minHeight: '24px', // Ensure consistent height for alignment
       width: '100%' // Take full width to ensure consistent alignment
@@ -62,8 +62,7 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
         flexShrink: 0, // Prevent text from shrinking
         display: 'flex',
         alignItems: 'center', // Center text vertically
-        flex: '1', // Take remaining space
-        minWidth: 0 // Allow text to shrink if needed
+        marginRight: '2px' // Add small margin to the right of text
       }}>
         {paymentMethod.name}
       </span>
