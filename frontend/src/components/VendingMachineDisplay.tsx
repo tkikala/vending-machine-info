@@ -1,13 +1,11 @@
+import React from 'react';
 import type { VendingMachine } from '../types';
 
-function PaymentIcon({ type, available }: { type: string; available: boolean }) {
+function PaymentIcon({ paymentMethod }: { paymentMethod: any }) {
+  const { paymentMethodType, available } = paymentMethod;
+  
   const getIcon = () => {
-    switch (type) {
-      case 'COIN': return '🪙';
-      case 'BANKNOTE': return '💶';
-      case 'GIROCARD': return '💳';
-      default: return '💳';
-    }
+    return paymentMethodType.icon || '💳';
   };
 
   return (
@@ -17,7 +15,7 @@ function PaymentIcon({ type, available }: { type: string; available: boolean }) 
         fontSize: '1.2rem',
         marginRight: '0.5rem'
       }}
-      title={`${type} ${available ? 'Available' : 'Not Available'}`}
+      title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
     >
       {getIcon()}
     </span>
@@ -27,71 +25,61 @@ function PaymentIcon({ type, available }: { type: string; available: boolean }) 
 function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
   const machineProducts = machine.products || [];
 
-  // Function to handle location click
   const handleLocationClick = () => {
     if (machine.coordinates) {
-      const [lat, lng] = machine.coordinates.split(',');
-      const url = `https://www.google.com/maps?q=${lat.trim()},${lng.trim()}`;
-      window.open(url, '_blank');
+      // Open Google Maps with coordinates
+      window.open(`https://www.google.com/maps?q=${machine.coordinates}`, '_blank');
     } else {
-      const url = `https://www.google.com/maps/search/${encodeURIComponent(machine.location)}`;
-      window.open(url, '_blank');
+      // Open Google Maps with location name
+      window.open(`https://www.google.com/maps/search/${encodeURIComponent(machine.location)}`, '_blank');
     }
   };
 
   return (
     <div className="vending-machine">
       <div className="vending-machine-header">
-        <div className="machine-info-header">
-          <div className="machine-logo">
-            {machine.logo ? (
-              <img 
-                src={machine.logo} 
-                alt={`${machine.name} logo`}
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="logo-placeholder">🏪</div>
-            )}
-          </div>
+        <div className="machine-info">
+          {machine.logo && (
+            <div className="machine-logo">
+              <img src={machine.logo} alt="Machine logo" />
+            </div>
+          )}
           <div className="machine-details">
-            <h3 style={{ margin: 0 }}>{machine.name}</h3>
+            <h2>{machine.name}</h2>
             <div 
-              style={{ 
-                color: 'inherit', 
-                opacity: 0.8, 
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                textDecorationColor: 'rgba(255,255,255,0.3)',
-                transition: 'opacity 0.2s'
-              }}
+              className="location"
               onClick={handleLocationClick}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '1';
-                e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.6)';
+              style={{
+                cursor: 'pointer',
+                color: '#007bff',
+                textDecoration: 'underline',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '0.8';
-                e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.3)';
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#0056b3'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#007bff'; }}
             >
               📍 {machine.location}
             </div>
-            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Owner: {machine.owner?.name || 'Unknown'}</div>
+            {machine.description && (
+              <p className="machine-description">{machine.description}</p>
+            )}
           </div>
-          <div className="payment-methods">
-            {machine.paymentMethods?.map((pm) => (
-              <PaymentIcon key={pm.id} type={pm.type} available={pm.available} />
-            ))}
-          </div>
+        </div>
+        <div className="payment-methods">
+          {machine.paymentMethods?.map((pm) => (
+            <PaymentIcon key={pm.id} paymentMethod={pm} />
+          ))}
         </div>
       </div>
       <div className="vending-machine-display">
         {machineProducts.map((machineProduct, index) => {
           const product = machineProduct.product;
+          const displayPrice = machineProduct.price !== null && machineProduct.price !== undefined 
+            ? machineProduct.price 
+            : product.price;
+          
           return (
             <div 
               key={machineProduct.id || index} 
@@ -110,8 +98,8 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
                   {product.description && (
                     <div className="product-description">{product.description}</div>
                   )}
-                  {product.price && (
-                    <div className="product-price">€{product.price.toFixed(2)}</div>
+                  {displayPrice && (
+                    <div className="product-price">€{displayPrice.toFixed(2)}</div>
                   )}
                 </div>
               </div>

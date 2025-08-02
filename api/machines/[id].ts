@@ -2,10 +2,15 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from '../prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log('🔍 Machine endpoint called');
-  
+  const { id } = req.query;
+
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'Machine ID is required' });
+  }
+
+  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
@@ -13,12 +18,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { id } = req.query;
-    
-    if (!id || typeof id !== 'string') {
-      return res.status(400).json({ error: 'Machine ID is required' });
-    }
-
     if (req.method === 'GET') {
       console.log('Fetching machine:', id);
       
@@ -44,6 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             products: {
               select: {
                 id: true,
+                price: true,
                 isAvailable: true,
                 product: {
                   select: {
@@ -60,8 +60,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             paymentMethods: {
               select: {
                 id: true,
-                type: true,
-                available: true
+                available: true,
+                paymentMethodType: {
+                  select: {
+                    id: true,
+                    type: true,
+                    name: true,
+                    icon: true
+                  }
+                }
               }
             },
             photos: {
@@ -71,10 +78,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 caption: true,
                 fileType: true,
                 originalName: true,
-                fileSize: true
-              }
+                fileSize: true,
+                createdAt: true
+              },
+              orderBy: { createdAt: 'desc' }
             },
             reviews: {
+              where: { isApproved: true },
               select: {
                 id: true,
                 rating: true,
@@ -82,8 +92,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 isApproved: true,
                 user: {
                   select: { id: true, name: true }
-                }
-              }
+                },
+                createdAt: true,
+                updatedAt: true
+              },
+              orderBy: { createdAt: 'desc' }
             }
           }
         });
@@ -110,9 +123,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const { name, location, description, logo, coordinates, isActive, products, paymentMethods } = req.body;
         
-        // Update machine with related data in a transaction
+        if (!name || !name.trim()) {
+          return res.status(400).json({ error: 'Machine name is required' });
+        }
+
+        if (!location || !location.trim()) {
+          return res.status(400).json({ error: 'Machine location is required' });
+        }
+
         const machine = await prisma.$transaction(async (tx) => {
-          // Update the machine
           const updatedMachine = await tx.vendingMachine.update({
             where: { id },
             data: {
@@ -127,18 +146,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
           // Update machine-product relationships
           if (products && Array.isArray(products)) {
-            // Delete existing relationships
-            await tx.machineProduct.deleteMany({
-              where: { vendingMachineId: id }
-            });
-
-            // Create new relationships
+            await tx.machineProduct.deleteMany({ where: { vendingMachineId: id } });
             for (const productData of products) {
               if (productData.productId) {
                 await tx.machineProduct.create({
                   data: {
                     vendingMachineId: id,
                     productId: productData.productId,
+                    price: productData.price || null,
                     isAvailable: productData.isAvailable !== undefined ? productData.isAvailable : true
                   }
                 });
@@ -148,20 +163,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
           // Update payment methods
           if (paymentMethods && Array.isArray(paymentMethods)) {
-            // Delete existing payment methods
-            await tx.paymentMethod.deleteMany({
-              where: { vendingMachineId: id }
-            });
-
-            // Create new payment methods
+            await tx.machinePaymentMethod.deleteMany({ where: { vendingMachineId: id } });
             for (const paymentType of paymentMethods) {
-              await tx.paymentMethod.create({
-                data: {
-                  type: paymentType,
-                  available: true,
-                  vendingMachineId: id
-                }
+              const pmType = await tx.paymentMethodType.findUnique({
+                where: { type: paymentType }
               });
+              
+              if (pmType) {
+                await tx.machinePaymentMethod.create({
+                  data: {
+                    vendingMachineId: id,
+                    paymentMethodTypeId: pmType.id,
+                    available: true
+                  }
+                });
+              }
             }
           }
 
@@ -182,36 +198,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'DELETE') {
       console.log('Deleting machine:', id);
-
       try {
         // Actually delete the machine and all related data
         await prisma.$transaction(async (tx) => {
-          // Delete related data first (due to foreign key constraints)
-          await tx.review.deleteMany({
-            where: { vendingMachineId: id }
-          });
-          
-          await tx.photo.deleteMany({
-            where: { vendingMachineId: id }
-          });
-          
-          await tx.paymentMethod.deleteMany({
-            where: { vendingMachineId: id }
-          });
-          
-          await tx.machineProduct.deleteMany({
-            where: { vendingMachineId: id }
-          });
-          
-          // Finally delete the machine
-          await tx.vendingMachine.delete({
-            where: { id }
-          });
+          await tx.review.deleteMany({ where: { vendingMachineId: id } });
+          await tx.photo.deleteMany({ where: { vendingMachineId: id } });
+          await tx.machinePaymentMethod.deleteMany({ where: { vendingMachineId: id } });
+          await tx.machineProduct.deleteMany({ where: { vendingMachineId: id } });
+          await tx.vendingMachine.delete({ where: { id } });
         });
-
         console.log(`✅ Deleted machine: ${id}`);
         return res.status(200).json({ message: 'Machine deleted successfully' });
-
       } catch (dbError: any) {
         console.error('❌ Database error:', dbError);
         return res.status(500).json({

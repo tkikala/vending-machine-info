@@ -13,10 +13,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      console.log('Admin machines endpoint called - fetching all machines...');
+      console.log('Fetching all machines for admin...');
       
       try {
-        // Get all machines (admin view) - including inactive ones
         const machines = await prisma.vendingMachine.findMany({
           select: {
             id: true,
@@ -24,6 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             location: true,
             description: true,
             logo: true,
+            coordinates: true,
             isActive: true,
             createdAt: true,
             updatedAt: true,
@@ -33,6 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             products: {
               select: {
                 id: true,
+                price: true,
                 isAvailable: true,
                 product: {
                   select: {
@@ -46,21 +47,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             paymentMethods: {
               select: {
                 id: true,
-                type: true,
-                available: true
+                available: true,
+                paymentMethodType: {
+                  select: {
+                    id: true,
+                    type: true,
+                    name: true
+                  }
+                }
               }
+            },
+            photos: {
+              select: {
+                id: true,
+                url: true,
+                caption: true,
+                fileType: true,
+                originalName: true,
+                fileSize: true,
+                createdAt: true
+              },
+              orderBy: { createdAt: 'desc' }
             },
             reviews: {
               select: {
                 id: true,
                 rating: true,
-                isApproved: true
-              }
+                comment: true,
+                isApproved: true,
+                user: {
+                  select: { id: true, name: true }
+                },
+                createdAt: true,
+                updatedAt: true
+              },
+              orderBy: { createdAt: 'desc' }
             }
-          }
+          },
+          orderBy: { createdAt: 'desc' }
         });
 
-        console.log(`✅ Found machines: ${machines.length}`);
+        console.log(`✅ Found ${machines.length} machines for admin`);
         return res.status(200).json(machines);
         
       } catch (dbError: any) {
@@ -74,7 +101,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
-    console.error('❌ API Error:', error);
+    console.error('❌ Admin Machines Error:', error);
     return res.status(500).json({
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'

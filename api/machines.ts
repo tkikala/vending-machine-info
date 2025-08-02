@@ -13,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      console.log('🔍 Fetching all machines...');
+      console.log('Fetching all machines...');
       
       try {
         const machines = await prisma.vendingMachine.findMany({
@@ -34,6 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             products: {
               select: {
                 id: true,
+                price: true,
                 isAvailable: true,
                 product: {
                   select: {
@@ -45,13 +46,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     isAvailable: true
                   }
                 }
-              }
+              },
             },
             paymentMethods: {
               select: {
                 id: true,
-                type: true,
-                available: true
+                available: true,
+                paymentMethodType: {
+                  select: {
+                    id: true,
+                    type: true,
+                    name: true,
+                    icon: true
+                  }
+                }
               }
             },
             photos: {
@@ -61,10 +69,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 caption: true,
                 fileType: true,
                 originalName: true,
-                fileSize: true
-              }
+                fileSize: true,
+                createdAt: true
+              },
+              orderBy: { createdAt: 'desc' }
             },
             reviews: {
+              where: { isApproved: true },
               select: {
                 id: true,
                 rating: true,
@@ -72,8 +83,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 isApproved: true,
                 user: {
                   select: { id: true, name: true }
-                }
-              }
+                },
+                createdAt: true,
+                updatedAt: true
+              },
+              orderBy: { createdAt: 'desc' }
             }
           }
         });
@@ -104,7 +118,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(400).json({ error: 'Machine location is required' });
         }
 
-        // Get admin user (assuming first admin user)
+        // Get admin user
         const adminUser = await prisma.user.findFirst({
           where: { role: 'ADMIN', isActive: true }
         });
@@ -113,9 +127,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(500).json({ error: 'No admin user found' });
         }
 
-        // Create machine with related data in a transaction
         const machine = await prisma.$transaction(async (tx) => {
-          // Create the machine
           const newMachine = await tx.vendingMachine.create({
             data: {
               name,
@@ -136,6 +148,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                   data: {
                     vendingMachineId: newMachine.id,
                     productId: productData.productId,
+                    price: productData.price || null,
                     isAvailable: productData.isAvailable !== undefined ? productData.isAvailable : true
                   }
                 });
@@ -146,20 +159,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           // Create payment methods
           if (paymentMethods && Array.isArray(paymentMethods)) {
             for (const paymentType of paymentMethods) {
-              await tx.paymentMethod.create({
-                data: {
-                  type: paymentType,
-                  available: true,
-                  vendingMachineId: newMachine.id
-                }
+              const pmType = await tx.paymentMethodType.findUnique({
+                where: { type: paymentType }
               });
+              
+              if (pmType) {
+                await tx.machinePaymentMethod.create({
+                  data: {
+                    vendingMachineId: newMachine.id,
+                    paymentMethodTypeId: pmType.id,
+                    available: true
+                  }
+                });
+              }
             }
           }
 
           return newMachine;
         });
 
-        console.log(`✅ Created machine: ${machine.id}`);
+        console.log(`✅ Created machine: ${machine.name}`);
         return res.status(201).json(machine);
         
       } catch (dbError: any) {
