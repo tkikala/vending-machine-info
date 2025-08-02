@@ -8,6 +8,54 @@ const router = Router();
 // Auth routes
 router.use('/auth', authRouter);
 
+// Get all payment methods (public)
+router.get('/payment-methods', async (req, res) => {
+  try {
+    const paymentMethods = [
+      {
+        id: '1',
+        type: 'COIN',
+        name: 'Coins',
+        description: 'Cash coins',
+        icon: '🪙',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        type: 'BANKNOTE',
+        name: 'Banknotes',
+        description: 'Cash banknotes',
+        icon: '💵',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '3',
+        type: 'GIROCARD',
+        name: 'Girocard',
+        description: 'German debit card',
+        icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyQzIgMTcuNTIgNi40OCAyMiAxMiAyMkMxNy41MiAyMiAyMiAxNy41MiAyMiAxMkMyMiA2LjQ4IDE3LjUyIDIgMTIgMloiIGZpbGw9IiMwMDAwMDAiLz4KPHBhdGggZD0iTTE2IDEySDhWMTBIMTZWMTRIMFYxNkgxNlYxMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '4',
+        type: 'CREDIT_CARD',
+        name: 'Creditcard',
+        description: 'Credit card',
+        icon: '💳',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+    res.json(paymentMethods);
+  } catch (error) {
+    console.error('Get payment methods error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get all vending machines (public)
 router.get('/machines', async (req, res) => {
   try {
