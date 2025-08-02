@@ -475,6 +475,15 @@ html[data-theme='light'] .vending-machine-header {
   min-width: 150px;
   flex-shrink: 0;
   margin-left: auto;
+  width: 100%;
+  max-width: 200px;
+}
+
+.payment-methods-header > div {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .vending-machine-display {

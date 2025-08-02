@@ -40,7 +40,8 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
       alignItems: 'center', 
       gap: '8px',
       opacity: isAvailable ? 1 : 0.6,
-      minHeight: '24px' // Ensure consistent height for alignment
+      minHeight: '24px', // Ensure consistent height for alignment
+      width: '100%' // Take full width to ensure consistent alignment
     }}>
       <div style={{ 
         width: '20px', 
@@ -50,7 +51,8 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
         justifyContent: 'center',
         flexShrink: 0, // Prevent icon from shrinking
         fontSize: isEmoji ? '16px' : 'auto', // Smaller font size for emojis
-        lineHeight: isEmoji ? '1' : 'auto' // Ensure emoji is centered
+        lineHeight: isEmoji ? '1' : 'auto', // Ensure emoji is centered
+        textAlign: 'center' // Center the emoji text
       }}>
         {icon}
       </div>
@@ -59,7 +61,9 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
         lineHeight: '1',
         flexShrink: 0, // Prevent text from shrinking
         display: 'flex',
-        alignItems: 'center' // Center text vertically
+        alignItems: 'center', // Center text vertically
+        flex: '1', // Take remaining space
+        minWidth: 0 // Allow text to shrink if needed
       }}>
         {paymentMethod.name}
       </span>
@@ -70,7 +74,8 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
           height: '8px',
           borderRadius: '50%',
           backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
-          flexShrink: 0 // Prevent status dot from shrinking
+          flexShrink: 0, // Prevent status dot from shrinking
+          marginLeft: 'auto' // Push to the right
         }}
       />
     </div>
