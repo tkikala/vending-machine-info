@@ -11,15 +11,20 @@ function PaymentIcon({ paymentMethod }: { paymentMethod: any }) {
   return (
     <div className="payment-icon">
       <span className="payment-text">{paymentMethodType.name}</span>
-      <span 
-        style={{ 
-          opacity: available ? 1 : 0.3,
-          fontSize: '1.2rem'
-        }}
-        title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
-      >
-        {getIcon()}
-      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <span 
+          style={{ 
+            fontSize: '1.2rem'
+          }}
+          title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
+        >
+          {getIcon()}
+        </span>
+        <div 
+          className={`payment-status ${available ? 'available' : 'unavailable'}`}
+          title={`${paymentMethodType.name} ${available ? 'Available' : 'Not Available'}`}
+        />
+      </div>
     </div>
   );
 }
@@ -44,10 +49,16 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
           <div className="machine-photo-header">
             {machine.logo && (
               <img 
-                src={machine.logo} 
+                src={`${machine.logo}?t=${Date.now()}`}
                 alt={`${machine.name} logo`}
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '12px'
                 }}
               />
             )}
