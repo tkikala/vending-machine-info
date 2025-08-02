@@ -36,17 +36,34 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
       display: 'flex', 
       alignItems: 'center', 
       gap: '8px',
-      opacity: isAvailable ? 1 : 0.6
+      opacity: isAvailable ? 1 : 0.6,
+      minHeight: '24px' // Ensure consistent height for alignment
     }}>
-      <span style={{ fontSize: '20px' }}>{getIcon()}</span>
-      <span style={{ fontSize: '14px' }}>{paymentMethod.name}</span>
+      <div style={{ 
+        width: '20px', 
+        height: '20px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexShrink: 0 // Prevent icon from shrinking
+      }}>
+        {getIcon()}
+      </div>
+      <span style={{ 
+        fontSize: '14px',
+        lineHeight: '1',
+        flexShrink: 0 // Prevent text from shrinking
+      }}>
+        {paymentMethod.name}
+      </span>
       <div 
         className={`payment-status ${isAvailable ? 'available' : 'unavailable'}`}
         style={{
           width: '8px',
           height: '8px',
           borderRadius: '50%',
-          backgroundColor: isAvailable ? '#4CAF50' : '#f44336'
+          backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
+          flexShrink: 0 // Prevent status dot from shrinking
         }}
       />
     </div>
