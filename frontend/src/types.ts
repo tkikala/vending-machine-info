@@ -43,8 +43,14 @@ export type PaymentMethodType = {
 export type MachinePaymentMethod = {
   id: string;
   vendingMachineId: string;
-  type: 'COIN' | 'BANKNOTE' | 'GIROCARD' | 'CREDIT_CARD';
-  available: boolean;
+  type?: 'COIN' | 'BANKNOTE' | 'GIROCARD' | 'CREDIT_CARD'; // Simple structure (local)
+  available?: boolean;
+  paymentMethodType?: { // Many-to-many structure (Vercel)
+    id: string;
+    type: 'COIN' | 'BANKNOTE' | 'GIROCARD' | 'CREDIT_CARD';
+    name: string;
+    icon?: string;
+  };
   createdAt?: string;
   updatedAt?: string;
 };
