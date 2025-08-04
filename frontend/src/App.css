@@ -560,7 +560,7 @@ html[data-theme='light'] .vending-slot {
   justify-content: space-between;
 }
 
-.product-image {
+.vending-slot .product-image {
   width: 22px;
   height: 22px;
   margin-bottom: 0.03rem;
@@ -659,7 +659,7 @@ html[data-theme='light'] .product-desc {
     padding: 0.04rem;
   }
 
-  .product-image {
+  .vending-slot .product-image {
     width: 18px;
     height: 18px;
   }
@@ -1988,7 +1988,7 @@ html[data-theme='light'] {
 }
 
 .product-image {
-  height: 200px;
+  height: 50px;
   background: var(--bg-secondary);
   display: flex;
   align-items: center;
