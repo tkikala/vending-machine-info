@@ -5,71 +5,94 @@ import { loginLimiter } from './middleware/rateLimiter';
 
 const authRouter = Router();
 
-// Login route with rate limiting
-authRouter.post('/login', loginLimiter, async (req, res) => {
+// Single auth handler that matches Vercel API structure
+authRouter.post('/', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { action } = req.query;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    // Handle login
+    if (action === 'login') {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+
+      console.log('Login attempt for:', email);
+
+      // Find user
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
+
+      if (!user || !user.password) {
+        console.log('❌ User not found:', email);
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      // Check if user is active
+      if (!user.isActive) {
+        console.log('❌ User account inactive:', email);
+        return res.status(401).json({ error: 'Account is deactivated' });
+      }
+
+      // Verify password
+      const isValidPassword = await verifyPassword(password, user.password);
+      if (!isValidPassword) {
+        console.log('❌ Invalid password for:', email);
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      // Create session
+      const session = await createSession(Number(user.id));
+
+      // Set secure cookie
+      res.cookie('session', session.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/'
+      });
+
+      console.log('✅ Login successful for:', user.name, user.role);
+
+      // Return user data (without password)
+      const { password: _, ...userWithoutPassword } = user;
+      res.json({
+        user: userWithoutPassword,
+        message: 'Login successful',
+      });
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    // Handle logout
+    else if (action === 'logout') {
+      console.log('Logout attempt');
+      
+      // Get session token from cookie
+      const sessionToken = req.cookies?.session;
+      
+      if (sessionToken) {
+        try {
+          // Delete the session from database
+          await prisma.session.deleteMany({
+            where: { token: sessionToken }
+          });
+        } catch (error) {
+          console.error('Error deleting session:', error);
+        }
+      }
 
-    if (!user || !user.password) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      // Clear cookie
+      res.clearCookie('session');
+      res.json({ message: 'Logout successful' });
     }
 
-    // Verify password
-    const isValidPassword = await verifyPassword(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    else {
+      res.status(400).json({ error: 'Invalid action' });
     }
-
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({ error: 'Account is deactivated' });
-    }
-
-    // Create session
-    const session = await createSession(Number(user.id));
-
-    // Set secure cookie
-    res.cookie('sessionToken', session.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    // Return user data (without password)
-    const { password: _, ...userWithoutPassword } = user;
-    res.json({
-      user: userWithoutPassword,
-      message: 'Login successful',
-    });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Logout route
-authRouter.post('/logout', requireAuth, async (req, res) => {
-  try {
-    // Delete session from database
-    await prisma.session.delete({
-      where: { token: req.session.token },
-    });
-
-    // Clear cookie
-    res.clearCookie('sessionToken');
-    res.json({ message: 'Logout successful' });
-  } catch (error) {
-    console.error('Logout error:', error);
+    console.error('Auth error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -101,11 +124,11 @@ authRouter.post('/register', requireAuth, async (req, res) => {
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
     });
 
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res.status(400).json({ error: 'User with this email already exists' });
     }
 
     // Hash password
@@ -114,13 +137,15 @@ authRouter.post('/register', requireAuth, async (req, res) => {
     // Create user
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
-        name,
-        role,
+        name: name.trim(),
+        role: role.toUpperCase(),
+        isActive: true,
       },
     });
 
+    // Return user data (without password)
     const { password: _, ...userWithoutPassword } = user;
     res.status(201).json({
       user: userWithoutPassword,

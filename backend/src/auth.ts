@@ -79,7 +79,7 @@ export async function cleanExpiredSessions() {
 // Authentication middleware
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.sessionToken;
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.session;
     
     if (!token) {
       return res.status(401).json({ error: 'Authentication required' });
