@@ -519,12 +519,12 @@ html[data-theme='light'] .vending-machine-display {
   background: linear-gradient(145deg, #34495e, #2c3e50);
   border: 2px solid #7f8c8d;
   border-radius: 8px;
-  padding: 0.15rem;
+  padding: 0.1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  min-height: 60px;
+  min-height: 45px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -561,9 +561,9 @@ html[data-theme='light'] .vending-slot {
 }
 
 .product-image {
-  width: 25px;
-  height: 25px;
-  margin-bottom: 0.1rem;
+  width: 20px;
+  height: 20px;
+  margin-bottom: 0.05rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -582,10 +582,10 @@ html[data-theme='light'] .vending-slot {
 }
 
 .product-name {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: bold;
   color: #ecf0f1;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.05rem;
   line-height: 1.1;
 }
 
@@ -594,16 +594,16 @@ html[data-theme='light'] .product-name {
 }
 
 .product-desc {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   color: var(--text-muted);
-  margin-top: 0.1rem;
+  margin-top: 0.05rem;
 }
 
 .product-price {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--payment-available);
   font-weight: 500;
-  margin-top: 0.1rem;
+  margin-top: 0.05rem;
 }
 
 html[data-theme='light'] .product-desc {
@@ -651,25 +651,25 @@ html[data-theme='light'] .product-desc {
     padding: 2rem 0;
   }
   .vending-machine-display {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.3rem;
   }
   .vending-slot {
-    min-height: 50px;
-    padding: 0.1rem;
+    min-height: 40px;
+    padding: 0.05rem;
   }
 
   .product-image {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
 
   .product-name {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
   }
 
   .product-desc {
-    font-size: 0.5rem;
+    font-size: 0.45rem;
   }
 }
 
