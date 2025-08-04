@@ -100,7 +100,7 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
           accept="image/*"
           multiple={false}
           maxFiles={1}
-          maxSize={3} // 3MB for logo
+          maxSize={50} // 50MB for logo
           label="Upload Logo"
           disabled={disabled || uploading}
         />
@@ -109,7 +109,7 @@ function LogoUpload({ currentLogo, onLogoChange, disabled = false }: LogoUploadP
       <div className="logo-help-text">
         <small>
           Upload a logo for your vending machine. Recommended size: 200x200px or larger.
-          Supported formats: JPEG, PNG, GIF, WebP. Max size: 3MB.
+          Supported formats: JPEG, PNG, GIF, WebP. Max size: 50MB.
         </small>
       </div>
     </div>

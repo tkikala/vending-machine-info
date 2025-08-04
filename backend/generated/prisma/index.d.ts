@@ -4122,6 +4122,7 @@ export namespace Prisma {
     location: string | null
     description: string | null
     logo: string | null
+    coordinates: string | null
     isActive: boolean | null
     ownerId: number | null
     createdAt: Date | null
@@ -4134,6 +4135,7 @@ export namespace Prisma {
     location: string | null
     description: string | null
     logo: string | null
+    coordinates: string | null
     isActive: boolean | null
     ownerId: number | null
     createdAt: Date | null
@@ -4146,6 +4148,7 @@ export namespace Prisma {
     location: number
     description: number
     logo: number
+    coordinates: number
     isActive: number
     ownerId: number
     createdAt: number
@@ -4168,6 +4171,7 @@ export namespace Prisma {
     location?: true
     description?: true
     logo?: true
+    coordinates?: true
     isActive?: true
     ownerId?: true
     createdAt?: true
@@ -4180,6 +4184,7 @@ export namespace Prisma {
     location?: true
     description?: true
     logo?: true
+    coordinates?: true
     isActive?: true
     ownerId?: true
     createdAt?: true
@@ -4192,6 +4197,7 @@ export namespace Prisma {
     location?: true
     description?: true
     logo?: true
+    coordinates?: true
     isActive?: true
     ownerId?: true
     createdAt?: true
@@ -4291,6 +4297,7 @@ export namespace Prisma {
     location: string
     description: string | null
     logo: string | null
+    coordinates: string | null
     isActive: boolean
     ownerId: number
     createdAt: Date
@@ -4322,6 +4329,7 @@ export namespace Prisma {
     location?: boolean
     description?: boolean
     logo?: boolean
+    coordinates?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
@@ -4340,6 +4348,7 @@ export namespace Prisma {
     location?: boolean
     description?: boolean
     logo?: boolean
+    coordinates?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
@@ -4353,6 +4362,7 @@ export namespace Prisma {
     location?: boolean
     description?: boolean
     logo?: boolean
+    coordinates?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
@@ -4366,13 +4376,14 @@ export namespace Prisma {
     location?: boolean
     description?: boolean
     logo?: boolean
+    coordinates?: boolean
     isActive?: boolean
     ownerId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type VendingMachineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "location" | "description" | "logo" | "isActive" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["vendingMachine"]>
+  export type VendingMachineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "location" | "description" | "logo" | "coordinates" | "isActive" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["vendingMachine"]>
   export type VendingMachineInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     products?: boolean | VendingMachine$productsArgs<ExtArgs>
@@ -4403,6 +4414,7 @@ export namespace Prisma {
       location: string
       description: string | null
       logo: string | null
+      coordinates: string | null
       isActive: boolean
       ownerId: number
       createdAt: Date
@@ -4840,6 +4852,7 @@ export namespace Prisma {
     readonly location: FieldRef<"VendingMachine", 'String'>
     readonly description: FieldRef<"VendingMachine", 'String'>
     readonly logo: FieldRef<"VendingMachine", 'String'>
+    readonly coordinates: FieldRef<"VendingMachine", 'String'>
     readonly isActive: FieldRef<"VendingMachine", 'Boolean'>
     readonly ownerId: FieldRef<"VendingMachine", 'Int'>
     readonly createdAt: FieldRef<"VendingMachine", 'DateTime'>
@@ -12108,6 +12121,7 @@ export namespace Prisma {
     location: 'location',
     description: 'description',
     logo: 'logo',
+    coordinates: 'coordinates',
     isActive: 'isActive',
     ownerId: 'ownerId',
     createdAt: 'createdAt',
@@ -12414,6 +12428,7 @@ export namespace Prisma {
     location?: StringFilter<"VendingMachine"> | string
     description?: StringNullableFilter<"VendingMachine"> | string | null
     logo?: StringNullableFilter<"VendingMachine"> | string | null
+    coordinates?: StringNullableFilter<"VendingMachine"> | string | null
     isActive?: BoolFilter<"VendingMachine"> | boolean
     ownerId?: IntFilter<"VendingMachine"> | number
     createdAt?: DateTimeFilter<"VendingMachine"> | Date | string
@@ -12431,6 +12446,7 @@ export namespace Prisma {
     location?: SortOrder
     description?: SortOrderInput | SortOrder
     logo?: SortOrderInput | SortOrder
+    coordinates?: SortOrderInput | SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -12451,6 +12467,7 @@ export namespace Prisma {
     location?: StringFilter<"VendingMachine"> | string
     description?: StringNullableFilter<"VendingMachine"> | string | null
     logo?: StringNullableFilter<"VendingMachine"> | string | null
+    coordinates?: StringNullableFilter<"VendingMachine"> | string | null
     isActive?: BoolFilter<"VendingMachine"> | boolean
     ownerId?: IntFilter<"VendingMachine"> | number
     createdAt?: DateTimeFilter<"VendingMachine"> | Date | string
@@ -12468,6 +12485,7 @@ export namespace Prisma {
     location?: SortOrder
     description?: SortOrderInput | SortOrder
     logo?: SortOrderInput | SortOrder
+    coordinates?: SortOrderInput | SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -12488,6 +12506,7 @@ export namespace Prisma {
     location?: StringWithAggregatesFilter<"VendingMachine"> | string
     description?: StringNullableWithAggregatesFilter<"VendingMachine"> | string | null
     logo?: StringNullableWithAggregatesFilter<"VendingMachine"> | string | null
+    coordinates?: StringNullableWithAggregatesFilter<"VendingMachine"> | string | null
     isActive?: BoolWithAggregatesFilter<"VendingMachine"> | boolean
     ownerId?: IntWithAggregatesFilter<"VendingMachine"> | number
     createdAt?: DateTimeWithAggregatesFilter<"VendingMachine"> | Date | string
@@ -13060,6 +13079,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13076,6 +13096,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -13092,6 +13113,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13108,6 +13130,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13124,6 +13147,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -13136,6 +13160,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13147,6 +13172,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13875,6 +13901,7 @@ export namespace Prisma {
     location?: SortOrder
     description?: SortOrder
     logo?: SortOrder
+    coordinates?: SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -13891,6 +13918,7 @@ export namespace Prisma {
     location?: SortOrder
     description?: SortOrder
     logo?: SortOrder
+    coordinates?: SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -13903,6 +13931,7 @@ export namespace Prisma {
     location?: SortOrder
     description?: SortOrder
     logo?: SortOrder
+    coordinates?: SortOrder
     isActive?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
@@ -15017,6 +15046,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15032,6 +15062,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15126,6 +15157,7 @@ export namespace Prisma {
     location?: StringFilter<"VendingMachine"> | string
     description?: StringNullableFilter<"VendingMachine"> | string | null
     logo?: StringNullableFilter<"VendingMachine"> | string | null
+    coordinates?: StringNullableFilter<"VendingMachine"> | string | null
     isActive?: BoolFilter<"VendingMachine"> | boolean
     ownerId?: IntFilter<"VendingMachine"> | number
     createdAt?: DateTimeFilter<"VendingMachine"> | Date | string
@@ -15581,6 +15613,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15596,6 +15629,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -15654,6 +15688,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15669,6 +15704,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15758,6 +15794,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15773,6 +15810,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -15829,6 +15867,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15844,6 +15883,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15890,6 +15930,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15905,6 +15946,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -15936,6 +15978,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15951,6 +15994,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15996,6 +16040,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16011,6 +16056,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     ownerId: number
     createdAt?: Date | string
@@ -16078,6 +16124,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16093,6 +16140,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     ownerId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16108,6 +16156,7 @@ export namespace Prisma {
     location: string
     description?: string | null
     logo?: string | null
+    coordinates?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16136,6 +16185,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16151,6 +16201,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16166,6 +16217,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     logo?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

@@ -52,6 +52,7 @@ model VendingMachine {
   location       String
   description    String?
   logo           String? // Added: Path to uploaded logo file
+  coordinates    String? // Google Maps coordinates (e.g., "52.5200,13.4050")
   isActive       Boolean                @default(true)
   ownerId        Int
   owner          User                   @relation(fields: [ownerId], references: [id])

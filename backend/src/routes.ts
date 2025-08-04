@@ -107,61 +107,78 @@ router.get('/admin/machines/:id', requireAuth, requireAdmin, async (req, res) =>
   }
 });
 
-// Create new vending machine (owner or admin)
-router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
+// Create vending machine
+router.post('/machines', requireAuth, async (req, res) => {
   try {
-    const { name, location, description, logo, products = [], paymentMethods = [] } = req.body;
+    const { name, location, description, logo, coordinates, products = [], paymentMethods = [] } = req.body;
 
-    // Get all available payment method types
-    const allPaymentMethodTypes = await prisma.paymentMethodType.findMany();
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Machine name is required' });
+    }
 
-    const machine = await prisma.vendingMachine.create({
-      data: {
-        name,
-        location,
-        description,
-        logo,
-        ownerId: req.user.id,
-        products: {
-          create: products.map((product: any) => ({
-            productId: product.productId,
-            price: product.price,
-            isAvailable: product.isAvailable ?? true,
-          })),
-        },
-        paymentMethods: {
-          create: allPaymentMethodTypes.map((pmType) => ({
-            paymentMethodTypeId: pmType.id,
-            available: false, // Default to false, will be updated based on frontend data
-          })),
-        },
-      },
-      include: {
-        products: { include: { product: true } },
-        paymentMethods: { include: { paymentMethodType: true } },
-        photos: true,
-        owner: { select: { id: true, name: true } },
-      },
+    if (!location || !location.trim()) {
+      return res.status(400).json({ error: 'Machine location is required' });
+    }
+
+    // Get admin user
+    const adminUser = await prisma.user.findFirst({
+      where: { role: 'ADMIN', isActive: true }
     });
 
-    // Update payment method availability based on frontend data
-    if (paymentMethods.length > 0) {
-      for (const pm of paymentMethods) {
-        if (pm.type) {
-          await prisma.machinePaymentMethod.updateMany({
-            where: {
-              vendingMachineId: machine.id,
-              paymentMethodType: {
-                type: pm.type
+    if (!adminUser) {
+      return res.status(500).json({ error: 'No admin user found' });
+    }
+
+    const machine = await prisma.$transaction(async (tx) => {
+      const newMachine = await tx.vendingMachine.create({
+        data: {
+          name,
+          location,
+          description: description || '',
+          logo: logo || null,
+          coordinates: coordinates || null,
+          ownerId: adminUser.id,
+          isActive: true
+        }
+      });
+
+      // Create machine-product relationships
+      if (products && Array.isArray(products)) {
+        for (const productData of products) {
+          if (productData.productId) {
+            await tx.machineProduct.create({
+              data: {
+                vendingMachineId: newMachine.id,
+                productId: productData.productId,
+                price: productData.price || null,
+                isAvailable: productData.isAvailable !== undefined ? productData.isAvailable : true
               }
-            },
-            data: {
-              available: pm.available ?? false
-            }
-          });
+            });
+          }
         }
       }
-    }
+
+      // Create payment methods
+      if (paymentMethods && Array.isArray(paymentMethods)) {
+        for (const paymentType of paymentMethods) {
+          const pmType = await tx.paymentMethodType.findUnique({
+            where: { type: paymentType }
+          });
+          
+          if (pmType) {
+            await tx.machinePaymentMethod.create({
+              data: {
+                vendingMachineId: newMachine.id,
+                paymentMethodTypeId: pmType.id,
+                available: true
+              }
+            });
+          }
+        }
+      }
+
+      return newMachine;
+    });
 
     // Fetch the updated machine with correct payment method data
     const updatedMachine = await prisma.vendingMachine.findUnique({
@@ -185,13 +202,14 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
 router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) => {
   try {
     const id = req.params.id;
-    const { name, location, description, logo, isActive, products = [], paymentMethods = [] } = req.body;
+    const { name, location, description, logo, coordinates, isActive, products = [], paymentMethods = [] } = req.body;
 
     const updateData: any = {
       ...(name && { name }),
       ...(location && { location }),
       ...(description !== undefined && { description }),
       ...(logo !== undefined && { logo }),
+      ...(coordinates !== undefined && { coordinates }),
       ...(isActive !== undefined && { isActive }),
     };
 

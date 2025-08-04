@@ -142,6 +142,7 @@ exports.Prisma.VendingMachineScalarFieldEnum = {
   location: 'location',
   description: 'description',
   logo: 'logo',
+  coordinates: 'coordinates',
   isActive: 'isActive',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
