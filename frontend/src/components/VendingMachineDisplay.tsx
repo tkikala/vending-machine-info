@@ -3,13 +3,27 @@ import type { VendingMachine } from '../types';
 
 function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAvailable: boolean }) {
   const getIcon = () => {
-    switch (paymentMethod.type) {
+    const type = paymentMethod.type;
+    const name = paymentMethod.name;
+    
+    switch (type) {
       case 'COIN':
         return '🪙';
       case 'BANKNOTE':
         return '💵';
       case 'GIROCARD':
-        return '💳';
+        return paymentMethod.icon ? (
+          <img 
+            src={paymentMethod.icon} 
+            alt="Girocard" 
+            style={{ 
+              width: '20px', 
+              height: '20px', 
+              objectFit: 'contain',
+              filter: isAvailable ? 'none' : 'grayscale(100%) opacity(50%)'
+            }} 
+          />
+        ) : '💳';
       case 'CREDIT_CARD':
         return '💳';
       default:
@@ -17,31 +31,58 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
     }
   };
 
+  const icon = getIcon();
+  const isEmoji = typeof icon === 'string';
+
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      fontSize: '0.9rem',
-      color: 'var(--text-main)',
-      padding: '0.25rem 0.5rem',
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '6px',
+      opacity: isAvailable ? 1 : 0.6,
+      minHeight: '24px',
+      padding: '4px 8px',
       borderRadius: '6px',
-      background: 'var(--bg-secondary)',
-      border: '1px solid var(--border-color)',
-      width: '100%',
-      justifyContent: 'space-between'
+      background: 'rgba(255,255,255,0.05)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      transition: 'all 0.2s ease'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '1rem' }}>{getIcon()}</span>
-        <span>{paymentMethod.name}</span>
+      <div style={{ 
+        width: '18px', 
+        height: '18px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexShrink: 0,
+        fontSize: isEmoji ? '14px' : 'auto',
+        lineHeight: isEmoji ? '1' : 'auto',
+        textAlign: 'center'
+      }}>
+        {icon}
       </div>
-      <div style={{
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
-        flexShrink: 0
-      }} />
+      <span style={{ 
+        fontSize: '13px',
+        lineHeight: '1',
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        flex: '1',
+        minWidth: 0,
+        fontWeight: '500'
+      }}>
+        {paymentMethod.name}
+      </span>
+      <div 
+        className={`payment-status ${isAvailable ? 'available' : 'unavailable'}`}
+        style={{
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
+          flexShrink: 0,
+          marginLeft: '4px'
+        }}
+      />
     </div>
   );
 }
