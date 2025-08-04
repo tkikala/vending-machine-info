@@ -504,11 +504,11 @@ html[data-theme='light'] .vending-machine-header {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  gap: 0.5rem;
+  gap: 0.3rem;
   background: rgba(0,0,0,0.2);
-  padding: 1rem;
+  padding: 0.8rem;
   border-radius: 8px;
-  min-height: 400px;
+  min-height: 240px;
 }
 
 html[data-theme='light'] .vending-machine-display {
@@ -519,7 +519,7 @@ html[data-theme='light'] .vending-machine-display {
   background: linear-gradient(145deg, #34495e, #2c3e50);
   border: 2px solid #7f8c8d;
   border-radius: 8px;
-  padding: 0.08rem;
+  padding: 0.05rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -560,7 +560,7 @@ html[data-theme='light'] .vending-slot {
   justify-content: space-between;
 }
 
-.vending-slot .product-image {
+.product-image {
   width: 22px;
   height: 22px;
   margin-bottom: 0.03rem;
@@ -655,11 +655,11 @@ html[data-theme='light'] .product-desc {
     gap: 0.25rem;
   }
   .vending-slot {
-    min-height: 32px;
-    padding: 0.04rem;
+    min-height: 22px;
+    padding: 0.03rem;
   }
 
-  .vending-slot .product-image {
+  .product-image {
     width: 18px;
     height: 18px;
   }
