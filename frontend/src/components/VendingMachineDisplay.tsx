@@ -1,29 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import type { VendingMachine, Product } from '../types';
+import React, { useState } from 'react';
+import type { VendingMachine } from '../types';
 
 function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAvailable: boolean }) {
   const getIcon = () => {
-    const type = paymentMethod.type;
-    const name = paymentMethod.name;
-    
-    switch (type) {
+    switch (paymentMethod.type) {
       case 'COIN':
         return '🪙';
       case 'BANKNOTE':
         return '💵';
       case 'GIROCARD':
-        return paymentMethod.icon ? (
-          <img 
-            src={paymentMethod.icon} 
-            alt="Girocard" 
-            style={{ 
-              width: '20px', 
-              height: '20px', 
-              objectFit: 'contain',
-              filter: isAvailable ? 'none' : 'grayscale(100%) opacity(50%)'
-            }} 
-          />
-        ) : '💳';
+        return '💳';
       case 'CREDIT_CARD':
         return '💳';
       default:
@@ -31,78 +17,38 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
     }
   };
 
-  const icon = getIcon();
-  const isEmoji = typeof icon === 'string';
-
   return (
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: '6px',
-      opacity: isAvailable ? 1 : 0.6,
-      minHeight: '24px',
-      padding: '4px 8px',
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      fontSize: '0.9rem',
+      color: 'var(--text-main)',
+      padding: '0.25rem 0.5rem',
       borderRadius: '6px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      transition: 'all 0.2s ease'
+      background: 'var(--bg-secondary)',
+      border: '1px solid var(--border-color)',
+      width: '100%',
+      justifyContent: 'space-between'
     }}>
-      <div style={{ 
-        width: '18px', 
-        height: '18px', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        flexShrink: 0,
-        fontSize: isEmoji ? '14px' : 'auto',
-        lineHeight: isEmoji ? '1' : 'auto',
-        textAlign: 'center'
-      }}>
-        {icon}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <span style={{ fontSize: '1rem' }}>{getIcon()}</span>
+        <span>{paymentMethod.name}</span>
       </div>
-      <span style={{ 
-        fontSize: '13px',
-        lineHeight: '1',
-        flexShrink: 0,
-        display: 'flex',
-        alignItems: 'center',
-        flex: '1',
-        minWidth: 0,
-        fontWeight: '500'
-      }}>
-        {paymentMethod.name}
-      </span>
-      <div 
-        className={`payment-status ${isAvailable ? 'available' : 'unavailable'}`}
-        style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
-          flexShrink: 0,
-          marginLeft: '4px'
-        }}
-      />
+      <div style={{
+        width: '8px',
+        height: '8px',
+        borderRadius: '50%',
+        backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
+        flexShrink: 0
+      }} />
     </div>
   );
 }
 
 function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const products = machine.products || [];
-
-  // Group products by category
-  const productsByCategory = products.reduce((acc, machineProduct: any) => {
-    const product = machineProduct.product;
-    const category = product.category || 'Other';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(machineProduct);
-    return acc;
-  }, {} as Record<string, any[]>);
-
-  // Sort categories
-  const sortedCategories = Object.keys(productsByCategory).sort();
 
   const handleLocationClick = () => {
     if (machine.coordinates) {
@@ -126,6 +72,14 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
   const machinePaymentMethods = new Map(
     machine.paymentMethods?.map(pm => [pm.paymentMethodType.type, pm.available]) || []
   );
+
+  // Get unique categories from products
+  const categories = ['all', ...Array.from(new Set(products.map((mp: any) => mp.product.category || 'Other')))];
+  
+  // Filter products by selected category
+  const filteredProducts = selectedCategory === 'all' 
+    ? products 
+    : products.filter((mp: any) => (mp.product.category || 'Other') === selectedCategory);
 
   return (
     <div className="vending-machine">
@@ -189,40 +143,49 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
           </div>
         </div>
       </div>
+
+      {/* Category Filter Capsules */}
+      {categories.length > 1 && (
+        <div className="category-filters">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`category-filter ${selectedCategory === category ? 'active' : ''}`}
+            >
+              {category === 'all' ? 'All Products' : category}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="vending-machine-display">
-        {sortedCategories.map((category) => (
-          <div key={category} className="category-section">
-            <h4>{category}</h4>
-            <div className="category-products">
-              {productsByCategory[category].map((machineProduct: any, index: number) => {
-                const product = machineProduct.product;
-                return (
-                  <div 
-                    key={machineProduct.id || index} 
-                    className="vending-slot"
-                  >
-                    <div className="slot-product">
-                      <div className="product-image">
-                        {product.photo ? (
-                          <img src={product.photo} alt={product.name} />
-                        ) : (
-                          <div className="product-placeholder">📦</div>
-                        )}
-                      </div>
-                      <div className="product-name">{product.name}</div>
-                      {product.description && (
-                        <div className="product-desc">{product.description}</div>
-                      )}
-                      {(machineProduct.price || product.price) && (
-                        <div className="product-price">€{(machineProduct.price || product.price).toFixed(2)}</div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+        {filteredProducts.map((machineProduct: any, index: number) => {
+          const product = machineProduct.product;
+          return (
+            <div 
+              key={machineProduct.id || index} 
+              className="vending-slot"
+            >
+              <div className="slot-product">
+                <div className="product-image">
+                  {product.photo ? (
+                    <img src={product.photo} alt={product.name} />
+                  ) : (
+                    <div className="product-placeholder">📦</div>
+                  )}
+                </div>
+                <div className="product-name">{product.name}</div>
+                {product.description && (
+                  <div className="product-desc">{product.description}</div>
+                )}
+                {(machineProduct.price || product.price) && (
+                  <div className="product-price">€{(machineProduct.price || product.price).toFixed(2)}</div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

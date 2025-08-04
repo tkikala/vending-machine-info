@@ -2160,3 +2160,48 @@ html[data-theme='light'] {
   color: white;
   text-decoration: none;
 }
+
+/* Category Filter Capsules */
+.category-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  padding: 0 1rem;
+  flex-wrap: wrap;
+}
+
+.category-filter {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.category-filter:hover {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.category-filter.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+@media (max-width: 768px) {
+  .category-filters {
+    padding: 0 0.5rem;
+    gap: 0.25rem;
+  }
+  
+  .category-filter {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
