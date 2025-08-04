@@ -23,9 +23,37 @@ router.get('/payment-methods', async (req, res) => {
   }
 });
 
-// Get all vending machines (public)
+// Get all vending machines or single machine by ID (public)
 router.get('/machines', async (req, res) => {
   try {
+    const { id } = req.query;
+    
+    // If ID is provided, get single machine
+    if (id && typeof id === 'string') {
+      console.log('Fetching machine:', id);
+      
+      const machine = await prisma.vendingMachine.findUnique({
+        where: { id, isActive: true },
+        include: {
+          products: { where: { isAvailable: true }, include: { product: true } },
+          paymentMethods: { include: { paymentMethodType: true } },
+          photos: true,
+          reviews: { where: { isApproved: true }, include: { user: { select: { id: true, name: true } } } },
+          owner: { select: { id: true, name: true } },
+        },
+      });
+      
+      if (!machine) {
+        console.log('Machine not found:', id);
+        return res.status(404).json({ error: 'Machine not found' });
+      }
+      
+      console.log('Found machine:', machine.name);
+      return res.json(machine);
+    }
+    
+    // Otherwise, get all machines
+    console.log('Fetching all machines');
     const machines = await prisma.vendingMachine.findMany({
       where: { isActive: true },
       include: {
@@ -36,6 +64,7 @@ router.get('/machines', async (req, res) => {
         owner: { select: { id: true, name: true } },
       },
     });
+    console.log('Found', machines.length, 'machines');
     res.json(machines);
   } catch (error) {
     console.error('Get machines error:', error);
@@ -43,27 +72,7 @@ router.get('/machines', async (req, res) => {
   }
 });
 
-// Get vending machine by ID (public)
-router.get('/machines/:id', async (req, res) => {
-  try {
-    const id = req.params.id;
-    const machine = await prisma.vendingMachine.findUnique({
-      where: { id, isActive: true },
-      include: {
-        products: { where: { isAvailable: true }, include: { product: true } },
-        paymentMethods: { include: { paymentMethodType: true } },
-        photos: true,
-        reviews: { where: { isApproved: true }, include: { user: { select: { id: true, name: true } } } },
-        owner: { select: { id: true, name: true } },
-      },
-    });
-    if (!machine) return res.status(404).json({ error: 'Machine not found' });
-    res.json(machine);
-  } catch (error) {
-    console.error('Get machine error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+
 
 // Admin Routes - Get all machines (including inactive)
 router.get('/admin/machines', requireAuth, requireAdmin, async (req, res) => {
@@ -81,28 +90,6 @@ router.get('/admin/machines', requireAuth, requireAdmin, async (req, res) => {
     res.json(machines);
   } catch (error) {
     console.error('Get admin machines error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get vending machine by ID (admin)
-router.get('/admin/machines/:id', requireAuth, requireAdmin, async (req, res) => {
-  try {
-    const id = req.params.id;
-    const machine = await prisma.vendingMachine.findUnique({
-      where: { id },
-      include: {
-        products: { include: { product: true } },
-        paymentMethods: { include: { paymentMethodType: true } },
-        photos: true,
-        reviews: { include: { user: { select: { id: true, name: true } } } },
-        owner: { select: { id: true, name: true } },
-      },
-    });
-    if (!machine) return res.status(404).json({ error: 'Machine not found' });
-    res.json(machine);
-  } catch (error) {
-    console.error('Get admin machine error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
