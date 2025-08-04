@@ -7,6 +7,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { id } = req.query;
 
+    // Handle DELETE with path parameter (for frontend compatibility)
+    if (req.method === 'DELETE' && req.url?.includes('/products/')) {
+      const pathId = req.url.split('/products/')[1];
+      if (pathId) {
+        console.log('Deleting product (path param):', pathId);
+        
+        try {
+          // Check if product exists
+          const existingProduct = await prisma.product.findUnique({
+            where: { id: pathId }
+          });
+
+          if (!existingProduct) {
+            return res.status(404).json({ error: 'Product not found' });
+          }
+
+          // Check if product is used in any machines
+          const machineProducts = await prisma.machineProduct.findMany({
+            where: { productId: pathId }
+          });
+
+          if (machineProducts.length > 0) {
+            return res.status(400).json({ 
+              error: 'Cannot delete product that is used in vending machines',
+              machineCount: machineProducts.length
+            });
+          }
+
+          // Delete product
+          await prisma.product.delete({
+            where: { id: pathId }
+          });
+
+          console.log('✅ Deleted product:', existingProduct.name);
+          return res.status(200).json({ message: 'Product deleted successfully' });
+          
+        } catch (dbError: any) {
+          console.error('❌ Database error during deletion:', dbError);
+          return res.status(500).json({
+            error: 'Database connection failed',
+            details: dbError.message
+          });
+        }
+      }
+    }
+
     // Handle individual product operations (GET, PUT, DELETE)
     if (id && typeof id === 'string') {
       if (req.method === 'GET') {
@@ -37,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log('Updating product:', id);
         
         try {
-          const { name, description, photo, price, category } = req.body;
+          const { name, description, photo, price } = req.body;
           
           if (!name || !name.trim()) {
             return res.status(400).json({ error: 'Product name is required' });
@@ -75,8 +121,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               name: name.trim(),
               description: description?.trim() || null,
               photo: photo || null,
-              price: price ? parseFloat(price) : null,
-              category: category?.trim() || null
+              price: price ? parseFloat(price) : null
             }
           });
 
@@ -180,7 +225,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Creating new product...');
       
       try {
-        const { name, description, photo, price, category } = req.body;
+        const { name, description, photo, price } = req.body;
         
         if (!name || !name.trim()) {
           return res.status(400).json({ error: 'Product name is required' });
@@ -209,7 +254,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             description: description?.trim() || null,
             photo: photo || null,
             price: price ? parseFloat(price) : null,
-            category: category?.trim() || null,
             isAvailable: true
           }
         });
