@@ -75,7 +75,7 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
           borderRadius: '50%',
           backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
           flexShrink: 0, // Prevent status dot from shrinking
-          marginLeft: '2px' // Small margin to bring dot closer to text
+          marginLeft: '1px' // Reduced margin to bring dot closer to text
         }}
       />
     </div>
@@ -90,7 +90,10 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
     const fetchAllPaymentMethods = async () => {
       try {
         console.log('🔍 Fetching all payment methods...');
-        const response = await fetch('/api/payment-methods');
+        const API_BASE = import.meta.env.PROD 
+          ? '/api' // Production: relative URLs (same domain)
+          : 'http://localhost:4000/api'; // Development: absolute URL
+        const response = await fetch(`${API_BASE}/payment-methods`);
         if (response.ok) {
           const data = await response.json();
           console.log('✅ Payment methods fetched:', data);
