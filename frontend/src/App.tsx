@@ -1,5 +1,5 @@
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import './App.css';
 import { AuthProvider } from './contexts/AuthContext';
 import MachineList from './components/MachineList';
 import MachinePage from './components/MachinePage';
@@ -8,39 +8,33 @@ import AdminDashboard from './components/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddMachineForm from './components/AddMachineForm';
 import EditMachineForm from './components/EditMachineForm';
+import './App.css';
 
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<MachineList />} />
-        <Route path="/machine/:id" element={<MachinePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<MachineList />} />
+          <Route path="/machines/:id" element={<MachinePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/admin" element={
+            <ProtectedRoute requireAdmin>
               <AdminDashboard />
             </ProtectedRoute>
-          } 
-        />
-                <Route
-          path="/admin/machines/new"
-          element={
+          } />
+          <Route path="/add-machine" element={
             <ProtectedRoute>
               <AddMachineForm />
             </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/machines/:id/edit"
-          element={
+          } />
+          <Route path="/edit-machine/:id" element={
             <ProtectedRoute>
               <EditMachineForm />
             </ProtectedRoute>
-          }
-        />
-      </Routes>
+          } />
+        </Routes>
+      </div>
     </AuthProvider>
   );
 }
