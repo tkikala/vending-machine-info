@@ -8,6 +8,7 @@ import AdminDashboard from './components/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddMachineForm from './components/AddMachineForm';
 import EditMachineForm from './components/EditMachineForm';
+import ProductsManagement from './components/ProductsManagement';
 import './App.css';
 
 function App() {
@@ -42,6 +43,11 @@ function App() {
           <Route path="/edit-machine/:id" element={
             <ProtectedRoute>
               <EditMachineForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/products" element={
+            <ProtectedRoute>
+              <ProductsManagement />
             </ProtectedRoute>
           } />
         </Routes>

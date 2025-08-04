@@ -495,4 +495,80 @@ router.delete('/products/:id', async (req, res) => {
   }
 });
 
+// Create review endpoint
+router.post('/reviews', requireAuth, async (req, res) => {
+  try {
+    const { vendingMachineId, rating, comment } = req.body;
+    
+    if (!vendingMachineId) {
+      return res.status(400).json({ error: 'Vending machine ID is required' });
+    }
+    
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+    
+    if (!comment || !comment.trim()) {
+      return res.status(400).json({ error: 'Comment is required' });
+    }
+
+    // Check if vending machine exists
+    const machine = await prisma.vendingMachine.findUnique({
+      where: { id: vendingMachineId }
+    });
+
+    if (!machine) {
+      return res.status(404).json({ error: 'Vending machine not found' });
+    }
+
+    // Create review
+    const review = await prisma.review.create({
+      data: {
+        rating,
+        comment: comment.trim(),
+        userId: req.user.id,
+        vendingMachineId,
+        isApproved: true // Auto-approve for now
+      },
+      include: {
+        user: { select: { id: true, name: true } }
+      }
+    });
+
+    console.log(`✅ Created review for machine: ${machine.name}`);
+    res.status(201).json(review);
+  } catch (error) {
+    console.error('Create review error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get reviews for a machine
+router.get('/reviews', async (req, res) => {
+  try {
+    const { machineId } = req.query;
+    
+    if (!machineId || typeof machineId !== 'string') {
+      return res.status(400).json({ error: 'Machine ID is required' });
+    }
+
+    const reviews = await prisma.review.findMany({
+      where: { 
+        vendingMachineId: machineId,
+        isApproved: true
+      },
+      include: {
+        user: { select: { id: true, name: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    console.log(`✅ Found ${reviews.length} reviews for machine: ${machineId}`);
+    res.json(reviews);
+  } catch (error) {
+    console.error('Get reviews error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router; 

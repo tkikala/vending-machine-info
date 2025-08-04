@@ -90,6 +90,20 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
 function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
   const products = machine.products || [];
 
+  // Group products by category
+  const productsByCategory = products.reduce((acc, machineProduct: any) => {
+    const product = machineProduct.product;
+    const category = product.category || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(machineProduct);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  // Sort categories
+  const sortedCategories = Object.keys(productsByCategory).sort();
+
   const handleLocationClick = () => {
     if (machine.coordinates) {
       // Open Google Maps with coordinates
@@ -176,32 +190,39 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
         </div>
       </div>
       <div className="vending-machine-display">
-        {products.map((machineProduct: any, index: number) => {
-          const product = machineProduct.product;
-          return (
-            <div 
-              key={machineProduct.id || index} 
-              className="vending-slot"
-            >
-              <div className="slot-product">
-                <div className="product-image">
-                  {product.photo ? (
-                    <img src={product.photo} alt={product.name} />
-                  ) : (
-                    <div className="product-placeholder">📦</div>
-                  )}
-                </div>
-                <div className="product-name">{product.name}</div>
-                {product.description && (
-                  <div className="product-desc">{product.description}</div>
-                )}
-                {(machineProduct.price || product.price) && (
-                  <div className="product-price">€{(machineProduct.price || product.price).toFixed(2)}</div>
-                )}
-              </div>
+        {sortedCategories.map((category) => (
+          <div key={category} className="category-section">
+            <h4>{category}</h4>
+            <div className="category-products">
+              {productsByCategory[category].map((machineProduct: any, index: number) => {
+                const product = machineProduct.product;
+                return (
+                  <div 
+                    key={machineProduct.id || index} 
+                    className="vending-slot"
+                  >
+                    <div className="slot-product">
+                      <div className="product-image">
+                        {product.photo ? (
+                          <img src={product.photo} alt={product.name} />
+                        ) : (
+                          <div className="product-placeholder">📦</div>
+                        )}
+                      </div>
+                      <div className="product-name">{product.name}</div>
+                      {product.description && (
+                        <div className="product-desc">{product.description}</div>
+                      )}
+                      {(machineProduct.price || product.price) && (
+                        <div className="product-price">€{(machineProduct.price || product.price).toFixed(2)}</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );

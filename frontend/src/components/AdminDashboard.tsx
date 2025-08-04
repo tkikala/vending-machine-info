@@ -91,9 +91,12 @@ function AdminDashboard() {
       </div>
 
       <div className="dashboard-content">
-        <div className="dashboard-actions">
-          <Link to="/admin/machines/new" className="btn btn-primary">
+        <div className="admin-actions">
+          <Link to="/admin/machines/new" className="admin-button">
             + Add New Machine
+          </Link>
+          <Link to="/products" className="admin-button">
+            📦 Manage Products
           </Link>
         </div>
 

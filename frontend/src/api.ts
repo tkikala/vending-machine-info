@@ -478,3 +478,37 @@ export async function deleteProduct(id: string): Promise<void> {
     throw new Error(error.error || 'Failed to delete product');
   }
 } 
+
+export async function createReview(machineId: string, data: { rating: number; comment: string }): Promise<any> {
+  const res = await fetch(`${API_BASE}/reviews`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      ...data,
+      vendingMachineId: machineId
+    }),
+  });
+  
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Failed to create review');
+  }
+  
+  return res.json();
+}
+
+export async function fetchMachineReviews(machineId: string): Promise<any[]> {
+  const res = await fetch(`${API_BASE}/reviews?machineId=${machineId}`, {
+    credentials: 'include',
+  });
+  
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Failed to fetch reviews');
+  }
+  
+  return res.json();
+} 
