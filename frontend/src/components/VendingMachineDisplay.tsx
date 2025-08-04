@@ -88,39 +88,6 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
 }
 
 function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
-  const [allPaymentMethods, setAllPaymentMethods] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAllPaymentMethods = async () => {
-      try {
-        console.log('🔍 Fetching all payment methods...');
-        const API_BASE = import.meta.env.PROD 
-          ? '/api' // Production: relative URLs (same domain)
-          : 'http://localhost:4000/api'; // Development: absolute URL
-        const response = await fetch(`${API_BASE}/payment-methods`);
-        if (response.ok) {
-          const data = await response.json();
-          console.log('✅ Payment methods fetched:', data);
-          
-          // Debug Girocard specifically
-          const girocard = data.find((pm: any) => pm.type === 'GIROCARD');
-          console.log('🔍 Girocard data:', girocard);
-          
-          setAllPaymentMethods(data);
-        } else {
-          console.error('❌ Failed to fetch payment methods:', response.status);
-        }
-      } catch (error) {
-        console.error('❌ Error fetching payment methods:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllPaymentMethods();
-  }, []);
-
   const products = machine.products || [];
 
   const handleLocationClick = () => {
@@ -133,9 +100,17 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
     }
   };
 
+  // Get all available payment method types in the correct order
+  const allPaymentMethodTypes = [
+    { type: 'COIN' as const, name: 'Coins', icon: '🪙' },
+    { type: 'BANKNOTE' as const, name: 'Banknotes', icon: '💵' },
+    { type: 'GIROCARD' as const, name: 'Girocard', icon: '💳' },
+    { type: 'CREDIT_CARD' as const, name: 'Creditcard', icon: '💳' }
+  ];
+
   // Create a map of available payment methods for this machine
-  const availablePaymentMethods = new Set(
-    machine.paymentMethods?.map(pm => pm.paymentMethodType.type) || []
+  const machinePaymentMethods = new Map(
+    machine.paymentMethods?.map(pm => [pm.paymentMethodType.type, pm.available]) || []
   );
 
   return (
@@ -190,25 +165,22 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
             )}
           </div>
           <div className="payment-methods-header">
-            {loading && <div style={{ color: 'var(--text-muted)' }}>Loading payment methods...</div>}
-            {!loading && allPaymentMethods.length === 0 && (
-              <div style={{ color: 'var(--text-muted)' }}>No payment methods available</div>
-            )}
-            {!loading && allPaymentMethods.map((paymentMethod) => (
+            {allPaymentMethodTypes.map((paymentMethod) => (
               <PaymentIcon 
-                key={paymentMethod.id} 
+                key={paymentMethod.type} 
                 paymentMethod={paymentMethod}
-                isAvailable={availablePaymentMethods.has(paymentMethod.type)}
+                isAvailable={machinePaymentMethods.get(paymentMethod.type) || false}
               />
             ))}
           </div>
         </div>
       </div>
       <div className="vending-machine-display">
-        {products.map((product: Product, index: number) => {
+        {products.map((machineProduct: any, index: number) => {
+          const product = machineProduct.product;
           return (
             <div 
-              key={product.id || index} 
+              key={machineProduct.id || index} 
               className="vending-slot"
             >
               <div className="slot-product">
@@ -223,8 +195,8 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
                 {product.description && (
                   <div className="product-desc">{product.description}</div>
                 )}
-                {product.price && (
-                  <div className="product-price">€{product.price.toFixed(2)}</div>
+                {(machineProduct.price || product.price) && (
+                  <div className="product-price">€{(machineProduct.price || product.price).toFixed(2)}</div>
                 )}
               </div>
             </div>

@@ -198,21 +198,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      // Handle DELETE (deactivate machine)
+      // Handle DELETE (delete machine)
       if (req.method === 'DELETE') {
-        console.log('Deactivating machine:', id);
+        console.log('Deleting machine:', id);
         
         try {
-          const updatedMachine = await prisma.vendingMachine.update({
-            where: { id },
-            data: { isActive: false }
+          // Delete related records first
+          await prisma.machineProduct.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          await prisma.machinePaymentMethod.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          await prisma.photo.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          await prisma.review.deleteMany({
+            where: { vendingMachineId: id }
+          });
+          
+          // Delete the machine
+          await prisma.vendingMachine.delete({
+            where: { id }
           });
 
-          console.log('✅ Deactivated machine:', updatedMachine.name);
-          return res.status(200).json({ message: 'Machine deactivated successfully' });
+          console.log('✅ Deleted machine:', id);
+          return res.status(200).json({ message: 'Machine deleted successfully' });
           
         } catch (dbError: any) {
-          console.error('❌ Database error during deactivation:', dbError);
+          console.error('❌ Database error during deletion:', dbError);
           return res.status(500).json({
             error: 'Database connection failed',
             details: dbError.message

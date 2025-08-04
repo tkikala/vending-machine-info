@@ -1,5 +1,7 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from './prisma';
+import { VercelRequest, VercelResponse } from '@vercel/node';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -7,19 +9,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const paymentMethods = await prisma.paymentMethodType.findMany();
+    console.log('🔍 Fetching all payment method types...');
     
-    // Sort payment methods in the desired order: Coins, Banknotes, Girocard, Creditcard
-    const sortedPaymentMethods = paymentMethods.sort((a, b) => {
-      const order = ['COIN', 'BANKNOTE', 'GIROCARD', 'CREDIT_CARD'];
-      const aIndex = order.indexOf(a.type);
-      const bIndex = order.indexOf(b.type);
-      return aIndex - bIndex;
+    const paymentMethods = await prisma.paymentMethodType.findMany({
+      orderBy: {
+        type: 'asc'
+      }
     });
 
-    res.status(200).json(sortedPaymentMethods);
+    console.log(`✅ Found ${paymentMethods.length} payment method types`);
+    return res.status(200).json(paymentMethods);
+    
   } catch (error) {
-    console.error('Payment methods error:', error);
-    res.status(500).json({ error: 'Failed to fetch payment methods' });
+    console.error('❌ Payment methods error:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 } 

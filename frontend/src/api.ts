@@ -189,7 +189,7 @@ export async function updateVendingMachine(id: string, data: any) {
 }
 
 export async function deleteVendingMachine(id: string) {
-  const res = await fetch(`${API_BASE}/machines/${id}`, {
+  const res = await fetch(`${API_BASE}/machines?id=${id}`, {
     method: 'DELETE',
     credentials: 'include',
   });
