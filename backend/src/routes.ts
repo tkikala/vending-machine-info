@@ -274,6 +274,45 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
   }
 });
 
+// Delete vending machine by query parameter (for frontend compatibility)
+router.delete('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
+  try {
+    const { id } = req.query;
+    
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ error: 'Machine ID is required' });
+    }
+
+    console.log('Deleting machine:', id);
+    
+    // Check if machine exists
+    const machine = await prisma.vendingMachine.findUnique({
+      where: { id },
+      include: { owner: true }
+    });
+
+    if (!machine) {
+      console.log('Machine not found for deletion:', id);
+      return res.status(404).json({ error: 'Machine not found' });
+    }
+
+    // Check if user has permission to delete this machine
+    if (req.user.role !== 'ADMIN' && machine.ownerId !== req.user.id) {
+      console.log('User not authorized to delete machine:', id);
+      return res.status(403).json({ error: 'Not authorized to delete this machine' });
+    }
+
+    // Delete the machine
+    await prisma.vendingMachine.delete({ where: { id } });
+    
+    console.log('✅ Deleted machine:', machine.name);
+    res.json({ message: 'Machine deleted successfully' });
+  } catch (error) {
+    console.error('Delete machine error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Delete vending machine (owner or admin)
 router.delete('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) => {
   try {
