@@ -55,7 +55,7 @@ model VendingMachine {
   isActive       Boolean                @default(true)
   ownerId        Int
   owner          User                   @relation(fields: [ownerId], references: [id])
-  products       Product[]
+  products       MachineProduct[]
   paymentMethods MachinePaymentMethod[]
   photos         Photo[]
   reviews        Review[]
@@ -64,17 +64,29 @@ model VendingMachine {
 }
 
 model Product {
-  id               Int            @id @default(autoincrement())
-  name             String
-  description      String?
-  photo            String?
-  price            Float?
-  slotCode         String? // A1, B2, etc.
-  isAvailable      Boolean        @default(true)
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  photo       String?
+  price       Float? // Default price
+  isAvailable Boolean          @default(true)
+  machines    MachineProduct[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
+}
+
+model MachineProduct {
+  id               String         @id @default(uuid())
   vendingMachineId String
+  productId        String
+  price            Float? // Override price for this machine
+  isAvailable      Boolean        @default(true)
   vendingMachine   VendingMachine @relation(fields: [vendingMachineId], references: [id], onDelete: Cascade)
+  product          Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now()) @updatedAt
+
+  @@unique([vendingMachineId, productId])
 }
 
 model PaymentMethodType {

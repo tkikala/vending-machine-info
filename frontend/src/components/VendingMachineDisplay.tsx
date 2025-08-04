@@ -41,7 +41,7 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
       gap: '8px', // Restore consistent gap between icon and text
       opacity: isAvailable ? 1 : 0.6,
       minHeight: '24px', // Ensure consistent height for alignment
-      width: '100%' // Take full width to ensure consistent alignment
+      width: '70%' // Take full width to ensure consistent alignment
     }}>
       <div style={{ 
         width: '20px', 
@@ -70,12 +70,12 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
       <div 
         className={`payment-status ${isAvailable ? 'available' : 'unavailable'}`}
         style={{
-          width: '8px',
-          height: '8px',
+          width: '10px',
+          height: '10px',
           borderRadius: '50%',
           backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
           flexShrink: 0, // Prevent status dot from shrinking
-          marginLeft: '1px' // Reduced margin to bring dot closer to text
+          marginLeft: '2px' // Small margin to bring dot closer to text
         }}
       />
     </div>

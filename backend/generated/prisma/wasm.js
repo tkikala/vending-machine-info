@@ -154,9 +154,17 @@ exports.Prisma.ProductScalarFieldEnum = {
   description: 'description',
   photo: 'photo',
   price: 'price',
-  slotCode: 'slotCode',
   isAvailable: 'isAvailable',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MachineProductScalarFieldEnum = {
+  id: 'id',
   vendingMachineId: 'vendingMachineId',
+  productId: 'productId',
+  price: 'price',
+  isAvailable: 'isAvailable',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -228,6 +236,7 @@ exports.Prisma.ModelName = {
   Session: 'Session',
   VendingMachine: 'VendingMachine',
   Product: 'Product',
+  MachineProduct: 'MachineProduct',
   PaymentMethodType: 'PaymentMethodType',
   MachinePaymentMethod: 'MachinePaymentMethod',
   Photo: 'Photo',

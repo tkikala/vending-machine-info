@@ -29,7 +29,7 @@ router.get('/machines', async (req, res) => {
     const machines = await prisma.vendingMachine.findMany({
       where: { isActive: true },
       include: {
-        products: { where: { isAvailable: true } },
+        products: { where: { isAvailable: true }, include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { where: { isApproved: true }, include: { user: { select: { id: true, name: true } } } },
@@ -50,7 +50,7 @@ router.get('/machines/:id', async (req, res) => {
     const machine = await prisma.vendingMachine.findUnique({
       where: { id, isActive: true },
       include: {
-        products: { where: { isAvailable: true } },
+        products: { where: { isAvailable: true }, include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { where: { isApproved: true }, include: { user: { select: { id: true, name: true } } } },
@@ -70,7 +70,7 @@ router.get('/admin/machines', requireAuth, requireAdmin, async (req, res) => {
   try {
     const machines = await prisma.vendingMachine.findMany({
       include: {
-        products: true,
+        products: { include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { include: { user: { select: { id: true, name: true } } } },
@@ -92,7 +92,7 @@ router.get('/admin/machines/:id', requireAuth, requireAdmin, async (req, res) =>
     const machine = await prisma.vendingMachine.findUnique({
       where: { id },
       include: {
-        products: true,
+        products: { include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { include: { user: { select: { id: true, name: true } } } },
@@ -124,11 +124,8 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
         ownerId: req.user.id,
         products: {
           create: products.map((product: any) => ({
-            name: product.name,
-            description: product.description,
-            photo: product.photo,
+            productId: product.productId,
             price: product.price,
-            slotCode: product.slotCode,
             isAvailable: product.isAvailable ?? true,
           })),
         },
@@ -140,7 +137,7 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
         },
       },
       include: {
-        products: true,
+        products: { include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         owner: { select: { id: true, name: true } },
@@ -170,7 +167,7 @@ router.post('/machines', requireAuth, requireOwnerOrAdmin, async (req, res) => {
     const updatedMachine = await prisma.vendingMachine.findUnique({
       where: { id: machine.id },
       include: {
-        products: true,
+        products: { include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         owner: { select: { id: true, name: true } },
@@ -200,8 +197,8 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
 
     // Handle products update - delete existing and create new ones
     if (products.length > 0) {
-      // Delete existing products
-      await prisma.product.deleteMany({
+      // Delete existing machine products
+      await prisma.machineProduct.deleteMany({
         where: { vendingMachineId: id }
       });
     }
@@ -250,18 +247,15 @@ router.put('/machines/:id', requireAuth, requireOwnerOrAdmin, async (req, res) =
         ...(products.length > 0 && {
           products: {
             create: products.map((product: any) => ({
-              name: product.name,
-              description: product.description,
-              photo: product.photo,
+              productId: product.productId,
               price: product.price,
-              slotCode: product.slotCode,
               isAvailable: product.isAvailable ?? true,
             })),
           },
         }),
       },
       include: {
-        products: true,
+        products: { include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         owner: { select: { id: true, name: true } },
@@ -293,7 +287,7 @@ router.get('/my-machines', requireAuth, async (req, res) => {
     const machines = await prisma.vendingMachine.findMany({
       where: { ownerId: req.user.id },
       include: {
-        products: true,
+        products: { include: { product: true } },
         paymentMethods: { include: { paymentMethodType: true } },
         photos: true,
         reviews: { include: { user: { select: { id: true, name: true } } } },
@@ -303,6 +297,87 @@ router.get('/my-machines', requireAuth, async (req, res) => {
     res.json(machines);
   } catch (error) {
     console.error('Get user machines error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Product search endpoint
+router.get('/products', async (req, res) => {
+  try {
+    const { search } = req.query;
+    
+    let products;
+    
+    if (search && typeof search === 'string') {
+      // Search products by name (SQLite doesn't support case-insensitive search)
+      products = await prisma.product.findMany({
+        where: {
+          name: {
+            contains: search
+          }
+        },
+        orderBy: {
+          name: 'asc'
+        },
+        take: 10 // Limit results
+      });
+    } else {
+      // Get all products
+      products = await prisma.product.findMany({
+        orderBy: {
+          name: 'asc'
+        }
+      });
+    }
+
+    console.log(`✅ Found ${products.length} products`);
+    res.json(products);
+  } catch (error) {
+    console.error('Product search error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create product endpoint
+router.post('/products', async (req, res) => {
+  try {
+    const { name, description, photo, price } = req.body;
+    
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Product name is required' });
+    }
+
+    // Check if product already exists
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        name: {
+          equals: name.trim()
+        }
+      }
+    });
+
+    if (existingProduct) {
+      return res.status(409).json({ 
+        error: 'Product already exists',
+        product: existingProduct
+      });
+    }
+
+    // Create new product
+    const product = await prisma.product.create({
+      data: {
+        name: name.trim(),
+        description: description?.trim() || null,
+        photo: photo || null,
+        price: price ? parseFloat(price) : null,
+        isAvailable: true
+      }
+    });
+
+    console.log(`✅ Created product: ${product.name}`);
+    res.status(201).json(product);
+  } catch (error) {
+    console.error('Create product error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
