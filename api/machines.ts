@@ -147,13 +147,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               where: { vendingMachineId: id }
             });
             
-            if (updateData.paymentMethods.length > 0) {
+            // Get all payment method types
+            const allPaymentMethodTypes = await prisma.paymentMethodType.findMany();
+            
+            // Create payment methods mapping
+            const paymentMethodsToCreate = allPaymentMethodTypes.map(pmType => {
+              const isAvailable = updateData.paymentMethods.includes(pmType.type) || false;
+              return {
+                vendingMachineId: id,
+                paymentMethodTypeId: pmType.id,
+                available: isAvailable,
+              };
+            });
+            
+            if (paymentMethodsToCreate.length > 0) {
               await prisma.machinePaymentMethod.createMany({
-                data: updateData.paymentMethods.map((pm: any) => ({
-                  vendingMachineId: id,
-                  paymentMethodTypeId: pm.paymentMethodTypeId,
-                  available: pm.available,
-                })),
+                data: paymentMethodsToCreate,
               });
             }
           }
@@ -322,6 +331,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(500).json({ error: 'No admin user found' });
         }
         
+        // Get all payment method types
+        const allPaymentMethodTypes = await prisma.paymentMethodType.findMany();
+        
+        // Create payment methods mapping
+        const paymentMethodsToCreate = allPaymentMethodTypes.map(pmType => {
+          const isAvailable = machineData.paymentMethods?.includes(pmType.type) || false;
+          return {
+            paymentMethodTypeId: pmType.id,
+            available: isAvailable,
+          };
+        });
+        
         const newMachine = await prisma.vendingMachine.create({
           data: {
             name: machineData.name,
@@ -339,10 +360,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               })) || [],
             },
             paymentMethods: {
-              create: machineData.paymentMethods?.map((pm: any) => ({
-                paymentMethodTypeId: pm.paymentMethodTypeId,
-                available: pm.available,
-              })) || [],
+              create: paymentMethodsToCreate,
             },
           },
           include: {
