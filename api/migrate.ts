@@ -1,41 +1,40 @@
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function migrateDatabase() {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
-    console.log('🔄 Starting database migration...');
+    console.log('🔄 Running database migration...');
     
-    // Run migrations
-    const { execSync } = require('child_process');
+    // Add category column to Product table if it doesn't exist
+    await prisma.$executeRaw`
+      ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "category" TEXT;
+    `;
     
-    console.log('📦 Running Prisma migrations...');
-    execSync('npx prisma migrate deploy', { 
-      stdio: 'inherit',
-      cwd: process.cwd()
+    console.log('✅ Migration completed successfully!');
+    
+    // Test the migration by fetching products
+    const products = await prisma.product.findMany({
+      take: 5
     });
     
-    console.log('✅ Database migration completed successfully!');
+    console.log(`✅ Found ${products.length} products in database`);
+    
+    return res.status(200).json({ 
+      message: 'Migration completed successfully',
+      productsCount: products.length
+    });
     
   } catch (error) {
-    console.error('❌ Migration failed:', error);
-    throw error;
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-// Run migration if this file is executed directly
-if (require.main === module) {
-  migrateDatabase()
-    .then(() => {
-      console.log('🎉 Migration script completed!');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('💥 Migration script failed:', error);
-      process.exit(1);
+    console.error('❌ Migration error:', error);
+    return res.status(500).json({
+      error: 'Migration failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
-}
-
-export default migrateDatabase; 
+  }
+} 
