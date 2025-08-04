@@ -26,7 +26,7 @@ const LoadingSpinner: React.FC = () => {
         {/* Machine Header */}
         <div style={{
           height: '40px',
-          background: 'linear-gradient(90deg, #ff6b6b, #ff8e8e)',
+          background: 'linear-gradient(90deg, #4ecdc4, #44a08d)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -35,7 +35,7 @@ const LoadingSpinner: React.FC = () => {
           fontWeight: 'bold',
           textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
         }}>
-          VENDING MACHINE
+          {/* Removed "VENDING MACHINE" text */}
         </div>
 
         {/* Glass Panel */}
@@ -72,8 +72,7 @@ const LoadingSpinner: React.FC = () => {
               animation: `slotGlow ${1.5 + i * 0.2}s ease-in-out infinite alternate`
             }}
           >
-            <span style={{ marginRight: '8px' }}>📦</span>
-            Product {i + 1}
+            {/* Removed "📦 Product X" text */}
           </div>
         ))}
 
@@ -117,7 +116,7 @@ const LoadingSpinner: React.FC = () => {
               style={{
                 width: '25px',
                 height: '25px',
-                background: 'linear-gradient(145deg, #ff6b6b, #ff8e8e)',
+                background: 'linear-gradient(145deg, #4ecdc4, #44a08d)',
                 borderRadius: '50%',
                 border: '2px solid #fff',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
@@ -162,27 +161,18 @@ const LoadingSpinner: React.FC = () => {
         </div>
       </div>
 
-      {/* Loading Text */}
-      <div style={{
-        fontSize: '18px',
-        fontWeight: 'bold',
-        color: 'var(--text-color)',
-        textAlign: 'center',
-        animation: 'textPulse 1.5s ease-in-out infinite alternate'
-      }}>
-        Loading your vending experience...
-      </div>
+      {/* Removed "Loading your vending experience..." text */}
 
       {/* CSS Animations */}
       <style>{`
         @keyframes vendingMachineGlow {
           0% { box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-          100% { box-shadow: 0 20px 40px rgba(255,107,107,0.3); }
+          100% { box-shadow: 0 20px 40px rgba(78,205,196,0.3); }
         }
 
         @keyframes slotGlow {
           0% { background: linear-gradient(90deg, #f0f0f0, #e0e0e0); }
-          100% { background: linear-gradient(90deg, #fff5f5, #ffe0e0); }
+          100% { background: linear-gradient(90deg, #f5fffe, #e0f5f3); }
         }
 
         @keyframes coinSlotGlow {
@@ -205,11 +195,6 @@ const LoadingSpinner: React.FC = () => {
           0% { transform: translateY(100px) rotate(0deg); opacity: 0; }
           50% { transform: translateY(0px) rotate(-180deg); opacity: 1; }
           100% { transform: translateY(-100px) rotate(-360deg); opacity: 0; }
-        }
-
-        @keyframes textPulse {
-          0% { opacity: 0.6; transform: scale(1); }
-          100% { opacity: 1; transform: scale(1.05); }
         }
       `}</style>
     </div>
