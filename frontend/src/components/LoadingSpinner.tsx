@@ -16,10 +16,10 @@ const LoadingSpinner: React.FC = () => {
         position: 'relative',
         width: '200px',
         height: '350px',
-        background: 'linear-gradient(145deg, #2d2d2d, #1a1a1a)',
+        background: 'var(--vending-machine-bg, linear-gradient(145deg, #2d2d2d, #1a1a1a))',
         borderRadius: '20px',
         boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-        border: '3px solid #404040',
+        border: '3px solid var(--vending-machine-border, #404040)',
         overflow: 'hidden',
         animation: 'vendingMachineGlow 2s ease-in-out infinite alternate'
       }}>
@@ -68,8 +68,8 @@ const LoadingSpinner: React.FC = () => {
             <div
               key={i}
               style={{
-                background: 'linear-gradient(145deg, #3a3a3a, #2a2a2a)',
-                border: '2px solid #505050',
+                background: 'var(--product-grid-bg, linear-gradient(145deg, #3a3a3a, #2a2a2a))',
+                border: '2px solid var(--product-grid-border, #505050)',
                 borderRadius: '6px',
                 display: 'flex',
                 alignItems: 'center',
@@ -176,12 +176,12 @@ const LoadingSpinner: React.FC = () => {
 
         @keyframes productGlow {
           0% { 
-            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
-            border-color: #505050;
+            background: var(--product-grid-bg, linear-gradient(145deg, #3a3a3a, #2a2a2a));
+            border-color: var(--product-grid-border, #505050);
             transform: scale(1);
           }
           100% { 
-            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+            background: var(--product-grid-bg-hover, linear-gradient(145deg, #4a4a4a, #3a3a3a));
             border-color: #00ffff;
             transform: scale(1.05);
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 10px rgba(0,255,255,0.3);

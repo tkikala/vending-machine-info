@@ -13,6 +13,13 @@
   --payment-available: #4ade80;
   --payment-unavailable: #f87171;
   --star: #fbbf24;
+  
+  /* Vending Machine Loading Screen - Light Mode */
+  --vending-machine-bg: linear-gradient(145deg, #e6e6e6, #ffffff);
+  --vending-machine-border: #d0d0d0;
+  --product-grid-bg: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  --product-grid-border: #dee2e6;
+  --product-grid-bg-hover: linear-gradient(145deg, #f3f4f6, #e5e7eb);
 }
 
 html[data-theme='dark'] {
@@ -28,6 +35,13 @@ html[data-theme='dark'] {
   --payment-available: #4ade80;
   --payment-unavailable: #f87171;
   --star: #fbbf24;
+  
+  /* Vending Machine Loading Screen - Dark Mode */
+  --vending-machine-bg: linear-gradient(145deg, #2d2d2d, #1a1a1a);
+  --vending-machine-border: #404040;
+  --product-grid-bg: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+  --product-grid-border: #505050;
+  --product-grid-bg-hover: linear-gradient(145deg, #4a4a4a, #3a3a3a);
 }
 
 html[data-theme='light'] {

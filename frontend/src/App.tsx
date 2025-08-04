@@ -16,11 +16,22 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<MachineList />} />
+          <Route path="/machine/:id" element={<MachinePage />} />
           <Route path="/machines/:id" element={<MachinePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/machines/new" element={
+            <ProtectedRoute>
+              <AddMachineForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/machines/:id/edit" element={
+            <ProtectedRoute>
+              <EditMachineForm />
             </ProtectedRoute>
           } />
           <Route path="/add-machine" element={
