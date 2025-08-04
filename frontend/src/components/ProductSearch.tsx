@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { searchProducts, createProduct } from '../api';
 import type { Product } from '../types';
+import ProductPhotoUpload from './ProductPhotoUpload';
 
 interface ProductSearchProps {
   onProductSelect: (product: Product, isAvailable: boolean, price?: number) => void;
@@ -22,6 +23,10 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
     price: '',
     photo: ''
   });
+
+  const handlePhotoUploaded = (photoUrl: string) => {
+    setNewProduct(prev => ({ ...prev, photo: photoUrl }));
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -245,19 +250,9 @@ function ProductSearch({ onProductSelect, disabled = false }: ProductSearchProps
                   }}
                 />
                 
-                <input
-                  type="url"
-                  value={newProduct.photo}
-                  onChange={(e) => setNewProduct(prev => ({ ...prev, photo: e.target.value }))}
-                  placeholder="Photo URL (optional)"
+                <ProductPhotoUpload
+                  onPhotoUploaded={handlePhotoUploaded}
                   disabled={loading}
-                  style={{
-                    padding: '0.5rem',
-                    border: '1px solid var(--text-muted)',
-                    borderRadius: '4px',
-                    backgroundColor: 'var(--bg)',
-                    color: 'var(--text-main)'
-                  }}
                 />
                 
                 <div style={{ display: 'flex', gap: '0.5rem' }}>

@@ -218,23 +218,21 @@ export async function fetchMyMachines() {
   return res.json();
 } 
 
-// File Upload API
+// File Upload API - Direct upload to bypass Base64 size limitations
 export async function uploadSingleFile(file: File): Promise<any> {
   try {
-    console.log('Uploading single file:', file.name);
+    console.log('Uploading single file directly:', file.name, 'Size:', file.size);
     
-    // Convert file to base64
-    const base64 = await fileToBase64(file);
+    // Create FormData for direct file upload
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
     
     const res = await fetch(`${API_BASE}/upload/single`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({
-        file: base64,
-        filename: file.name,
-        contentType: file.type
-      })
+      body: formData // Send as FormData instead of JSON
     });
 
     console.log('Upload response status:', res.status, res.statusText);
@@ -255,7 +253,7 @@ export async function uploadSingleFile(file: File): Promise<any> {
 
 export async function uploadGalleryFiles(machineId: string, files: File[], captions?: string[]): Promise<any> {
   try {
-    console.log('Uploading gallery files for machine:', machineId, files.length, 'files');
+    console.log('Uploading gallery files directly for machine:', machineId, files.length, 'files');
     
     // Validate files before upload
     if (files.length === 0) {
@@ -266,13 +264,13 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
       throw new Error('Maximum 10 files allowed per upload');
     }
     
-    // Check file sizes
-    const oversizedFiles = files.filter(file => file.size > 4 * 1024 * 1024);
+    // Check file sizes - now we can handle much larger files
+    const oversizedFiles = files.filter(file => file.size > 50 * 1024 * 1024); // 50MB limit
     if (oversizedFiles.length > 0) {
-      throw new Error(`Files too large: ${oversizedFiles.map(f => f.name).join(', ')}. Maximum 4MB per file.`);
+      throw new Error(`Files too large: ${oversizedFiles.map(f => f.name).join(', ')}. Maximum 50MB per file.`);
     }
     
-    // Upload files one by one to avoid payload size limits
+    // Upload files one by one using FormData
     const uploadedFiles = [];
     const errors = [];
     
@@ -281,23 +279,19 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
       const caption = captions?.[i] || '';
       
       try {
-        console.log(`Uploading file ${i + 1}/${files.length}: ${file.name}`);
+        console.log(`Uploading file ${i + 1}/${files.length}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
         
-        // Convert single file to base64
-        const fileData = {
-          file: await fileToBase64(file),
-          filename: file.name,
-          contentType: file.type
-        };
+        // Create FormData for direct file upload
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('filename', file.name);
+        formData.append('contentType', file.type);
+        formData.append('caption', caption);
 
         const res = await fetch(`${API_BASE}/upload/gallery/${machineId}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({
-            files: [fileData],
-            captions: [caption]
-          })
+          body: formData
         });
 
         if (!res.ok) {
@@ -332,19 +326,37 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
   }
 }
 
-// Helper function to convert file to base64
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
-      const base64 = result.split(',')[1];
-      resolve(base64);
-    };
-    reader.onerror = error => reject(error);
-  });
+// New function for uploading product photos
+export async function uploadProductPhoto(file: File): Promise<any> {
+  try {
+    console.log('Uploading product photo directly:', file.name, 'Size:', file.size);
+    
+    // Create FormData for direct file upload
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
+    
+    const res = await fetch(`${API_BASE}/upload/product-photo`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+
+    console.log('Product photo upload response status:', res.status, res.statusText);
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Product photo upload failed');
+    }
+
+    const data = await res.json();
+    console.log('Product photo uploaded successfully:', data.file.filename);
+    return data;
+  } catch (error) {
+    console.error('uploadProductPhoto error:', error);
+    throw error;
+  }
 }
 
 export async function deleteGalleryItem(photoId: number): Promise<any> {

@@ -1,15 +1,15 @@
 import { useState, useRef } from 'react';
-import { uploadSingleFile } from '../api';
+import { uploadProductPhoto } from '../api';
 
 interface ProductPhotoUploadProps {
-  currentPhoto?: string;
-  onPhotoChange: (photoUrl: string | undefined, file?: File) => void;
+  onPhotoUploaded: (photoUrl: string) => void;
+  currentPhotoUrl?: string;
   disabled?: boolean;
 }
 
-function ProductPhotoUpload({ currentPhoto, onPhotoChange, disabled = false }: ProductPhotoUploadProps) {
+function ProductPhotoUpload({ onPhotoUploaded, currentPhotoUrl, disabled = false }: ProductPhotoUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,137 +22,114 @@ function ProductPhotoUpload({ currentPhoto, onPhotoChange, disabled = false }: P
       return;
     }
 
-    // Validate file size (4MB limit)
-    if (file.size > 4 * 1024 * 1024) {
-      setError('File size must be less than 4MB');
+    // Validate file size (50MB limit)
+    if (file.size > 50 * 1024 * 1024) {
+      setError('File size must be less than 50MB');
       return;
     }
 
-    setError('');
     setUploading(true);
+    setError(null);
 
     try {
-      const result = await uploadSingleFile(file);
-      onPhotoChange(result.file.url, file);
+      console.log('Uploading product photo:', file.name, 'Size:', file.size);
+      const result = await uploadProductPhoto(file);
       console.log('Product photo uploaded successfully:', result.file.url);
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload photo');
-      console.error('Product photo upload error:', err);
+      onPhotoUploaded(result.file.url);
+    } catch (uploadError) {
+      console.error('Product photo upload failed:', uploadError);
+      setError(uploadError instanceof Error ? uploadError.message : 'Upload failed');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleRemovePhoto = () => {
-    onPhotoChange(undefined);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleClick = () => {
+    if (!disabled && fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
   return (
-    <div style={{ marginBottom: '1rem' }}>
-      <label>Product Photo</label>
+    <div className="product-photo-upload">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+        disabled={disabled || uploading}
+      />
       
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '0.5rem', 
-        alignItems: 'center' 
-      }}>
-        {currentPhoto ? (
-          <div style={{
-            position: 'relative',
-            width: '120px',
-            height: '120px',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            border: '2px solid var(--border-color)'
-          }}>
+      <div 
+        className="upload-area"
+        onClick={handleClick}
+        style={{
+          border: '2px dashed var(--text-muted)',
+          borderRadius: '8px',
+          padding: '1rem',
+          textAlign: 'center',
+          cursor: disabled || uploading ? 'not-allowed' : 'pointer',
+          opacity: disabled || uploading ? 0.6 : 1,
+          transition: 'all 0.2s ease',
+          background: 'var(--card-bg)',
+          minHeight: '120px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem'
+        }}
+      >
+        {currentPhotoUrl ? (
+          <div style={{ width: '100%', maxWidth: '200px' }}>
             <img 
-              src={currentPhoto} 
+              src={currentPhotoUrl} 
               alt="Product" 
               style={{
                 width: '100%',
-                height: '100%',
+                height: 'auto',
+                borderRadius: '6px',
+                maxHeight: '100px',
                 objectFit: 'cover'
               }}
             />
-            <button
-              type="button"
-              onClick={handleRemovePhoto}
-              disabled={disabled || uploading}
-              style={{
-                position: 'absolute',
-                top: '4px',
-                right: '4px',
-                background: 'rgba(255, 0, 0, 0.8)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50%',
-                width: '24px',
-                height: '24px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              ✕
-            </button>
+            <p style={{ fontSize: '0.8rem', margin: '0.5rem 0 0 0', color: 'var(--text-muted)' }}>
+              Click to change photo
+            </p>
           </div>
         ) : (
-          <div style={{
-            width: '120px',
-            height: '120px',
-            border: '2px dashed var(--border-color)',
-            borderRadius: '8px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'var(--bg-secondary)',
-            cursor: 'pointer'
-          }}>
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📷</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-              Click to upload photo
+          <>
+            <div style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>📷</div>
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
+              {uploading ? 'Uploading...' : 'Click to upload product photo'}
             </div>
-          </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Max 50MB • JPG, PNG, GIF
+            </div>
+          </>
         )}
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          disabled={disabled || uploading}
-          style={{ display: 'none' }}
-        />
-        
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={disabled || uploading}
-          style={{
-            background: 'var(--primary-color)',
-            color: 'white',
-            border: 'none',
-            padding: '0.5rem 1rem',
-            borderRadius: '4px',
-            cursor: disabled || uploading ? 'not-allowed' : 'pointer',
-            fontSize: '0.9rem',
-            opacity: disabled || uploading ? 0.5 : 1
-          }}
-        >
-          {uploading ? 'Uploading...' : currentPhoto ? 'Change Photo' : 'Upload Photo'}
-        </button>
       </div>
-      
+
       {error && (
-        <div style={{ color: '#e74c3c', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+        <div style={{ 
+          color: '#f44336', 
+          fontSize: '0.8rem', 
+          marginTop: '0.5rem',
+          textAlign: 'center'
+        }}>
           {error}
+        </div>
+      )}
+
+      {uploading && (
+        <div style={{ 
+          color: 'var(--text-muted)', 
+          fontSize: '0.8rem', 
+          marginTop: '0.5rem',
+          textAlign: 'center'
+        }}>
+          Uploading product photo...
         </div>
       )}
     </div>

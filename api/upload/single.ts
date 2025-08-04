@@ -1,5 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { put } from '@vercel/blob';
+import formidable from 'formidable';
+import { promises as fs } from 'fs';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('🔍 Single file upload endpoint called');
@@ -15,87 +17,74 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method === 'POST') {
       console.log('Uploading single file...');
-      console.log('Request body keys:', Object.keys(req.body || {}));
       console.log('Content-Type:', req.headers['content-type']);
       console.log('Content-Length:', req.headers['content-length']);
       
-      // Check if we have file data
-      if (!req.body) {
-        console.log('❌ No request body');
-        return res.status(400).json({ error: 'No request body provided' });
-      }
-
-      const { file, filename, contentType } = req.body;
-      
-      console.log('File data received:', {
-        hasFile: !!file,
-        fileLength: file ? file.length : 0,
-        filename,
-        contentType
+      // Parse FormData
+      const form = formidable({
+        maxFileSize: 50 * 1024 * 1024, // 50MB limit
+        keepExtensions: true,
+        uploadDir: '/tmp'
       });
+
+      const [fields, files] = await form.parse(req);
       
-      if (!file || !filename) {
-        console.log('❌ Missing file data or filename');
-        return res.status(400).json({ 
-          error: 'File data and filename are required',
-          received: {
-            hasFile: !!file,
-            hasFilename: !!filename,
-            bodyKeys: Object.keys(req.body)
-          }
-        });
+      console.log('Form fields:', fields);
+      console.log('Form files:', Object.keys(files));
+      
+      const file = files.file?.[0];
+      const filename = fields.filename?.[0];
+      const contentType = fields.contentType?.[0];
+      
+      if (!file) {
+        console.log('❌ No file uploaded');
+        return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      // Validate that file is a valid base64 string
-      if (typeof file !== 'string' || !file.match(/^[A-Za-z0-9+/]*={0,2}$/)) {
-        console.log('❌ Invalid base64 data');
-        return res.status(400).json({ 
-          error: 'Invalid file data format. Expected base64 string.',
-          receivedType: typeof file
-        });
-      }
-
-      // Validate file size (max 3MB to account for Vercel's 4.5MB payload limit)
-      const fileSizeInBytes = Math.ceil((file.length * 3) / 4);
-      const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
-      
-      if (fileSizeInBytes > maxSizeInBytes) {
-        console.log('❌ File too large:', fileSizeInBytes, 'bytes');
-        return res.status(400).json({ 
-          error: 'File too large. Maximum size is 3MB',
-          receivedSize: fileSizeInBytes,
-          maxSize: maxSizeInBytes
-        });
-      }
+      console.log('File received:', {
+        originalName: file.originalFilename,
+        size: file.size,
+        mimetype: file.mimetype,
+        tempPath: file.filepath
+      });
 
       try {
-        // Convert base64 to buffer
-        const buffer = Buffer.from(file, 'base64');
+        // Read the uploaded file
+        const buffer = await fs.readFile(file.filepath);
         
         // Generate unique filename
         const timestamp = Date.now();
-        const extension = filename.split('.').pop()?.toLowerCase() || 'jpg';
+        const extension = file.originalFilename?.split('.').pop()?.toLowerCase() || 'jpg';
         const uniqueFilename = `logo_${timestamp}.${extension}`;
 
         // Upload to Vercel Blob Storage
         const blob = await put(uniqueFilename, buffer, {
           access: 'public',
-          contentType: contentType || 'image/jpeg'
+          contentType: contentType || file.mimetype || 'image/jpeg'
         });
+
+        // Clean up temp file
+        await fs.unlink(file.filepath);
 
         console.log(`✅ File uploaded to Vercel Blob: ${uniqueFilename} (${buffer.length} bytes)`);
         return res.status(200).json({
           message: 'File uploaded successfully',
           file: {
             filename: uniqueFilename,
-            originalName: filename,
+            originalName: file.originalFilename,
             url: blob.url,
             size: buffer.length,
-            contentType: contentType || 'image/jpeg'
+            contentType: contentType || file.mimetype || 'image/jpeg'
           }
         });
       } catch (uploadError) {
         console.error('❌ Upload error:', uploadError);
+        // Clean up temp file on error
+        try {
+          await fs.unlink(file.filepath);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup temp file:', cleanupError);
+        }
         return res.status(500).json({
           error: 'Failed to upload file to Vercel Blob Storage',
           details: uploadError instanceof Error ? uploadError.message : 'Unknown error'
