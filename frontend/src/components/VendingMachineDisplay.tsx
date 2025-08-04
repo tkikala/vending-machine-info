@@ -38,44 +38,49 @@ function PaymentIcon({ paymentMethod, isAvailable }: { paymentMethod: any; isAva
     <div style={{ 
       display: 'flex', 
       alignItems: 'center', 
-      gap: '8px', // Restore consistent gap between icon and text
+      gap: '6px',
       opacity: isAvailable ? 1 : 0.6,
-      minHeight: '24px', // Ensure consistent height for alignment
-      width: '70%' // Take full width to ensure consistent alignment
+      minHeight: '24px',
+      padding: '4px 8px',
+      borderRadius: '6px',
+      background: 'rgba(255,255,255,0.05)',
+      border: '1px solid rgba(255,255,255,0.1)',
+      transition: 'all 0.2s ease'
     }}>
       <div style={{ 
-        width: '20px', 
-        height: '20px', 
+        width: '18px', 
+        height: '18px', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        flexShrink: 0, // Prevent icon from shrinking
-        fontSize: isEmoji ? '16px' : 'auto', // Smaller font size for emojis
-        lineHeight: isEmoji ? '1' : 'auto', // Ensure emoji is centered
-        textAlign: 'center' // Center the emoji text
+        flexShrink: 0,
+        fontSize: isEmoji ? '14px' : 'auto',
+        lineHeight: isEmoji ? '1' : 'auto',
+        textAlign: 'center'
       }}>
         {icon}
       </div>
       <span style={{ 
-        fontSize: '14px',
+        fontSize: '13px',
         lineHeight: '1',
-        flexShrink: 0, // Prevent text from shrinking
+        flexShrink: 0,
         display: 'flex',
-        alignItems: 'center', // Center text vertically
-        flex: '1', // Take remaining space
-        minWidth: 0 // Allow text to shrink if needed
+        alignItems: 'center',
+        flex: '1',
+        minWidth: 0,
+        fontWeight: '500'
       }}>
         {paymentMethod.name}
       </span>
       <div 
         className={`payment-status ${isAvailable ? 'available' : 'unavailable'}`}
         style={{
-          width: '10px',
-          height: '10px',
+          width: '8px',
+          height: '8px',
           borderRadius: '50%',
           backgroundColor: isAvailable ? '#4CAF50' : '#f44336',
-          flexShrink: 0, // Prevent status dot from shrinking
-          marginLeft: '2px' // Small margin to bring dot closer to text
+          flexShrink: 0,
+          marginLeft: '4px'
         }}
       />
     </div>
