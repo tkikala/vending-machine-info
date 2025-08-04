@@ -40,7 +40,7 @@ const VendingMachineLogo: React.FC<VendingMachineLogoProps> = ({
         fontWeight: 'bold',
         textShadow: `${1 * scale}px ${1 * scale}px ${2 * scale}px rgba(0,0,0,0.3)`
       }}>
-        VC
+        Vending Community
       </div>
 
       {/* Glass Panel */}
@@ -56,7 +56,7 @@ const VendingMachineLogo: React.FC<VendingMachineLogoProps> = ({
         backdropFilter: 'blur(5px)'
       }} />
 
-      {/* Product Grid - Simplified 2x2 for logo */}
+      {/* Product Grid - 4x4 like loading screen */}
       <div style={{
         position: 'absolute',
         top: `${60 * scale}px`,
@@ -64,12 +64,12 @@ const VendingMachineLogo: React.FC<VendingMachineLogoProps> = ({
         right: `${20 * scale}px`,
         height: `${220 * scale}px`,
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gridTemplateRows: '1fr 1fr',
+        gridTemplateColumns: '1fr 1fr 1fr 1fr',
+        gridTemplateRows: '1fr 1fr 1fr 1fr',
         gap: `${5 * scale}px`,
         padding: `${5 * scale}px`
       }}>
-        {[...Array(4)].map((_, i) => (
+        {[...Array(16)].map((_, i) => (
           <div
             key={i}
             style={{
