@@ -8,16 +8,17 @@ export type User = {
   updatedAt: string;
 };
 
-export type Product = {
+export interface Product {
   id: string;
   name: string;
   description?: string;
   photo?: string;
-  price?: number; // Default price
+  price?: number;
+  category?: string;
   isAvailable: boolean;
   createdAt: string;
   updatedAt: string;
-};
+}
 
 export type MachineProduct = {
   id: string;

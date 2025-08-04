@@ -1,39 +1,162 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from './prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
   try {
+    const { id } = req.query;
+
+    // Handle individual product operations (GET, PUT, DELETE)
+    if (id && typeof id === 'string') {
+      if (req.method === 'GET') {
+        console.log('Fetching product:', id);
+        
+        try {
+          const product = await prisma.product.findUnique({
+            where: { id }
+          });
+
+          if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+          }
+
+          console.log('✅ Found product:', product.name);
+          return res.status(200).json(product);
+          
+        } catch (dbError: any) {
+          console.error('❌ Database error:', dbError);
+          return res.status(500).json({
+            error: 'Database connection failed',
+            details: dbError.message
+          });
+        }
+      }
+
+      if (req.method === 'PUT') {
+        console.log('Updating product:', id);
+        
+        try {
+          const { name, description, photo, price, category } = req.body;
+          
+          if (!name || !name.trim()) {
+            return res.status(400).json({ error: 'Product name is required' });
+          }
+
+          // Check if product exists
+          const existingProduct = await prisma.product.findUnique({
+            where: { id }
+          });
+
+          if (!existingProduct) {
+            return res.status(404).json({ error: 'Product not found' });
+          }
+
+          // Check if name is already taken by another product
+          const nameConflict = await prisma.product.findFirst({
+            where: {
+              name: {
+                equals: name.trim()
+              },
+              id: {
+                not: id
+              }
+            }
+          });
+
+          if (nameConflict) {
+            return res.status(409).json({ error: 'Product name already exists' });
+          }
+
+          // Update product
+          const product = await prisma.product.update({
+            where: { id },
+            data: {
+              name: name.trim(),
+              description: description?.trim() || null,
+              photo: photo || null,
+              price: price ? parseFloat(price) : null,
+              category: category?.trim() || null
+            }
+          });
+
+          console.log('✅ Updated product:', product.name);
+          return res.status(200).json(product);
+          
+        } catch (dbError: any) {
+          console.error('❌ Database error during update:', dbError);
+          return res.status(500).json({
+            error: 'Database connection failed',
+            details: dbError.message
+          });
+        }
+      }
+
+      if (req.method === 'DELETE') {
+        console.log('Deleting product:', id);
+        
+        try {
+          // Check if product exists
+          const existingProduct = await prisma.product.findUnique({
+            where: { id }
+          });
+
+          if (!existingProduct) {
+            return res.status(404).json({ error: 'Product not found' });
+          }
+
+          // Check if product is used in any machines
+          const machineProducts = await prisma.machineProduct.findMany({
+            where: { productId: id }
+          });
+
+          if (machineProducts.length > 0) {
+            return res.status(400).json({ 
+              error: 'Cannot delete product that is used in vending machines',
+              machineCount: machineProducts.length
+            });
+          }
+
+          // Delete product
+          await prisma.product.delete({
+            where: { id }
+          });
+
+          console.log('✅ Deleted product:', existingProduct.name);
+          return res.status(200).json({ message: 'Product deleted successfully' });
+          
+        } catch (dbError: any) {
+          console.error('❌ Database error during deletion:', dbError);
+          return res.status(500).json({
+            error: 'Database connection failed',
+            details: dbError.message
+          });
+        }
+      }
+    }
+
+    // Handle list operations (GET) and creation (POST)
     if (req.method === 'GET') {
-      const { search } = req.query;
+      console.log('Fetching all products...');
       
       try {
+        const { search } = req.query;
+        
         let products;
         
         if (search && typeof search === 'string') {
-          // Search products by name
           products = await prisma.product.findMany({
             where: {
               name: {
-                contains: search,
-                mode: 'insensitive'
+                contains: search
               }
             },
             orderBy: {
               name: 'asc'
             },
-            take: 10 // Limit results
+            take: 10
           });
         } else {
-          // Get all products
           products = await prisma.product.findMany({
             orderBy: {
               name: 'asc'
@@ -57,7 +180,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Creating new product...');
       
       try {
-        const { name, description, photo, price } = req.body;
+        const { name, description, photo, price, category } = req.body;
         
         if (!name || !name.trim()) {
           return res.status(400).json({ error: 'Product name is required' });
@@ -67,8 +190,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const existingProduct = await prisma.product.findFirst({
           where: {
             name: {
-              equals: name.trim(),
-              mode: 'insensitive'
+              equals: name.trim()
             }
           }
         });
@@ -87,17 +209,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             description: description?.trim() || null,
             photo: photo || null,
             price: price ? parseFloat(price) : null,
+            category: category?.trim() || null,
             isAvailable: true
           }
         });
 
-        console.log(`✅ Created product: ${product.name}`);
+        console.log('✅ Created product:', product.name);
         return res.status(201).json(product);
         
       } catch (dbError: any) {
-        console.error('❌ Database error:', dbError);
+        console.error('❌ Database error during creation:', dbError);
         return res.status(500).json({
-          error: 'Failed to create product',
+          error: 'Database connection failed',
           details: dbError.message
         });
       }

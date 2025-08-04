@@ -359,7 +359,7 @@ router.get('/products', async (req, res) => {
 // Create product endpoint
 router.post('/products', async (req, res) => {
   try {
-    const { name, description, photo, price } = req.body;
+    const { name, description, photo, price, category } = req.body;
     
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Product name is required' });
@@ -388,6 +388,7 @@ router.post('/products', async (req, res) => {
         description: description?.trim() || null,
         photo: photo || null,
         price: price ? parseFloat(price) : null,
+        category: category?.trim() || null,
         isAvailable: true
       }
     });
@@ -396,6 +397,100 @@ router.post('/products', async (req, res) => {
     res.status(201).json(product);
   } catch (error) {
     console.error('Create product error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update product endpoint
+router.put('/products/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { name, description, photo, price, category } = req.body;
+    
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Product name is required' });
+    }
+
+    // Check if product exists
+    const existingProduct = await prisma.product.findUnique({
+      where: { id }
+    });
+
+    if (!existingProduct) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Check if name is already taken by another product
+    const nameConflict = await prisma.product.findFirst({
+      where: {
+        name: {
+          equals: name.trim()
+        },
+        id: {
+          not: id
+        }
+      }
+    });
+
+    if (nameConflict) {
+      return res.status(409).json({ error: 'Product name already exists' });
+    }
+
+    // Update product
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        description: description?.trim() || null,
+        photo: photo || null,
+        price: price ? parseFloat(price) : null,
+        category: category?.trim() || null
+      }
+    });
+
+    console.log(`✅ Updated product: ${product.name}`);
+    res.json(product);
+  } catch (error) {
+    console.error('Update product error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete product endpoint
+router.delete('/products/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Check if product exists
+    const existingProduct = await prisma.product.findUnique({
+      where: { id }
+    });
+
+    if (!existingProduct) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Check if product is used in any machines
+    const machineProducts = await prisma.machineProduct.findMany({
+      where: { productId: id }
+    });
+
+    if (machineProducts.length > 0) {
+      return res.status(400).json({ 
+        error: 'Cannot delete product that is used in vending machines',
+        machineCount: machineProducts.length
+      });
+    }
+
+    // Delete product
+    await prisma.product.delete({
+      where: { id }
+    });
+
+    console.log(`✅ Deleted product: ${existingProduct.name}`);
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Delete product error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

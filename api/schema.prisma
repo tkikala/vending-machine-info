@@ -69,6 +69,7 @@ model Product {
   description String?
   photo       String?
   price       Float?           // Default price
+  category    String?          // Product category (e.g., Snacks, Cigarettes, Cold drinks, Hot drinks)
   isAvailable Boolean          @default(true)
   machines    MachineProduct[]
   createdAt   DateTime         @default(now())
