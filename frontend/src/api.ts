@@ -41,7 +41,7 @@ export async function fetchVendingMachines() {
 export async function fetchVendingMachine(id: string) {
   try {
     console.log('Fetching vending machine:', id);
-    const res = await fetch(`${API_BASE}/machines/${id}`, {
+    const res = await fetch(`${API_BASE}/machines?id=${id}`, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
@@ -63,7 +63,7 @@ export async function fetchVendingMachine(id: string) {
 export async function login(email: string, password: string) {
   try {
     console.log('Attempting login for:', email);
-    const res = await fetch(`${API_BASE}/auth/login`, {
+    const res = await fetch(`${API_BASE}/auth?action=login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -90,7 +90,7 @@ export async function login(email: string, password: string) {
 export async function logout() {
   try {
     console.log('Attempting logout');
-    const res = await fetch(`${API_BASE}/auth/logout`, {
+    const res = await fetch(`${API_BASE}/auth?action=logout`, {
       method: 'POST',
       credentials: 'include',
     });
@@ -114,25 +114,16 @@ export async function logout() {
 
 export async function getCurrentUser() {
   try {
-    console.log('Checking current user session');
-    const res = await fetch(`${API_BASE}/auth/me`, {
+    console.log('Getting current user');
+    const res = await fetch(`${API_BASE}/auth?action=me`, {
       credentials: 'include',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
     });
     
-    console.log('getCurrentUser response status:', res.status, res.statusText);
+    console.log('Get current user response status:', res.status, res.statusText);
     
     if (!res.ok) {
-      if (res.status === 401) {
-        console.log('No active session');
-        return null; // Not authenticated
-      }
       const error = await res.json();
-      console.error('getCurrentUser failed:', error);
+      console.error('Get current user failed:', error);
       throw new Error(error.error || 'Failed to get current user');
     }
     
@@ -147,16 +138,19 @@ export async function getCurrentUser() {
 
 // Admin API
 export async function fetchAllMachines() {
-  const res = await fetch(`${API_BASE}/admin/machines`, {
-    credentials: 'include',
-  });
-  
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || 'Failed to fetch machines');
+  try {
+    console.log('Fetching all machines for admin...');
+    const res = await fetch(`${API_BASE}/machines?admin=true`, {
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch all machines`);
+    const data = await res.json();
+    console.log('Fetched all machines:', data.length);
+    return data;
+  } catch (error) {
+    console.error('fetchAllMachines error:', error);
+    throw error;
   }
-  
-  return res.json();
 }
 
 export async function createVendingMachine(data: any) {
@@ -176,19 +170,22 @@ export async function createVendingMachine(data: any) {
 }
 
 export async function updateVendingMachine(id: string, data: any) {
-  const res = await fetch(`${API_BASE}/machines/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(data),
-  });
-  
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || 'Failed to update machine');
+  try {
+    console.log('Updating vending machine:', id);
+    const res = await fetch(`${API_BASE}/machines?id=${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update vending machine`);
+    const result = await res.json();
+    console.log('Updated machine:', result.name);
+    return result;
+  } catch (error) {
+    console.error('updateVendingMachine error:', error);
+    throw error;
   }
-  
-  return res.json();
 }
 
 export async function deleteVendingMachine(id: string) {
@@ -229,7 +226,7 @@ export async function uploadSingleFile(file: File): Promise<any> {
     formData.append('filename', file.name);
     formData.append('contentType', file.type);
     
-    const res = await fetch(`${API_BASE}/upload/single`, {
+    const res = await fetch(`${API_BASE}/upload?type=logo`, {
       method: 'POST',
       credentials: 'include',
       body: formData // Send as FormData instead of JSON
@@ -288,7 +285,7 @@ export async function uploadGalleryFiles(machineId: string, files: File[], capti
         formData.append('contentType', file.type);
         formData.append('caption', caption);
 
-        const res = await fetch(`${API_BASE}/upload/gallery/${machineId}`, {
+        const res = await fetch(`${API_BASE}/upload?type=gallery&machineId=${machineId}`, {
           method: 'POST',
           credentials: 'include',
           body: formData
@@ -337,7 +334,7 @@ export async function uploadProductPhoto(file: File): Promise<any> {
     formData.append('filename', file.name);
     formData.append('contentType', file.type);
     
-    const res = await fetch(`${API_BASE}/upload/product-photo`, {
+    const res = await fetch(`${API_BASE}/upload?type=product`, {
       method: 'POST',
       credentials: 'include',
       body: formData
