@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
+import VendingMachineLogo from './VendingMachineLogo';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,11 +33,16 @@ function LoginPage() {
   };
 
   return (
-    <div className="login-page">
+    <>
       <div className="header">
-        <h1>Vending Machine Admin</h1>
-        <p style={{ color: '#888', fontWeight: 500 }}>Sign in to manage vending machines</p>
-        <div className="dark-toggle">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <VendingMachineLogo size={48} />
+          <div>
+            <h1>Login</h1>
+            <p style={{ color: '#888', fontWeight: 500 }}>Access your vending machine dashboard</p>
+          </div>
+        </div>
+        <div className="header-right">
           <DarkModeToggle mode={mode} setMode={setMode} />
         </div>
       </div>
@@ -86,7 +92,7 @@ function LoginPage() {
           </form>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

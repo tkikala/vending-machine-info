@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-function Gallery({ photos }: { photos: { id: number; url: string }[] }) {
+function Gallery({ photos }: { photos: { id: string | number; url: string }[] }) {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);

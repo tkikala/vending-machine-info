@@ -5,6 +5,7 @@ import type { VendingMachine } from '../types';
 import VendingMachineDisplay from './VendingMachineDisplay';
 import DarkModeToggle from './DarkModeToggle';
 import Gallery from './Gallery';
+import VendingMachineLogo from './VendingMachineLogo';
 import { useDarkMode } from '../hooks/useDarkMode';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -49,8 +50,13 @@ function MachineList() {
   return (
     <>
       <div className="header">
-        <h1>Vending Machine Info</h1>
-        <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <VendingMachineLogo size={48} />
+          <div>
+            <h1>Vending Machine Info</h1>
+            <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
+          </div>
+        </div>
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
           <Link to="/login" style={{ 
             textDecoration: 'none', 
