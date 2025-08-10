@@ -50,6 +50,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         success_url: `${appUrl}/billing/success`,
         cancel_url: `${appUrl}/billing/cancel`,
         metadata: { userId: session.user.id, plan },
+        subscription_data: {
+          metadata: { userId: session.user.id }
+        }
       });
 
       return res.status(200).json({ url: checkout.url });

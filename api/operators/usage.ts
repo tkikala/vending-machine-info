@@ -14,7 +14,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const session = await prisma.session.findUnique({ where: { token: sessionToken }, include: { user: true } });
     if (!session || !session.user) return res.status(401).json({ error: 'Unauthorized' });
 
-    const sub = await prisma.subscription.findFirst({ where: { userId: session.user.id, status: 'ACTIVE' } });
+    const sub = await prisma.subscription.findFirst({
+      where: { userId: session.user.id, NOT: { status: 'CANCELED' } },
+      orderBy: { updatedAt: 'desc' }
+    });
     const machineLimit = sub?.machineLimit ?? 1;
     const featuredSlots = sub?.featuredSlots ?? 0;
     const plan = sub?.plan ?? 'STARTER';
