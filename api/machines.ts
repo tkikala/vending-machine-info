@@ -359,13 +359,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const machineData = req.body;
         
-        // Get admin user for ownership
-        const adminUser = await prisma.user.findFirst({
-          where: { role: 'ADMIN', isActive: true }
-        });
-
-        if (!adminUser) {
-          return res.status(500).json({ error: 'No admin user found' });
+        // Determine owner: use logged-in user if present; otherwise fall back to first admin
+        let ownerId: string | null = null;
+        const sessionToken = req.cookies?.session;
+        if (sessionToken) {
+          const session = await prisma.session.findUnique({ where: { token: sessionToken }, include: { user: true } });
+          if (session?.user) ownerId = session.user.id;
+        }
+        if (!ownerId) {
+          const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN', isActive: true } });
+          if (!adminUser) return res.status(500).json({ error: 'No admin user found' });
+          ownerId = adminUser.id;
         }
         
         // Get all payment method types
@@ -388,7 +392,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             logo: machineData.logo,
             coordinates: machineData.coordinates,
             isActive: machineData.isActive ?? true,
-            ownerId: adminUser.id,
+            ownerId: ownerId,
             products: {
               create: machineData.products?.map((product: any) => ({
                 productId: product.productId,

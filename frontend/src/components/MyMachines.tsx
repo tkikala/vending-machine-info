@@ -16,12 +16,9 @@ export default function MyMachines() {
     (async () => {
       try {
         setLoading(true);
-        const data = await fetchMyMachines();
+        const [data, u] = await Promise.all([fetchMyMachines(), fetchUsage()]);
         setRows(data);
-        try {
-          const u = await fetchUsage();
-          setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots } });
-        } catch {}
+        setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots } });
       } catch (e: any) {
         setError(e.message || 'Failed to load your machines');
       } finally {
@@ -74,6 +71,13 @@ export default function MyMachines() {
           }
         }}>⬆️ Upgrade to Pro</button>
         <a href="/operator/reviews" className="admin-button">💬 Manage Reviews</a>
+        <button className="admin-button" onClick={async () => {
+          try {
+            await fetch('/api/billing?action=sync', { credentials: 'include' });
+            const u = await fetchUsage();
+            setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots } });
+          } catch {}
+        }}>🔄 Sync Plan</button>
       </div>
       {rows.length === 0 && <p>You do not own any machines yet.</p>}
       <div style={{ display: 'grid', gap: 12 }}>
