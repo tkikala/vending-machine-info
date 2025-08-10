@@ -20,6 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log('Fetching machine:', id);
         
         try {
+          const now = new Date();
           const machine = await prisma.vendingMachine.findUnique({
             where: { 
               id: id,
@@ -95,6 +96,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                   updatedAt: true
                 },
                 orderBy: { createdAt: 'desc' }
+              },
+              featured: {
+                where: { startsAt: { lte: now }, endsAt: { gte: now } },
+                select: { id: true, startsAt: true, endsAt: true }
               }
             }
           });
@@ -320,8 +325,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           orderBy: { createdAt: 'desc' }
         });
 
+        // Rank featured machines first using active featured listings
+        const now = new Date();
+        const activeFeatured = await prisma.featuredListing.findMany({
+          where: { startsAt: { lte: now }, endsAt: { gte: now } },
+          select: { machineId: true }
+        });
+        const featuredSet = new Set(activeFeatured.map(f => f.machineId));
+
+        const ranked = (machines as any[]).slice().sort((a, b) => {
+          const af = featuredSet.has(a.id) ? 1 : 0;
+          const bf = featuredSet.has(b.id) ? 1 : 0;
+          if (af !== bf) return bf - af; // featured first
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+
         console.log(`✅ Found ${machines.length} machines`);
-        return res.status(200).json(machines);
+        return res.status(200).json(ranked);
         
       } catch (dbError: any) {
         console.error('❌ Database error:', dbError);
