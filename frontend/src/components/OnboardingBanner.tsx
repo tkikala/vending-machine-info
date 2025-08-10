@@ -1,9 +1,10 @@
 import React from 'react';
+import { startCheckout } from '../api';
 
 export default function OnboardingBanner({ data }: { data: { plan?: string; onboarding?: { hasActiveSubscription: boolean; hasMachine: boolean; hasPhotos: boolean; hasReviews: boolean; hasReply: boolean } } }) {
   const ob = data.onboarding || { hasActiveSubscription: false, hasMachine: false, hasPhotos: false, hasReviews: false, hasReply: false };
   const items = [
-    { key: 'subscription', ok: ob.hasActiveSubscription, label: 'Subscription active', action: ob.hasActiveSubscription ? undefined : { label: 'Subscribe', href: '/admin' } },
+    { key: 'subscription', ok: ob.hasActiveSubscription, label: 'Subscription active', action: ob.hasActiveSubscription ? undefined : { label: 'Subscribe', type: 'subscribe' as const } },
     { key: 'machine', ok: ob.hasMachine, label: 'At least one machine', action: ob.hasMachine ? undefined : { label: 'Add Machine', href: '/admin/machines/new' } },
     { key: 'photos', ok: ob.hasPhotos, label: 'Add photos to a machine', action: undefined },
     { key: 'reviews', ok: ob.hasReviews, label: 'Receive one review', action: undefined },
@@ -37,7 +38,24 @@ export default function OnboardingBanner({ data }: { data: { plan?: string; onbo
               {i.label}
             </div>
             {!i.ok && i.action && (
-              <a className="admin-button" href={i.action.href} style={{ padding: '6px 10px', borderRadius: 8 }}> {i.action.label} </a>
+              i.action.type === 'subscribe' ? (
+                <button
+                  className="admin-button"
+                  style={{ padding: '6px 10px', borderRadius: 8 }}
+                  onClick={async () => {
+                    try {
+                      const url = await startCheckout('STARTER');
+                      window.location.href = url;
+                    } catch (e) {
+                      // no-op
+                    }
+                  }}
+                >
+                  {i.action.label}
+                </button>
+              ) : (
+                <a className="admin-button" href={i.action.href} style={{ padding: '6px 10px', borderRadius: 8 }}> {i.action.label} </a>
+              )
             )}
           </div>
         ))}
