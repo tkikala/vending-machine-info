@@ -2,6 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import bcrypt from 'bcryptjs';
 import prisma from './prisma';
 import crypto from 'crypto';
+import Stripe from 'stripe';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
@@ -47,6 +48,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!isValidPassword) {
           console.log('❌ Invalid password for:', email);
           return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        // Ensure Stripe customer exists for this user (for operator billing)
+        try {
+          if (!user.stripeCustomerId && process.env.STRIPE_SECRET_KEY) {
+            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+              apiVersion: '2024-06-20',
+            });
+            const customer = await stripe.customers.create({
+              email: user.email,
+              name: user.name,
+            });
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { stripeCustomerId: customer.id },
+            });
+          }
+        } catch (err) {
+          console.warn('⚠️ Failed to ensure Stripe customer:', err);
         }
 
         // Generate session token

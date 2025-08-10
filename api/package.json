@@ -12,7 +12,8 @@
     "@prisma/client": "^6.13.0",
     "@vercel/blob": "^1.1.1",
     "@vercel/node": "^5.3.7",
-    "bcryptjs": "^3.0.2"
+    "bcryptjs": "^3.0.2",
+    "stripe": "^14.25.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
