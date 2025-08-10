@@ -538,6 +538,37 @@ export async function startCheckout(plan: 'STARTER' | 'PRO') {
   return data.url as string;
 }
 
+// Operator reviews
+export async function listOwnedReviews() {
+  const res = await fetch(`${API_BASE}/operators/reviews`, { credentials: 'include' });
+  if (!res.ok) throw new Error('Failed to load reviews');
+  return res.json();
+}
+
+export async function actOnReview(id: string, action: 'reply' | 'hide' | 'unhide', reply?: string) {
+  const res = await fetch(`${API_BASE}/operators/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ id, action, reply })
+  });
+  if (!res.ok) throw new Error('Failed to update review');
+  return res.json();
+}
+
+// Leads (public)
+export async function submitLead(data: { name: string; email: string; phone?: string; venueName: string; address: string; message?: string }) {
+  const res = await fetch(`${API_BASE}/leads`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error || 'Failed to submit lead');
+  }
+  return res.json();
+}
 export async function openBillingPortal() {
   const res = await fetch(`${API_BASE}/billing?action=portal`, {
     credentials: 'include',

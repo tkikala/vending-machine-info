@@ -8,6 +8,8 @@ import AdminDashboard from './components/AdminDashboard';
 import AdminClaims from './components/AdminClaims';
 import ProtectedRoute from './components/ProtectedRoute';
 import MyMachines from './components/MyMachines';
+import OperatorReviews from './components/OperatorReviews';
+import LeadForm from './components/LeadForm';
 import AddMachineForm from './components/AddMachineForm';
 import EditMachineForm from './components/EditMachineForm';
 import ProductsManagement from './components/ProductsManagement';
@@ -62,6 +64,12 @@ function App() {
               <MyMachines />
             </ProtectedRoute>
           } />
+          <Route path="/operator/reviews" element={
+            <ProtectedRoute>
+              <OperatorReviews />
+            </ProtectedRoute>
+          } />
+          <Route path="/request-machine" element={<LeadForm />} />
         </Routes>
       </div>
     </AuthProvider>
