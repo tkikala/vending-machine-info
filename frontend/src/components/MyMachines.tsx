@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { fetchMyMachines, openBillingPortal } from '../api';
-import React from 'react';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
