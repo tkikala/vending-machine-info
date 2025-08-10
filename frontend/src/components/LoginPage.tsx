@@ -31,6 +31,16 @@ function LoginPage() {
     }
   };
 
+  const googleLogin = async () => {
+    try {
+      const res = await fetch('/api/auth?action=google');
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      setError('Failed to start Google login');
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="header">
@@ -84,6 +94,12 @@ function LoginPage() {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
+
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button className="login-button" onClick={googleLogin} style={{ background: 'linear-gradient(135deg,#4285F4,#34A853)', border: 'none' }}>
+              Continue with Google
+            </button>
+          </div>
         </div>
       </div>
     </div>

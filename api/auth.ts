@@ -134,6 +134,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Handle Google OAuth start
+    if (action === 'google' && req.method === 'GET') {
+      const clientId = process.env.GOOGLE_CLIENT_ID;
+      const redirectUri = `${process.env.APP_URL || ''}/api/auth?action=google-callback`;
+      const scope = encodeURIComponent('openid email profile');
+      const state = crypto.randomBytes(16).toString('hex');
+      const url = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&prompt=consent`;
+      return res.status(200).json({ url });
+    }
+
+    // Handle Google OAuth callback
+    if (action === 'google-callback' && req.method === 'GET') {
+      try {
+        const code = String(req.query.code || '');
+        const redirectUri = `${process.env.APP_URL || ''}/api/auth?action=google-callback`;
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            code,
+            client_id: String(process.env.GOOGLE_CLIENT_ID || ''),
+            client_secret: String(process.env.GOOGLE_CLIENT_SECRET || ''),
+            redirect_uri: redirectUri,
+            grant_type: 'authorization_code'
+          }) as any
+        });
+        const tokenJson = await tokenRes.json();
+        const idToken = tokenJson.id_token as string;
+        if (!idToken) return res.status(400).json({ error: 'Missing id_token' });
+        const payload = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString());
+        const email = String(payload.email || '').toLowerCase();
+        const name = String(payload.name || email.split('@')[0]);
+        if (!email) return res.status(400).json({ error: 'No email from Google' });
+
+        // Find or create user
+        let user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+          user = await prisma.user.create({ data: { email, name, role: 'OWNER', isActive: true } });
+        }
+
+        // Create session
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await prisma.session.create({ data: { userId: user.id, token: sessionToken, expiresAt } });
+        res.setHeader('Set-Cookie', `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=${24 * 60 * 60}; Path=/`);
+        return res.status(302).setHeader('Location', '/my-machines').end();
+      } catch (e: any) {
+        console.error('Google OAuth error:', e);
+        return res.status(500).json({ error: 'Google auth failed' });
+      }
+    }
+
     // Handle me (get current user)
     if (action === 'me' && req.method === 'GET') {
       console.log('Checking current user session');
