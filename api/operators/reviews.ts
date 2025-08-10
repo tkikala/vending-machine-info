@@ -14,8 +14,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!session || !session.user) return res.status(401).json({ error: 'Unauthorized' });
 
     if (req.method === 'GET') {
+      // Get user's machine IDs first to avoid relational filter edge cases
+      const myMachines = await prisma.vendingMachine.findMany({
+        where: { ownerId: session.user.id },
+        select: { id: true, name: true }
+      });
+      const machineIds = myMachines.map(m => m.id);
+
+      if (machineIds.length === 0) return res.status(200).json([]);
+
       const reviews = await prisma.review.findMany({
-        where: { vendingMachine: { ownerId: session.user.id } },
+        where: { vendingMachineId: { in: machineIds } },
         select: {
           id: true,
           rating: true,
