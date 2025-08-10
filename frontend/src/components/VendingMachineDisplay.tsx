@@ -144,7 +144,14 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
             )}
           </div>
           <div className="machine-details">
-            <h3 style={{ margin: 0 }}>{machine.name}</h3>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {machine.name}
+              {(machine as any).featured?.length > 0 && (
+                <span className="status-badge active" style={{ background: '#f59e42', borderColor: '#f59e42' }}>
+                  ⭐ Featured
+                </span>
+              )}
+            </h3>
             <div 
               style={{
                 color: 'inherit', 

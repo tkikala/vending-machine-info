@@ -77,7 +77,7 @@ function MachineList() {
         <div key={m.id} className="machine-card">
           <div className="machine-content">
             <Link to={`/machine/${m.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <VendingMachineDisplay machine={m} />
+              <VendingMachineDisplay machine={m as any} />
             </Link>
 
             <Gallery photos={m.photos || []} />

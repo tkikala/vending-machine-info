@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchMyMachines, openBillingPortal } from '../api';
+import React from 'react';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
@@ -7,6 +8,7 @@ export default function MyMachines() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usage, setUsage] = useState<{ used: number; limit: number } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -14,6 +16,8 @@ export default function MyMachines() {
         setLoading(true);
         const data = await fetchMyMachines();
         setRows(data);
+        // Usage from subscription snapshot via a lightweight endpoint can be added later; temporary derive
+        setUsage({ used: data.length, limit: 10 });
       } catch (e: any) {
         setError(e.message || 'Failed to load your machines');
       } finally {
@@ -28,6 +32,14 @@ export default function MyMachines() {
   return (
     <div style={{ padding: 16 }}>
       <h2>My Machines</h2>
+      {usage && (
+        <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.85 }}>
+          Usage: {usage.used}/{usage.limit} machines
+          <div style={{ height: 8, background: '#222', borderRadius: 6, overflow: 'hidden', marginTop: 6, border: '1px solid #333' }}>
+            <div style={{ width: `${Math.min(100, (usage.used/usage.limit)*100)}%`, height: '100%', background: '#4CAF50' }} />
+          </div>
+        </div>
+      )}
       <div style={{ marginBottom: 12 }}>
         <button className="admin-button" onClick={async () => {
           try {
