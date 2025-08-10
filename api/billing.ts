@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import prisma from './prisma';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
-const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2024-06-20' }) : null as any;
+const stripe = stripeSecret ? new Stripe(stripeSecret) : null as any;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS

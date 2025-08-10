@@ -53,9 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Ensure Stripe customer exists for this user (for operator billing)
         try {
           if (!user.stripeCustomerId && process.env.STRIPE_SECRET_KEY) {
-            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-              apiVersion: '2024-06-20',
-            });
+            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
             const customer = await stripe.customers.create({
               email: user.email,
               name: user.name,
