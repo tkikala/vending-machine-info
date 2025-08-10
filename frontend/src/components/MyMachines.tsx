@@ -9,7 +9,7 @@ export default function MyMachines() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string; slots?: { used: number; limit: number } } | null>(null);
+  const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string; slots?: { used: number; limit: number }; onboarding?: any } | null>(null);
   const { logout } = useAuth() as any;
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function MyMachines() {
         setLoading(true);
         const [data, u] = await Promise.all([fetchMyMachines(), fetchUsage()]);
         setRows(data);
-        setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots } });
+        setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots }, onboarding: u.onboarding });
       } catch (e: any) {
         setError(e.message || 'Failed to load your machines');
       } finally {
@@ -75,7 +75,7 @@ export default function MyMachines() {
           try {
             await fetch('/api/billing?action=sync', { credentials: 'include' });
             const u = await fetchUsage();
-            setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots } });
+            setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots }, onboarding: u.onboarding });
           } catch {}
         }}>🔄 Sync Plan</button>
       </div>

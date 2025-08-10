@@ -2,7 +2,7 @@ import React from 'react';
 import { startCheckout } from '../api';
 
 export default function OnboardingBanner({ data }: { data: { plan?: string; onboarding?: { hasActiveSubscription: boolean; hasMachine: boolean; hasPhotos: boolean; hasReviews: boolean; hasReply: boolean } } }) {
-  const ob = data.onboarding || { hasActiveSubscription: false, hasMachine: false, hasPhotos: false, hasReviews: false, hasReply: false };
+  const ob = (data && (data as any).onboarding) || { hasActiveSubscription: false, hasMachine: false, hasPhotos: false, hasReviews: false, hasReply: false };
   const items = [
     { key: 'subscription', ok: ob.hasActiveSubscription, label: 'Subscription active', action: ob.hasActiveSubscription ? undefined : { label: 'Subscribe', type: 'subscribe' as const } },
     { key: 'machine', ok: ob.hasMachine, label: 'At least one machine', action: ob.hasMachine ? undefined : { label: 'Add Machine', href: '/admin/machines/new' } },
