@@ -1,5 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from '../prisma';
+import { sendEmail } from '../email';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -46,8 +47,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           prisma.vendingMachine.update({ where: { id: claim.machineId }, data: { ownerId: claim.requesterUserId } }),
           prisma.machineClaim.update({ where: { id }, data: { status: 'APPROVED', decidedByUserId: session.user.id, decidedAt: new Date() } }),
         ]);
+
+        // Notify requester
+        try {
+          if (claim.requester.email) {
+            await sendEmail(
+              claim.requester.email,
+              'Your machine claim was approved',
+              `<p>Your ownership request for machine ${claim.machine.name} has been approved.</p>`
+            );
+          }
+        } catch {}
       } else {
         await prisma.machineClaim.update({ where: { id }, data: { status: 'REJECTED', decidedByUserId: session.user.id, decidedAt: new Date() } });
+        try {
+          if (claim.requester.email) {
+            await sendEmail(
+              claim.requester.email,
+              'Your machine claim was rejected',
+              `<p>Your ownership request for machine ${claim.machine.name} was rejected.</p>`
+            );
+          }
+        } catch {}
       }
 
       return res.status(200).json({ success: true });

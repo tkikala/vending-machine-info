@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchMyMachines, openBillingPortal, fetchUsage } from '../api';
+import { fetchMyMachines, openBillingPortal, fetchUsage, startCheckout } from '../api';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
@@ -50,6 +50,15 @@ export default function MyMachines() {
             alert(e.message || 'Failed to open billing portal');
           }
         }}>🧾 Manage Subscription</button>
+        <button className="admin-button" onClick={async () => {
+          try {
+            const url = await startCheckout('PRO');
+            window.location.href = url;
+          } catch (e: any) {
+            alert(e.message || 'Failed to start upgrade');
+          }
+        }}>⬆️ Upgrade to Pro</button>
+        <a href="/operator/reviews" className="admin-button">💬 Manage Reviews</a>
       </div>
       {rows.length === 0 && <p>You do not own any machines yet.</p>}
       <div style={{ display: 'grid', gap: 12 }}>

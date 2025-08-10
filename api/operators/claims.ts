@@ -1,5 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from '../prisma';
+import { sendEmail } from '../email';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -30,6 +31,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           message: message?.trim() || null,
         },
       });
+      // Notify admin
+      try {
+        const admins = await prisma.user.findMany({ where: { role: 'ADMIN', isActive: true } });
+        for (const admin of admins) {
+          if (admin.email) {
+            await sendEmail(
+              admin.email,
+              'New machine claim submitted',
+              `<p>User ${session.user.name} requested ownership for machine ${machine.name}.</p>`
+            );
+          }
+        }
+      } catch {}
 
       return res.status(201).json(claim);
     }

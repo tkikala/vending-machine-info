@@ -113,6 +113,16 @@ function AdminDashboard() {
           </button>
           <button className="admin-button" onClick={async () => {
             try {
+              const url = await startCheckout('PRO');
+              window.location.href = url;
+            } catch (e: any) {
+              alert(e.message || 'Failed to start checkout');
+            }
+          }}>
+            💳 Subscribe (Pro)
+          </button>
+          <button className="admin-button" onClick={async () => {
+            try {
               const url = await openBillingPortal();
               window.location.href = url;
             } catch (e: any) {
