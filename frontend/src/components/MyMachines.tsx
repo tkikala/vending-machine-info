@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchMyMachines, openBillingPortal, fetchUsage, startCheckout } from '../api';
+import OnboardingBanner from './OnboardingBanner';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
@@ -33,6 +34,7 @@ export default function MyMachines() {
   return (
     <div style={{ padding: 16 }}>
       <h2>My Machines {usage?.plan ? <span style={{ fontSize: 14, opacity: 0.8 }}>({usage.plan} plan)</span> : null}</h2>
+      {usage && <OnboardingBanner data={{ plan: usage.plan, onboarding: (usage as any).onboarding }} />}
       {usage && (
         <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.85 }}>
           Usage: {usage.used}/{usage.limit} machines

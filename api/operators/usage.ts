@@ -26,7 +26,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: { userId: session.user.id, startsAt: { lte: now }, endsAt: { gte: now } }
     });
 
-    return res.status(200).json({ machineLimit, featuredSlots, usedMachines, activeFeatured, plan });
+    // Onboarding signals
+    const ownedMachineIds = await prisma.vendingMachine.findMany({ where: { ownerId: session.user.id }, select: { id: true } });
+    const ids = ownedMachineIds.map(m => m.id);
+    let hasPhotos = false;
+    let hasReviews = false;
+    let hasReply = false;
+    if (ids.length > 0) {
+      const photosCount = await prisma.photo.count({ where: { vendingMachineId: { in: ids } } });
+      const reviewsCount = await prisma.review.count({ where: { vendingMachineId: { in: ids } } });
+      const repliesCount = await prisma.review.count({ where: { vendingMachineId: { in: ids }, NOT: { reply: null } } as any });
+      hasPhotos = photosCount > 0;
+      hasReviews = reviewsCount > 0;
+      hasReply = repliesCount > 0;
+    }
+    const hasActiveSubscription = !!sub && sub.status === 'ACTIVE';
+
+    return res.status(200).json({ 
+      machineLimit, featuredSlots, usedMachines, activeFeatured, plan,
+      onboarding: { hasActiveSubscription, hasMachine: usedMachines > 0, hasPhotos, hasReviews, hasReply }
+    });
   } catch (error) {
     console.error('❌ Operator Usage Error:', error);
     return res.status(500).json({ error: 'Internal server error' });

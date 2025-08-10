@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchAllMachines, deleteVendingMachine, updateVendingMachine, startCheckout, openBillingPortal } from '../api';
+import { fetchAllMachines, deleteVendingMachine, updateVendingMachine, startCheckout, openBillingPortal, fetchUsage } from '../api';
+import OnboardingBanner from './OnboardingBanner';
 import type { VendingMachine } from '../types';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -13,9 +14,11 @@ function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const { user, logout, isAdmin } = useAuth();
   const [mode, setMode] = useDarkMode();
+  const [usage, setUsage] = useState<any>(null);
 
   useEffect(() => {
     loadMachines();
+    (async () => { try { setUsage(await fetchUsage()); } catch {} })();
   }, []);
 
   async function loadMachines() {
@@ -91,6 +94,7 @@ function AdminDashboard() {
       </div>
 
       <div className="dashboard-content">
+        {usage && <OnboardingBanner data={usage} />}
         <div className="admin-actions">
           <Link to="/admin/machines/new" className="admin-button">
             + Add New Machine
