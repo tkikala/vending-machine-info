@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import MyMachines from './components/MyMachines';
 import OperatorReviews from './components/OperatorReviews';
 import LeadForm from './components/LeadForm';
+import BillingSuccess from './components/BillingSuccess';
 import AddMachineForm from './components/AddMachineForm';
 import EditMachineForm from './components/EditMachineForm';
 import ProductsManagement from './components/ProductsManagement';
@@ -70,6 +71,8 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/request-machine" element={<LeadForm />} />
+          <Route path="/billing/success" element={<BillingSuccess />} />
+          <Route path="/billing/cancel" element={<BillingSuccess canceled />} />
         </Routes>
       </div>
     </AuthProvider>

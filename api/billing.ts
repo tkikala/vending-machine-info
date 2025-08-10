@@ -82,6 +82,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ url: portal.url });
     }
 
+    if (action === 'sync' && req.method === 'GET') {
+      if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
+
+      const sessionToken = req.cookies?.session;
+      if (!sessionToken) return res.status(401).json({ error: 'Unauthorized' });
+
+      const session = await prisma.session.findUnique({ where: { token: sessionToken }, include: { user: true } });
+      if (!session?.user?.stripeCustomerId) return res.status(400).json({ error: 'No Stripe customer' });
+
+      // Fetch active subscription from Stripe and persist locally
+      const list = await stripe.subscriptions.list({ customer: session.user.stripeCustomerId, status: 'all', expand: ['data.items'] });
+      const active = list.data.find(s => ['active', 'trialing', 'past_due'].includes(s.status));
+      if (!active) {
+        // Mark as canceled if existed before
+        const existing = await prisma.subscription.findFirst({ where: { userId: session.user.id } });
+        if (existing) {
+          await prisma.subscription.update({ where: { id: existing.id }, data: { status: 'CANCELED' } });
+        }
+        return res.status(200).json({ synced: true, status: 'CANCELED' });
+      }
+
+      const price = active.items.data[0]?.price;
+      const proPriceId = process.env.STRIPE_PRICE_PRO;
+      const starterPriceId = process.env.STRIPE_PRICE_STARTER;
+      const planNick = price?.nickname?.toUpperCase();
+      let plan: 'PRO' | 'STARTER' = 'STARTER';
+      if (price?.id && proPriceId && price.id === proPriceId) plan = 'PRO';
+      else if (price?.id && starterPriceId && price.id === starterPriceId) plan = 'STARTER';
+      else if (planNick === 'PRO') plan = 'PRO';
+
+      await prisma.subscription.upsert({
+        where: { id: active.id },
+        update: {
+          status: active.status === 'canceled' ? 'CANCELED' : 'ACTIVE',
+          currentPeriodEnd: new Date(active.current_period_end * 1000),
+          plan,
+          machineLimit: plan === 'PRO' ? 100 : 10,
+          featuredSlots: plan === 'PRO' ? 5 : 1,
+        },
+        create: {
+          id: active.id,
+          userId: session.user.id,
+          plan,
+          status: active.status === 'canceled' ? 'CANCELED' : 'ACTIVE',
+          currentPeriodEnd: new Date(active.current_period_end * 1000),
+          stripeSubscriptionId: active.id,
+          machineLimit: plan === 'PRO' ? 100 : 10,
+          featuredSlots: plan === 'PRO' ? 5 : 1,
+        },
+      });
+
+      return res.status(200).json({ synced: true, plan });
+    }
+
     if (action === 'webhook' && req.method === 'POST') {
       if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
 
