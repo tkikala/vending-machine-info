@@ -159,21 +159,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               canceled: 'CANCELED',
               unpaid: 'PAST_DUE',
             };
+            // Determine plan based on price nickname or specific price IDs
+            const price = sub.items.data[0]?.price;
+            const proPriceId = process.env.STRIPE_PRICE_PRO;
+            const starterPriceId = process.env.STRIPE_PRICE_STARTER;
+            const planNick = price?.nickname?.toUpperCase();
+            let plan: 'PRO' | 'STARTER' = 'STARTER';
+            if (price?.id && proPriceId && price.id === proPriceId) plan = 'PRO';
+            else if (price?.id && starterPriceId && price.id === starterPriceId) plan = 'STARTER';
+            else if (planNick === 'PRO') plan = 'PRO';
+
             await prisma.subscription.upsert({
               where: { id: sub.id },
               update: {
                 status: statusMap[sub.status] || 'ACTIVE',
                 currentPeriodEnd: new Date(sub.current_period_end * 1000),
+                plan,
+                machineLimit: plan === 'PRO' ? 100 : 10,
+                featuredSlots: plan === 'PRO' ? 5 : 1,
               },
               create: {
                 id: sub.id,
                 userId: String(sub.metadata?.userId || ''),
-                plan: (sub.items.data[0]?.price?.nickname === 'PRO' ? 'PRO' : 'STARTER') as any,
+                plan: plan as any,
                 status: statusMap[sub.status] || 'ACTIVE',
                 currentPeriodEnd: new Date(sub.current_period_end * 1000),
                 stripeSubscriptionId: sub.id,
-                machineLimit: (sub.items.data[0]?.price?.nickname === 'PRO') ? 100 : 10,
-                featuredSlots: (sub.items.data[0]?.price?.nickname === 'PRO') ? 5 : 1,
+                machineLimit: plan === 'PRO' ? 100 : 10,
+                featuredSlots: plan === 'PRO' ? 5 : 1,
               },
             });
             break;

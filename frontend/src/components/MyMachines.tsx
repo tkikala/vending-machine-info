@@ -7,7 +7,7 @@ export default function MyMachines() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string } | null>(null);
+  const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string; slots?: { used: number; limit: number } } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -17,7 +17,7 @@ export default function MyMachines() {
         setRows(data);
         try {
           const u = await fetchUsage();
-          setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan });
+          setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots } });
         } catch {}
       } catch (e: any) {
         setError(e.message || 'Failed to load your machines');
@@ -39,6 +39,14 @@ export default function MyMachines() {
           <div style={{ height: 8, background: '#222', borderRadius: 6, overflow: 'hidden', marginTop: 6, border: '1px solid #333' }}>
             <div style={{ width: `${Math.min(100, (usage.used/usage.limit)*100)}%`, height: '100%', background: '#4CAF50' }} />
           </div>
+          {usage.slots && (
+            <div style={{ marginTop: 8 }}>
+              Featured slots: {usage.slots.used}/{usage.slots.limit}
+              <div style={{ height: 8, background: '#222', borderRadius: 6, overflow: 'hidden', marginTop: 6, border: '1px solid #333' }}>
+                <div style={{ width: `${Math.min(100, (usage.slots.used/usage.slots.limit)*100)}%`, height: '100%', background: '#f59e42' }} />
+              </div>
+            </div>
+          )}
         </div>
       )}
       <div style={{ marginBottom: 12 }}>
