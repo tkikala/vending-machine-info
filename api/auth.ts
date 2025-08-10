@@ -134,6 +134,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Handle signup
+    if (action === 'signup' && req.method === 'POST') {
+      const { email, password, name } = req.body || {};
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+
+      try {
+        const normalizedEmail = String(email).toLowerCase();
+        const exists = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+        if (exists) {
+          return res.status(409).json({ error: 'Email already in use' });
+        }
+
+        const hash = await bcrypt.hash(String(password), 10);
+        const user = await prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            password: hash,
+            name: String(name || normalizedEmail.split('@')[0]),
+            role: 'OWNER',
+            isActive: true,
+          }
+        });
+
+        // Ensure Stripe customer for billing
+        try {
+          if (process.env.STRIPE_SECRET_KEY) {
+            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+            const customer = await stripe.customers.create({ email: user.email, name: user.name });
+            await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId: customer.id } });
+          }
+        } catch (err) {
+          console.warn('⚠️ Stripe customer create on signup failed:', err);
+        }
+
+        // Create session
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await prisma.session.create({ data: { userId: user.id, token: sessionToken, expiresAt } });
+        res.setHeader('Set-Cookie', `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=${24 * 60 * 60}; Path=/`);
+
+        return res.status(201).json({
+          message: 'Signup successful',
+          user: { id: user.id, email: user.email, name: user.name, role: user.role }
+        });
+      } catch (dbError: any) {
+        console.error('❌ Database error during signup:', dbError);
+        return res.status(500).json({ error: 'Database connection failed', details: dbError.message });
+      }
+    }
+
     // Handle Google OAuth start
     if (action === 'google' && req.method === 'GET') {
       const clientId = process.env.GOOGLE_CLIENT_ID;

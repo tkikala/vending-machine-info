@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { signup } from '../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -9,6 +10,7 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signupMode, setSignupMode] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,6 +43,20 @@ function LoginPage() {
     }
   };
 
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await signup(email, password);
+      navigate('/my-machines', { replace: true });
+    } catch (err: any) {
+      setError(err.message || 'Signup failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="header">
@@ -61,7 +77,7 @@ function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="login-form">
+          <form onSubmit={signupMode ? handleSignup : handleSubmit} className="login-form">
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <input
@@ -91,13 +107,19 @@ function LoginPage() {
               className="login-button"
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (signupMode ? 'Creating account...' : 'Signing in...') : (signupMode ? 'Create Account' : 'Sign In')}
             </button>
           </form>
 
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
             <button className="login-button" onClick={googleLogin} style={{ background: 'linear-gradient(135deg,#4285F4,#34A853)', border: 'none' }}>
               Continue with Google
+            </button>
+          </div>
+
+          <div style={{ marginTop: 10 }}>
+            <button className="login-button" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--text-main)' }} onClick={() => setSignupMode(!signupMode)}>
+              {signupMode ? 'Have an account? Sign In' : "Don't have an account? Sign Up"}
             </button>
           </div>
         </div>

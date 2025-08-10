@@ -87,6 +87,20 @@ export async function login(email: string, password: string) {
   }
 }
 
+export async function signup(email: string, password: string, name?: string) {
+  const res = await fetch(`${API_BASE}/auth?action=signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ email, password, name })
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Signup failed');
+  }
+  return res.json();
+}
+
 export async function logout() {
   try {
     console.log('Attempting logout');
