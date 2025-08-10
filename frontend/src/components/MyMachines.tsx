@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchMyMachines, openBillingPortal, fetchUsage, startCheckout } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import OnboardingBanner from './OnboardingBanner';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
@@ -9,6 +10,7 @@ export default function MyMachines() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string; slots?: { used: number; limit: number } } | null>(null);
+  const { logout } = useAuth() as any;
 
   useEffect(() => {
     (async () => {
@@ -34,6 +36,9 @@ export default function MyMachines() {
   return (
     <div style={{ padding: 16 }}>
       <h2>My Machines {usage?.plan ? <span style={{ fontSize: 14, opacity: 0.8 }}>({usage.plan} plan)</span> : null}</h2>
+      <div style={{ marginBottom: 8 }}>
+        <button className="admin-button" onClick={async () => { try { await logout(); } catch {} }} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}>Logout</button>
+      </div>
       {usage && <OnboardingBanner data={{ plan: usage.plan, onboarding: (usage as any).onboarding }} />}
       {usage && (
         <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.85 }}>

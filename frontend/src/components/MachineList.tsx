@@ -14,7 +14,7 @@ function MachineList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useDarkMode();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, logout } = useAuth() as any;
 
   useEffect(() => {
     console.log('🚀 MachineList component mounted');
@@ -68,6 +68,11 @@ function MachineList() {
                   transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 600
                 }}>🛠️ Admin</Link>
               )}
+              <button onClick={async () => { try { await logout(); } catch {} }} style={{
+                textDecoration: 'none', color: 'var(--text-main)', background: 'transparent',
+                padding: '0.6rem 1.0rem', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.9,
+                transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 600
+              }}>Logout</button>
             </>
           ) : (
             <Link to="/login" style={{

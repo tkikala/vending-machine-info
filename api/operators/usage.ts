@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       hasReviews = reviewsCount > 0;
       hasReply = repliesCount > 0;
     }
-    const hasActiveSubscription = !!sub && sub.status === 'ACTIVE';
+    const hasActiveSubscription = !!sub && sub.status !== 'CANCELED';
 
     return res.status(200).json({ 
       machineLimit, featuredSlots, usedMachines, activeFeatured, plan,

@@ -43,7 +43,6 @@ export default function BillingSuccess({ canceled = false }: { canceled?: boolea
         {error && <div style={{ marginTop: 10, padding: 12, borderRadius: 12, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>Sync error: {error}</div>}
         <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
           <a className="admin-button" href="/my-machines" style={{ padding: '10px 14px', borderRadius: 10 }}>Go to My Machines</a>
-          <a className="admin-button" href="/admin" style={{ padding: '10px 14px', borderRadius: 10, background: 'transparent' }}>Admin</a>
         </div>
       </div>
     </div>
