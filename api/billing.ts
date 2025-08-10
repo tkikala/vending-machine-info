@@ -62,12 +62,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!sessionToken) return res.status(401).json({ error: 'Unauthorized' });
 
       const session = await prisma.session.findUnique({ where: { token: sessionToken }, include: { user: true } });
-      if (!session || !session.user || !session.user.stripeCustomerId) return res.status(401).json({ error: 'Unauthorized' });
+      if (!session || !session.user) return res.status(401).json({ error: 'Unauthorized' });
+
+      // Ensure stripe customer exists if missing
+      let customerId = session.user.stripeCustomerId || undefined;
+      if (!customerId) {
+        const customer = await stripe.customers.create({ email: session.user.email, name: session.user.name });
+        customerId = customer.id;
+        await prisma.user.update({ where: { id: session.user.id }, data: { stripeCustomerId: customer.id } });
+      }
 
       const returnUrl = process.env.BILLING_PORTAL_RETURN_URL || process.env.APP_URL || 'http://localhost:5173';
 
       const portal = await stripe.billingPortal.sessions.create({
-        customer: session.user.stripeCustomerId,
+        customer: customerId!,
         return_url: returnUrl,
       });
 
