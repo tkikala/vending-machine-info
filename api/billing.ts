@@ -169,6 +169,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             else if (price?.id && starterPriceId && price.id === starterPriceId) plan = 'STARTER';
             else if (planNick === 'PRO') plan = 'PRO';
 
+            // Resolve userId: prefer metadata; fall back to finding by Stripe customer ID
+            let userId = String(sub.metadata?.userId || '');
+            if (!userId && sub.customer) {
+              const userByCustomer = await prisma.user.findFirst({ where: { stripeCustomerId: String(sub.customer) } });
+              if (userByCustomer) userId = userByCustomer.id;
+            }
+
             await prisma.subscription.upsert({
               where: { id: sub.id },
               update: {
@@ -180,7 +187,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               },
               create: {
                 id: sub.id,
-                userId: String(sub.metadata?.userId || ''),
+                userId,
                 plan: plan as any,
                 status: statusMap[sub.status] || 'ACTIVE',
                 currentPeriodEnd: new Date(sub.current_period_end * 1000),
