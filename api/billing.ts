@@ -1,5 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
+import type { IncomingMessage } from 'http';
 import prisma from './prisma';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
@@ -80,11 +81,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
       if (!sig || !webhookSecret) return res.status(400).json({ error: 'Missing signature or secret' });
 
-      // On Vercel, raw body handling needs config; for now assume body is raw string (to be adjusted per deployment)
+      // Read raw body for signature verification
+      const getRawBody = (request: IncomingMessage): Promise<Buffer> => {
+        return new Promise((resolve, reject) => {
+          try {
+            const chunks: Buffer[] = [];
+            request.on('data', (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+            request.on('end', () => resolve(Buffer.concat(chunks)));
+            request.on('error', (err) => reject(err));
+          } catch (err) {
+            reject(err);
+          }
+        });
+      };
+
       let event: Stripe.Event;
       try {
-        const rawBody = (req as any).rawBody || JSON.stringify(req.body);
-        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+        let rawBodyBuf: Buffer;
+        if ((req as any).rawBody && typeof (req as any).rawBody !== 'object') {
+          rawBodyBuf = Buffer.isBuffer((req as any).rawBody)
+            ? (req as any).rawBody
+            : Buffer.from((req as any).rawBody);
+        } else if (typeof req.body === 'string') {
+          rawBodyBuf = Buffer.from(req.body);
+        } else {
+          rawBodyBuf = await getRawBody(req);
+        }
+        event = stripe.webhooks.constructEvent(rawBodyBuf, sig, webhookSecret);
       } catch (err: any) {
         console.error('❌ Webhook signature verification failed', err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);

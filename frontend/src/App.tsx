@@ -7,6 +7,7 @@ import LoginPage from './components/LoginPage';
 import AdminDashboard from './components/AdminDashboard';
 import AdminClaims from './components/AdminClaims';
 import ProtectedRoute from './components/ProtectedRoute';
+import MyMachines from './components/MyMachines';
 import AddMachineForm from './components/AddMachineForm';
 import EditMachineForm from './components/EditMachineForm';
 import ProductsManagement from './components/ProductsManagement';
@@ -54,6 +55,11 @@ function App() {
           <Route path="/products" element={
             <ProtectedRoute>
               <ProductsManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-machines" element={
+            <ProtectedRoute>
+              <MyMachines />
             </ProtectedRoute>
           } />
         </Routes>

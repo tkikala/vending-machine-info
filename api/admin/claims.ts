@@ -34,6 +34,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!claim || claim.status !== 'PENDING') return res.status(404).json({ error: 'Claim not found or already decided' });
 
       if (decision === 'APPROVE') {
+        // Enforce subscription machine limit
+        const sub = await prisma.subscription.findFirst({ where: { userId: claim.requesterUserId, status: 'ACTIVE' } });
+        const limit = sub?.machineLimit ?? 1;
+        const currentOwned = await prisma.vendingMachine.count({ where: { ownerId: claim.requesterUserId } });
+        if (currentOwned >= limit) {
+          return res.status(403).json({ error: 'Machine limit reached for requester' });
+        }
+
         await prisma.$transaction([
           prisma.vendingMachine.update({ where: { id: claim.machineId }, data: { ownerId: claim.requesterUserId } }),
           prisma.machineClaim.update({ where: { id }, data: { status: 'APPROVED', decidedByUserId: session.user.id, decidedAt: new Date() } }),
