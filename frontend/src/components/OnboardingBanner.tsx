@@ -14,17 +14,30 @@ export default function OnboardingBanner({ data }: { data: { plan?: string; onbo
   if (remaining.length === 0) return null;
 
   return (
-    <div style={{ border: '1px solid #333', borderRadius: 10, padding: 14, marginBottom: 16, background: 'rgba(255,255,255,0.03)' }}>
-      <div style={{ fontWeight: 600, marginBottom: 8 }}>Getting Started</div>
-      <div style={{ display: 'grid', gap: 6 }}>
+    <div style={{
+      border: '1px solid rgba(255,255,255,0.12)',
+      borderRadius: 16,
+      padding: 18,
+      marginBottom: 20,
+      background: 'linear-gradient(135deg, rgba(79,70,229,0.1), rgba(147,51,234,0.1))',
+      boxShadow: '0 6px 24px rgba(0,0,0,0.25)'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#9333ea)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚀</div>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 16 }}>Get set up in minutes</div>
+          <div style={{ opacity: 0.8, fontSize: 13 }}>Complete these steps to unlock featured placement and analytics.</div>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gap: 8 }}>
         {items.map(i => (
-          <div key={i.key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-            <div>
-              <span style={{ marginRight: 8 }}>{i.ok ? '✅' : '⬜️'}</span>
+          <div key={i.key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '8px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: i.ok ? '#16a34a' : 'transparent', border: i.ok ? 'none' : '1px solid rgba(255,255,255,0.2)' }}>{i.ok ? '✓' : ''}</span>
               {i.label}
             </div>
             {!i.ok && i.action && (
-              <a className="admin-button" href={i.action.href}>{i.action.label}</a>
+              <a className="admin-button" href={i.action.href} style={{ padding: '6px 10px', borderRadius: 8 }}> {i.action.label} </a>
             )}
           </div>
         ))}

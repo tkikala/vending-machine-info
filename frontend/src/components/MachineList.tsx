@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { fetchVendingMachines } from '../api';
 import type { VendingMachine } from '../types';
 import VendingMachineDisplay from './VendingMachineDisplay';
@@ -13,6 +14,7 @@ function MachineList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useDarkMode();
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
     console.log('🚀 MachineList component mounted');
@@ -51,48 +53,29 @@ function MachineList() {
       <div className="header">
         <h1>Vending Machine Info</h1>
         <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
-        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link to="/my-machines" style={{
-            textDecoration: 'none',
-            color: 'var(--text-main)',
-            background: 'var(--product-bg)',
-            padding: '0.6rem 1.2rem',
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            opacity: 0.9,
-            transition: 'opacity 0.2s, transform 0.2s',
-            border: '1px solid rgba(255,255,255,0.1)',
-            fontWeight: '500',
-            whiteSpace: 'nowrap'
-          }}>🧑‍💼 My Machines</Link>
-          <Link to="/admin" style={{
-            textDecoration: 'none',
-            color: 'var(--text-main)',
-            background: 'var(--product-bg)',
-            padding: '0.6rem 1.2rem',
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            opacity: 0.9,
-            transition: 'opacity 0.2s, transform 0.2s',
-            border: '1px solid rgba(255,255,255,0.1)',
-            fontWeight: '500',
-            whiteSpace: 'nowrap'
-          }}>🛠️ Admin</Link>
-          <Link to="/login" style={{ 
-            textDecoration: 'none', 
-            color: 'var(--text-main)', 
-            background: 'var(--product-bg)', 
-            padding: '0.6rem 1.2rem', 
-            borderRadius: '8px', 
-            fontSize: '0.9rem',
-            opacity: 0.9,
-            transition: 'opacity 0.2s, transform 0.2s',
-            border: '1px solid rgba(255,255,255,0.1)',
-            fontWeight: '500',
-            whiteSpace: 'nowrap',
-          }}>
-            🔐 Login
-          </Link>
+        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+          {user ? (
+            <>
+              <Link to="/my-machines" style={{
+                textDecoration: 'none', color: 'var(--text-main)', background: 'var(--product-bg)',
+                padding: '0.6rem 1.0rem', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.95,
+                transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 600
+              }}>🧑‍💼 My Machines</Link>
+              {isAdmin && (
+                <Link to="/admin" style={{
+                  textDecoration: 'none', color: 'var(--text-main)', background: 'var(--product-bg)',
+                  padding: '0.6rem 1.0rem', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.95,
+                  transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 600
+                }}>🛠️ Admin</Link>
+              )}
+            </>
+          ) : (
+            <Link to="/login" style={{
+              textDecoration: 'none', color: 'var(--text-main)', background: 'linear-gradient(135deg,#4f46e5,#9333ea)',
+              padding: '0.6rem 1.2rem', borderRadius: '10px', fontSize: '0.95rem', opacity: 0.98,
+              transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 700
+            }}>🔐 Login</Link>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', marginLeft: '2rem' }}>
             <DarkModeToggle mode={mode} setMode={setMode} />
           </div>
