@@ -5,6 +5,7 @@ import MachineList from './components/MachineList';
 import MachinePage from './components/MachinePage';
 import LoginPage from './components/LoginPage';
 import AdminDashboard from './components/AdminDashboard';
+import AdminClaims from './components/AdminClaims';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddMachineForm from './components/AddMachineForm';
 import EditMachineForm from './components/EditMachineForm';
@@ -23,6 +24,11 @@ function App() {
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/claims" element={
+            <ProtectedRoute requireAdmin>
+              <AdminClaims />
             </ProtectedRoute>
           } />
           <Route path="/admin/machines/new" element={

@@ -512,3 +512,115 @@ export async function fetchMachineReviews(machineId: string): Promise<any[]> {
   
   return res.json();
 } 
+
+// Billing
+export async function startCheckout(plan: 'STARTER' | 'PRO') {
+  const res = await fetch(`${API_BASE}/billing?action=checkout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ plan })
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to start checkout');
+  }
+  const data = await res.json();
+  return data.url as string;
+}
+
+export async function openBillingPortal() {
+  const res = await fetch(`${API_BASE}/billing?action=portal`, {
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to open billing portal');
+  }
+  const data = await res.json();
+  return data.url as string;
+}
+
+// Claims
+export async function createClaim(machineId: string, message?: string) {
+  const res = await fetch(`${API_BASE}/operators/claims`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ machineId, message })
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to create claim');
+  }
+  return res.json();
+}
+
+export async function listPendingClaims() {
+  const res = await fetch(`${API_BASE}/admin/claims`, { credentials: 'include' });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to fetch claims');
+  }
+  return res.json();
+}
+
+export async function decideClaim(id: string, decision: 'APPROVE' | 'REJECT') {
+  const res = await fetch(`${API_BASE}/admin/claims`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ id, decision })
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to decide claim');
+  }
+  return res.json();
+}
+
+// Featured
+export async function featureMachine(machineId: string, durationDays = 30) {
+  const res = await fetch(`${API_BASE}/featured`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ machineId, durationDays })
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to feature machine');
+  }
+  return res.json();
+}
+
+export async function getFeaturedStatus(machineId: string) {
+  const res = await fetch(`${API_BASE}/featured?machineId=${encodeURIComponent(machineId)}`);
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to fetch featured status');
+  }
+  return res.json();
+}
+
+// Analytics
+export async function sendAnalyticsEvent(machineId: string, type: 'view' | 'click_website' | 'click_phone') {
+  try {
+    await fetch(`${API_BASE}/analytics?action=event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ machineId, type })
+    });
+  } catch (e) {
+    // non-blocking
+  }
+}
+
+export async function fetchMachineStats(machineId: string, range: '7d' | '30d' = '30d') {
+  const res = await fetch(`${API_BASE}/analytics?action=stats&machineId=${encodeURIComponent(machineId)}&range=${range}`, { credentials: 'include' });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to fetch stats');
+  }
+  return res.json();
+}

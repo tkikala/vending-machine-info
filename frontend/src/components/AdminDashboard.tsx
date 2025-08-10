@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchAllMachines, deleteVendingMachine, updateVendingMachine } from '../api';
+import { fetchAllMachines, deleteVendingMachine, updateVendingMachine, startCheckout, openBillingPortal } from '../api';
 import type { VendingMachine } from '../types';
 import DarkModeToggle from './DarkModeToggle';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -98,6 +98,29 @@ function AdminDashboard() {
           <Link to="/products" className="admin-button">
             📦 Manage Products
           </Link>
+          <Link to="/admin/claims" className="admin-button">
+            🤝 Review Claims
+          </Link>
+          <button className="admin-button" onClick={async () => {
+            try {
+              const url = await startCheckout('STARTER');
+              window.location.href = url;
+            } catch (e: any) {
+              alert(e.message || 'Failed to start checkout');
+            }
+          }}>
+            💳 Subscribe (Starter)
+          </button>
+          <button className="admin-button" onClick={async () => {
+            try {
+              const url = await openBillingPortal();
+              window.location.href = url;
+            } catch (e: any) {
+              alert(e.message || 'Failed to open billing portal');
+            }
+          }}>
+            🧾 Billing Portal
+          </button>
         </div>
 
         <div className="machines-grid">
