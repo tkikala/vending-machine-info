@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 declare global {
+  // eslint-disable-next-line no-var
   var __prisma: PrismaClient | undefined;
 }
 
@@ -15,13 +16,5 @@ if (process.env.NODE_ENV === 'production') {
   prisma = globalThis.__prisma;
 }
 
-// Test the connection on startup
-prisma.$connect()
-  .then(() => {
-    console.log('✅ Prisma client connected successfully');
-  })
-  .catch((error) => {
-    console.error('❌ Prisma client connection failed:', error);
-  });
-
-export default prisma; 
+// Do not connect during import. Connection will be established lazily on first query.
+export default prisma;
