@@ -17,6 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const sub = await prisma.subscription.findFirst({ where: { userId: session.user.id, status: 'ACTIVE' } });
     const machineLimit = sub?.machineLimit ?? 1;
     const featuredSlots = sub?.featuredSlots ?? 0;
+    const plan = sub?.plan ?? 'STARTER';
 
     const usedMachines = await prisma.vendingMachine.count({ where: { ownerId: session.user.id } });
 
@@ -25,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: { userId: session.user.id, startsAt: { lte: now }, endsAt: { gte: now } }
     });
 
-    return res.status(200).json({ machineLimit, featuredSlots, usedMachines, activeFeatured });
+    return res.status(200).json({ machineLimit, featuredSlots, usedMachines, activeFeatured, plan });
   } catch (error) {
     console.error('❌ Operator Usage Error:', error);
     return res.status(500).json({ error: 'Internal server error' });

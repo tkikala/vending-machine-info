@@ -7,7 +7,7 @@ export default function MyMachines() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usage, setUsage] = useState<{ used: number; limit: number } | null>(null);
+  const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -17,7 +17,7 @@ export default function MyMachines() {
         setRows(data);
         try {
           const u = await fetchUsage();
-          setUsage({ used: u.usedMachines, limit: u.machineLimit });
+          setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan });
         } catch {}
       } catch (e: any) {
         setError(e.message || 'Failed to load your machines');
@@ -32,7 +32,7 @@ export default function MyMachines() {
 
   return (
     <div style={{ padding: 16 }}>
-      <h2>My Machines</h2>
+      <h2>My Machines {usage?.plan ? <span style={{ fontSize: 14, opacity: 0.8 }}>({usage.plan} plan)</span> : null}</h2>
       {usage && (
         <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.85 }}>
           Usage: {usage.used}/{usage.limit} machines
