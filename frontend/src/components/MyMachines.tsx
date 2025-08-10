@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchMyMachines, openBillingPortal } from '../api';
+import { fetchMyMachines, openBillingPortal, fetchUsage } from '../api';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
@@ -15,8 +15,10 @@ export default function MyMachines() {
         setLoading(true);
         const data = await fetchMyMachines();
         setRows(data);
-        // Usage from subscription snapshot via a lightweight endpoint can be added later; temporary derive
-        setUsage({ used: data.length, limit: 10 });
+        try {
+          const u = await fetchUsage();
+          setUsage({ used: u.usedMachines, limit: u.machineLimit });
+        } catch {}
       } catch (e: any) {
         setError(e.message || 'Failed to load your machines');
       } finally {

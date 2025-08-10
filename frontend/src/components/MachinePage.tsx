@@ -5,6 +5,7 @@ import type { VendingMachine } from '../types';
 import VendingMachineDisplay from './VendingMachineDisplay';
 import DarkModeToggle from './DarkModeToggle';
 import Gallery from './Gallery';
+import MachineAnalytics from './MachineAnalytics';
 import Reviews from './Reviews';
 import { useDarkMode } from '../hooks/useDarkMode';
 import LoadingSpinner from './LoadingSpinner';
@@ -70,6 +71,8 @@ function MachinePage() {
           <Gallery photos={machine.photos} />
 
           <Reviews machineId={machine.id} machineName={machine.name} />
+
+          <MachineAnalytics machineId={machine.id} />
 
           <div style={{ marginTop: '1.2rem', display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
             <button

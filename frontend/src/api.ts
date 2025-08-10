@@ -449,6 +449,15 @@ export async function fetchAllProducts(): Promise<Product[]> {
   return res.json();
 }
 
+export async function fetchUsage() {
+  const res = await fetch(`${API_BASE}/operators/usage`, { credentials: 'include' });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to fetch usage');
+  }
+  return res.json();
+}
+
 export async function updateProduct(id: string, data: any): Promise<Product> {
   const res = await fetch(`${API_BASE}/products/${id}`, {
     method: 'PUT',
