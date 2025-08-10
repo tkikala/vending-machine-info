@@ -14,31 +14,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!session || !session.user) return res.status(401).json({ error: 'Unauthorized' });
 
     if (req.method === 'GET') {
-      // Get user's machine IDs first to avoid relational filter edge cases
-      const myMachines = await prisma.vendingMachine.findMany({
-        where: { ownerId: session.user.id },
-        select: { id: true, name: true }
-      });
-      const machineIds = myMachines.map(m => m.id);
+      try {
+        const myMachines = await prisma.vendingMachine.findMany({
+          where: { ownerId: session.user.id },
+          select: { id: true, name: true }
+        });
+        const machineIds = myMachines.map(m => m.id);
+        if (machineIds.length === 0) return res.status(200).json([]);
 
-      if (machineIds.length === 0) return res.status(200).json([]);
+        const machineIdToName = new Map(myMachines.map(m => [m.id, m.name] as const));
 
-      const reviews = await prisma.review.findMany({
-        where: { vendingMachineId: { in: machineIds } },
-        select: {
-          id: true,
-          rating: true,
-          comment: true,
-          reply: true,
-          isHidden: true,
-          isApproved: true,
-          createdAt: true,
-          user: { select: { id: true, name: true } },
-          vendingMachine: { select: { id: true, name: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-      return res.status(200).json(reviews);
+        const reviews = await prisma.review.findMany({
+          where: { vendingMachineId: { in: machineIds } },
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            reply: true,
+            isHidden: true,
+            isApproved: true,
+            createdAt: true,
+            user: { select: { id: true, name: true } },
+            vendingMachineId: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        const shaped = reviews.map(r => ({
+          ...r,
+          vendingMachine: { id: r.vendingMachineId, name: machineIdToName.get(r.vendingMachineId) || '' }
+        }));
+        return res.status(200).json(shaped);
+      } catch (e: any) {
+        console.error('Operator reviews GET error:', e);
+        return res.status(500).json({ error: 'Internal server error', details: e?.message });
+      }
     }
 
     if (req.method === 'POST') {
