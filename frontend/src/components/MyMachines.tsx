@@ -95,17 +95,39 @@ export default function MyMachines() {
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <span className={`status-badge ${m.isActive ? 'active' : 'inactive'}`}>{m.isActive ? 'Active' : 'Inactive'}</span>
-              <button className="admin-button" onClick={async () => {
-                try {
-                  const res = await fetch('/api/featured', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ machineId: m.id }) });
-                  if (!res.ok) throw new Error('Failed to feature');
-                  alert('Machine featured for 30 days');
-                  const u = await fetchUsage();
-                  setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots }, onboarding: u.onboarding });
-                } catch (e: any) {
-                  alert(e.message || 'Feature failed');
-                }
-              }}>⭐ Feature</button>
+              {usage?.slots && usage.slots.limit > 0 ? (
+                <button className="admin-button" onClick={async () => {
+                  try {
+                    // Check current featured status via GET
+                    const statusRes = await fetch(`/api/featured?machineId=${m.id}`);
+                    const status = await statusRes.json().catch(() => ({}));
+                    if (status?.active) {
+                      const res = await fetch(`/api/featured?machineId=${m.id}`, { method: 'DELETE', credentials: 'include' });
+                      if (!res.ok) throw new Error('Failed to remove featured');
+                    } else {
+                      const res = await fetch('/api/featured', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ machineId: m.id }) });
+                      if (!res.ok) throw new Error('Failed to feature');
+                    }
+                    const u = await fetchUsage();
+                    setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots }, onboarding: u.onboarding });
+                  } catch (e: any) {
+                    alert(e.message || 'Feature toggle failed');
+                  }
+                }}>{(() => {
+                  // Simple label that flips if any slot is in use (approx)
+                  return '⭐ Toggle Featured';
+                })()}</button>
+              ) : (
+                <button className="admin-button" onClick={async () => {
+                  // open subscription upsell
+                  const ok = confirm('Featuring requires a subscription. Would you like to subscribe now?');
+                  if (!ok) return;
+                  try {
+                    const url = await startCheckout('STARTER');
+                    window.location.href = url;
+                  } catch {}
+                }}>⭐ Feature (requires subscription)</button>
+              )}
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setShowFeatureInfo(true)}>❓ What is Featured?</button>
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => { setOpenGalleryFor(m.id); setLocalGallery([]); }}>📷 Add Photos</button>
             </div>

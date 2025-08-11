@@ -49,6 +49,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(201).json(listing);
     }
 
+    if (req.method === 'DELETE') {
+      const sessionToken = req.cookies?.session;
+      if (!sessionToken) return res.status(401).json({ error: 'Unauthorized' });
+      const session = await prisma.session.findUnique({ where: { token: sessionToken }, include: { user: true } });
+      if (!session || !session.user) return res.status(401).json({ error: 'Unauthorized' });
+
+      const { machineId: mid } = req.query as { [k: string]: string };
+      if (!mid) return res.status(400).json({ error: 'machineId required' });
+
+      // Only the owner or admin can remove featured
+      const machine = await prisma.vendingMachine.findUnique({ where: { id: mid } });
+      if (!machine) return res.status(404).json({ error: 'Machine not found' });
+      if (machine.ownerId !== session.user.id && session.user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+
+      const now = new Date();
+      await prisma.featuredListing.deleteMany({ where: { machineId: mid, userId: session.user.id, startsAt: { lte: now }, endsAt: { gte: now } } });
+      return res.status(200).json({ removed: true });
+    }
+
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('❌ Featured Error:', error);

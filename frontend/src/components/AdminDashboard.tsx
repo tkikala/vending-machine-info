@@ -102,6 +102,9 @@ function AdminDashboard() {
           <Link to="/products" className="admin-button">
             📦 Manage Products
           </Link>
+          <Link to="/admin/subscriptions" className="admin-button">
+            💳 View Subscriptions
+          </Link>
           <Link to="/admin/claims" className="admin-button">
             🤝 Review Claims
           </Link>
