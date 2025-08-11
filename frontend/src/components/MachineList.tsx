@@ -54,12 +54,15 @@ function MachineList() {
     const text = `${m.name} ${m.location} ${(m.products||[]).map((mp:any)=>mp.product?.name||'').join(' ')}`.toLowerCase();
     const matchText = query.trim().length === 0 || text.includes(query.toLowerCase());
     if (selectedPayments.length === 0) return matchText;
-    const pay = (m.paymentMethods||[]).map((pm:any)=>pm.paymentMethodType?.type);
-    const hasCard = pay.includes('CREDIT_CARD') || pay.includes('GIROCARD');
-    const hasGiro = pay.includes('GIROCARD');
-    const hasCoins = pay.includes('COIN');
-    const hasBanknotes = pay.includes('BANKNOTE');
-    const isCashOnly = !hasCard && (hasCoins || hasBanknotes);
+    // Consider ONLY enabled (green) payment methods
+    const enabledTypes = (m.paymentMethods||[])
+      .filter((pm:any)=>pm.available)
+      .map((pm:any)=>pm.paymentMethodType?.type);
+    const hasCard = enabledTypes.includes('CREDIT_CARD') || enabledTypes.includes('GIROCARD');
+    const hasGiro = enabledTypes.includes('GIROCARD');
+    const hasCoins = enabledTypes.includes('COIN');
+    const hasBanknotes = enabledTypes.includes('BANKNOTE');
+    const isCashOnly = (hasCoins || hasBanknotes) && !hasCard;
     const check = (tag:string) => {
       switch(tag){
         case 'card': return hasCard;
@@ -76,9 +79,9 @@ function MachineList() {
 
   return (
     <>
-      <div className="header">
-        <h1>Vending Machine Info</h1>
-        <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
+      <div className="header" style={{ position: 'relative' }}>
+        <h1 style={{ textAlign: 'center' }}>Vending Machine Info</h1>
+        <p style={{ color: '#888', fontWeight: 500, textAlign: 'center' }}>Find out what each vending machine offers and how you can pay!</p>
         <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '8px 12px', maxWidth: 520 }}>
             <span style={{ opacity: 0.8 }}>🔎</span>
@@ -101,37 +104,20 @@ function MachineList() {
             )}
           </div>
         </div>
-        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+        {/* Top-right compact auth group */}
+        <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           {user ? (
             <>
-              <Link to="/my-machines" style={{
-                textDecoration: 'none', color: 'var(--text-main)', background: 'var(--product-bg)',
-                padding: '0.6rem 1.0rem', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.95,
-                transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 600
-              }}>🧑‍💼 My Machines</Link>
+              <Link to="/my-machines" className="admin-button" style={{ padding: '6px 10px' }}>🧑‍💼 My Machines</Link>
               {isAdmin && (
-                <Link to="/admin" style={{
-                  textDecoration: 'none', color: 'var(--text-main)', background: 'var(--product-bg)',
-                  padding: '0.6rem 1.0rem', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.95,
-                  transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 600
-                }}>🛠️ Admin</Link>
+                <Link to="/admin" className="admin-button" style={{ padding: '6px 10px' }}>🛠️ Admin</Link>
               )}
-              <button onClick={async () => { try { await logout(); } catch {} }} style={{
-                textDecoration: 'none', color: 'var(--text-main)', background: 'transparent',
-                padding: '0.6rem 1.0rem', borderRadius: '10px', fontSize: '0.9rem', opacity: 0.9,
-                transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 600
-              }}>Logout</button>
+              <button onClick={async () => { try { await logout(); } catch {} }} className="admin-button" style={{ padding: '6px 10px', background: 'transparent' }}>Logout</button>
             </>
           ) : (
-            <Link to="/login" style={{
-              textDecoration: 'none', color: 'var(--text-main)', background: 'linear-gradient(135deg,#4f46e5,#9333ea)',
-              padding: '0.6rem 1.2rem', borderRadius: '10px', fontSize: '0.95rem', opacity: 0.98,
-              transition: 'opacity 0.2s, transform 0.2s', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 700
-            }}>🔐 Login</Link>
+            <Link to="/login" className="admin-button" style={{ padding: '6px 10px', background: 'linear-gradient(135deg,#4f46e5,#9333ea)' }}>🔐 Login</Link>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', marginLeft: '2rem' }}>
-            <DarkModeToggle mode={mode} setMode={setMode} />
-          </div>
+          <DarkModeToggle mode={mode} setMode={setMode} />
         </div>
       </div>
       {filtered.map((m) => (
