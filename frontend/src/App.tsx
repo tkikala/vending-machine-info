@@ -5,6 +5,7 @@ import MachineList from './components/MachineList';
 import MachinePage from './components/MachinePage';
 import LoginPage from './components/LoginPage';
 import AdminDashboard from './components/AdminDashboard';
+import AdminSubscriptions from './components/AdminSubscriptions';
 import AdminClaims from './components/AdminClaims';
 import ProtectedRoute from './components/ProtectedRoute';
 import MyMachines from './components/MyMachines';
@@ -28,6 +29,11 @@ function App() {
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/subscriptions" element={
+            <ProtectedRoute requireAdmin>
+              <AdminSubscriptions />
             </ProtectedRoute>
           } />
           <Route path="/admin/claims" element={

@@ -262,6 +262,12 @@ export async function uploadSingleFile(file: File): Promise<any> {
   }
 }
 
+export async function listSubscriptions() {
+  const res = await fetch(`${API_BASE}/admin/subscriptions`, { credentials: 'include' });
+  if (!res.ok) throw new Error('Failed to load subscriptions');
+  return res.json();
+}
+
 export async function uploadGalleryFiles(machineId: string, files: File[], captions?: string[]): Promise<any> {
   try {
     console.log('Uploading gallery files directly for machine:', machineId, files.length, 'files');
