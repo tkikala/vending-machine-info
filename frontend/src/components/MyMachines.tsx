@@ -3,6 +3,7 @@ import { fetchMyMachines, openBillingPortal, fetchUsage, startCheckout } from '.
 import { useAuth } from '../contexts/AuthContext';
 import OnboardingBanner from './OnboardingBanner';
 import GalleryManager from './GalleryManager';
+import FeatureInfo from './FeatureInfo';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
@@ -14,6 +15,7 @@ export default function MyMachines() {
   const { logout } = useAuth() as any;
   const [openGalleryFor, setOpenGalleryFor] = useState<string | null>(null);
   const [localGallery, setLocalGallery] = useState<any[]>([]);
+  const [showFeatureInfo, setShowFeatureInfo] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -104,6 +106,7 @@ export default function MyMachines() {
                   alert(e.message || 'Feature failed');
                 }
               }}>⭐ Feature</button>
+              <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setShowFeatureInfo(true)}>❓ What is Featured?</button>
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => { setOpenGalleryFor(m.id); setLocalGallery([]); }}>📷 Add Photos</button>
             </div>
           </div>
@@ -138,6 +141,8 @@ export default function MyMachines() {
           </div>
         </div>
       )}
+
+      <FeatureInfo open={showFeatureInfo} onClose={() => setShowFeatureInfo(false)} />
     </div>
   );
 }
