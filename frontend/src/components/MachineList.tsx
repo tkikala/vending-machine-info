@@ -11,6 +11,8 @@ import LoadingSpinner from './LoadingSpinner';
 
 function MachineList() {
   const [machines, setMachines] = useState<VendingMachine[]>([]);
+  const [query, setQuery] = useState('');
+  const [paymentFilter, setPaymentFilter] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useDarkMode();
@@ -48,11 +50,28 @@ function MachineList() {
   }
 
   console.log('✅ Rendering machines:', machines.length);
+  const filtered = machines.filter((m) => {
+    const text = `${m.name} ${m.location} ${(m.products||[]).map((p:any)=>p.name).join(' ')}`.toLowerCase();
+    const matchText = text.includes(query.toLowerCase());
+    const matchPay = paymentFilter ? (m.paymentMethods||[]).some((pm:any)=>pm.paymentMethodType?.type === paymentFilter) : true;
+    return matchText && matchPay;
+  });
+
   return (
     <>
       <div className="header">
         <h1>Vending Machine Info</h1>
         <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
+        <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <input placeholder="Search products or locations" value={query} onChange={(e)=>setQuery(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-main)' }} />
+          <select value={paymentFilter} onChange={(e)=>setPaymentFilter(e.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-main)' }}>
+            <option value="">All Payments</option>
+            <option value="GIROCARD">Girocard</option>
+            <option value="CREDIT_CARD">Credit Card</option>
+            <option value="COIN">Coins</option>
+            <option value="BANKNOTE">Banknotes</option>
+          </select>
+        </div>
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           {user ? (
             <>
@@ -86,7 +105,7 @@ function MachineList() {
           </div>
         </div>
       </div>
-      {machines.map((m) => (
+      {filtered.map((m) => (
         <div key={m.id} className="machine-card">
           <div className="machine-content">
             <Link to={`/machine/${m.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>

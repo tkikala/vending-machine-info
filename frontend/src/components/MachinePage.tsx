@@ -62,6 +62,27 @@ function MachinePage() {
         <div className="machine-content">
           <VendingMachineDisplay machine={machine} />
 
+          <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button className="btn btn-secondary" onClick={() => {
+              if (machine.coordinates) {
+                window.open(`https://www.google.com/maps?q=${encodeURIComponent(machine.coordinates)}`, '_blank');
+              } else {
+                window.open(`https://www.google.com/maps/search/${encodeURIComponent(machine.location)}`, '_blank');
+              }
+            }}>🗺️ Directions (Google Maps)</button>
+            <button className="btn btn-secondary" onClick={async () => {
+              const url = `${window.location.origin}/machine/${machine.id}`;
+              try {
+                if ((navigator as any).share) {
+                  await (navigator as any).share({ title: machine.name, text: `Vending Machine: ${machine.name}`, url });
+                } else {
+                  await navigator.clipboard.writeText(url);
+                  alert('Link copied');
+                }
+              } catch {}
+            }}>🔗 Share</button>
+          </div>
+
           <div className="machine-meta">
             <p className="last-updated">
               Last updated: {formatDate(machine.updatedAt)}
@@ -71,6 +92,18 @@ function MachinePage() {
           <Gallery photos={machine.photos} />
 
           <Reviews machineId={machine.id} machineName={machine.name} />
+
+          {/* JSON-LD structured data */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            name: machine.name,
+            address: { '@type': 'PostalAddress', streetAddress: machine.location },
+            url: `${window.location.origin}/machine/${machine.id}`,
+            geo: machine.coordinates ? (() => { const [lat, lng] = String(machine.coordinates).split(',').map((s)=>parseFloat(s)); return { '@type': 'GeoCoordinates', latitude: lat, longitude: lng }; })() : undefined,
+            paymentAccepted: (machine.paymentMethods || []).map((pm) => pm.paymentMethodType?.type).filter(Boolean),
+            makesOffer: (machine.products || []).map((mp) => ({ '@type': 'Offer', itemOffered: { '@type': 'Product', name: mp.product?.name } }))
+          }) }} />
 
           <MachineAnalytics machineId={machine.id} />
 
