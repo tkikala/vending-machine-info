@@ -13,6 +13,8 @@
     "@vercel/blob": "^1.1.1",
     "@vercel/node": "^5.3.7",
     "bcryptjs": "^3.0.2",
+    "pdfkit": "^0.13.0",
+    "qrcode": "^1.5.3",
     "stripe": "^14.25.0"
   },
   "devDependencies": {
