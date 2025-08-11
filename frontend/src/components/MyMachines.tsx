@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import OnboardingBanner from './OnboardingBanner';
 import GalleryManager from './GalleryManager';
 import FeatureInfo from './FeatureInfo';
+import { EmbedPreview, EmbedSnippet } from './EmbedWidget';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
@@ -16,6 +17,7 @@ export default function MyMachines() {
   const [openGalleryFor, setOpenGalleryFor] = useState<string | null>(null);
   const [localGallery, setLocalGallery] = useState<any[]>([]);
   const [showFeatureInfo, setShowFeatureInfo] = useState(false);
+  const [embedFor, setEmbedFor] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -130,6 +132,7 @@ export default function MyMachines() {
               )}
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setShowFeatureInfo(true)}>❓ What is Featured?</button>
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => { setOpenGalleryFor(m.id); setLocalGallery([]); }}>📷 Add Photos</button>
+              <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setEmbedFor(m.id)}>🔗 Embed</button>
             </div>
           </div>
         ))}
@@ -165,6 +168,19 @@ export default function MyMachines() {
       )}
 
       <FeatureInfo open={showFeatureInfo} onClose={() => setShowFeatureInfo(false)} />
+
+      {embedFor && (
+        <div style={{ marginTop: 16, border: '1px solid #333', borderRadius: 12, padding: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Embed Preview</h3>
+            <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setEmbedFor(null)}>Close</button>
+          </div>
+          <EmbedPreview machineId={embedFor} />
+          <div style={{ marginTop: 10 }}>
+            <EmbedSnippet machineId={embedFor} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

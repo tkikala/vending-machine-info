@@ -1,7 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from '../prisma';
+import QRCode from 'qrcode';
+import PDFDocument from 'pdfkit';
 
-// Simple SVG PDF (browser/print-friendly). For production, we could integrate a QR library and real PDF.
+// Generate a branded QR PDF with loading rings motif
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   const sessionToken = req.cookies?.session;
@@ -12,14 +14,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const machineId = String(req.query.machineId || '');
   if (!machineId) return res.status(400).json({ error: 'machineId required' });
 
-  // UTM link
   const base = process.env.APP_URL || '';
   const url = `${base}/machine/${machineId}?utm_source=sticker&utm_medium=offline&utm_campaign=reviews`;
 
-  // Minimal QR: link text + placeholder box; swap with QR lib if needed
-  const svg = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="595" height="842" viewBox="0 0 595 842"><rect width="100%" height="100%" fill="#ffffff"/><text x="50" y="80" font-family="Arial" font-size="24">Scan to view products, pay options & reviews</text><rect x="50" y="120" width="300" height="300" fill="#f3f3f3" stroke="#000"/><text x="50" y="450" font-family="Arial" font-size="14">URL: ${url}</text><text x="50" y="480" font-family="Arial" font-size="12" fill="#666">(Replace QR box with printed QR code if you use a QR generator.)</text></svg>`;
+  // Create QR PNG buffer
+  const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, scale: 8 });
+  const qrBase64 = qrDataUrl.split(',')[1];
+  const qrBuffer = Buffer.from(qrBase64, 'base64');
 
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Content-Disposition', `attachment; filename="machine-${machineId}-qr.svg"`);
-  return res.status(200).send(svg);
+  const doc = new PDFDocument({ size: 'A4', margin: 40 });
+  const chunks: any[] = [];
+  doc.on('data', (c) => chunks.push(c));
+  doc.on('end', () => {
+    const pdf = Buffer.concat(chunks);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=machine-${machineId}-qr.pdf`);
+    res.status(200).send(pdf);
+  });
+
+  doc.fontSize(22).text('Scan to view products, payments & reviews');
+  doc.moveDown(0.5);
+  doc.fontSize(12).fillColor('#555').text(url);
+  doc.moveDown(1);
+
+  // Decorative loading rings motif
+  const cx = 420, cy = 120;
+  const rings = [40, 60, 80];
+  rings.forEach((r, i) => {
+    doc.circle(cx, cy, r).strokeColor(['#8b5cf6', '#6366f1', '#22c55e'][i]).lineWidth(2).stroke();
+  });
+
+  doc.image(qrBuffer, 40, 120, { width: 260, height: 260 });
+  doc.moveDown(18);
+  doc.fontSize(10).fillColor('#666').text('Tip: Place this near the keypad/payment area for maximum scans.');
+  doc.end();
 }
