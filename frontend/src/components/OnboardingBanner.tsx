@@ -4,11 +4,11 @@ import { startCheckout } from '../api';
 export default function OnboardingBanner({ data }: { data: { plan?: string; onboarding?: { hasActiveSubscription: boolean; hasMachine: boolean; hasPhotos: boolean; hasReviews: boolean; hasReply: boolean } } }) {
   const ob = (data && (data as any).onboarding) || { hasActiveSubscription: false, hasMachine: false, hasPhotos: false, hasReviews: false, hasReply: false };
   const items = [
-    { key: 'subscription', ok: ob.hasActiveSubscription, label: 'Subscription active', action: ob.hasActiveSubscription ? undefined : { label: 'Subscribe', type: 'subscribe' as const } },
+    { key: 'subscription', ok: ob.hasActiveSubscription, label: 'Subscription active', description: 'Unlock featured placement and analytics.', action: ob.hasActiveSubscription ? undefined : { label: 'Subscribe', type: 'subscribe' as const } },
     { key: 'machine', ok: ob.hasMachine, label: 'At least one machine', action: ob.hasMachine ? undefined : { label: 'Add Machine', href: '/admin/machines/new' } },
-    { key: 'photos', ok: ob.hasPhotos, label: 'Add photos to a machine', action: undefined },
-    { key: 'reviews', ok: ob.hasReviews, label: 'Receive one review', action: undefined },
-    { key: 'reply', ok: ob.hasReply, label: 'Reply to a review', action: { label: 'Manage Reviews', href: '/operator/reviews' } },
+    { key: 'photos', ok: ob.hasPhotos, label: 'Add photos to a machine', description: 'Photos increase engagement and trust.', action: undefined },
+    { key: 'reviews', ok: ob.hasReviews, label: 'Receive one review', description: 'Reviews drive clicks and conversions.', action: undefined },
+    { key: 'reply', ok: ob.hasReply, label: 'Reply to a review', description: 'Reply to improve ratings and conversion.', action: { label: 'Manage Reviews', href: '/operator/reviews' } },
   ];
 
   const remaining = items.filter(i => !i.ok);
@@ -32,10 +32,11 @@ export default function OnboardingBanner({ data }: { data: { plan?: string; onbo
       </div>
       <div style={{ display: 'grid', gap: 8 }}>
         {items.map(i => (
-          <div key={i.key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '8px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div key={i.key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: i.ok ? '#16a34a' : 'transparent', border: i.ok ? 'none' : '1px solid rgba(255,255,255,0.2)' }}>{i.ok ? '✓' : ''}</span>
               {i.label}
+              {i.description && <span style={{ opacity: 0.6, fontSize: 12 }}> — {i.description}</span>}
             </div>
             {!i.ok && i.action && (
               i.action.type === 'subscribe' ? (

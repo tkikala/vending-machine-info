@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchMyMachines, openBillingPortal, fetchUsage, startCheckout } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import OnboardingBanner from './OnboardingBanner';
+import GalleryManager from './GalleryManager';
 
 type Row = { id: string; name: string; location: string; description?: string; logo?: string; isActive: boolean };
 
@@ -11,6 +12,8 @@ export default function MyMachines() {
   const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string; slots?: { used: number; limit: number }; onboarding?: any } | null>(null);
   const { logout } = useAuth() as any;
+  const [openGalleryFor, setOpenGalleryFor] = useState<string | null>(null);
+  const [localGallery, setLocalGallery] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -101,11 +104,40 @@ export default function MyMachines() {
                   alert(e.message || 'Feature failed');
                 }
               }}>⭐ Feature</button>
-              <a className="admin-button" href={`/admin/machines/${m.id}/edit`} style={{ background: 'transparent' }}>📷 Add Photos</a>
+              <button className="admin-button" style={{ background: 'transparent' }} onClick={() => { setOpenGalleryFor(m.id); setLocalGallery([]); }}>📷 Add Photos</button>
             </div>
           </div>
         ))}
       </div>
+
+      {openGalleryFor && (
+        <div style={{ marginTop: 16, border: '1px solid #333', borderRadius: 12, padding: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Add Photos</h3>
+            <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setOpenGalleryFor(null)}>Close</button>
+          </div>
+          <GalleryManager initialGallery={[]} onGalleryChange={setLocalGallery} />
+          <div style={{ marginTop: 10 }}>
+            <button className="admin-button" onClick={async () => {
+              try {
+                for (const item of localGallery) {
+                  const form = new FormData();
+                  form.append('file', item.file);
+                  form.append('filename', item.originalName || 'upload');
+                  form.append('contentType', item.file?.type || 'image/jpeg');
+                  form.append('caption', item.caption || '');
+                  const res = await fetch(`/api/upload?type=gallery&machineId=${openGalleryFor}`, { method: 'POST', credentials: 'include', body: form });
+                  if (!res.ok) throw new Error('Upload failed');
+                }
+                alert('Photos uploaded');
+                setOpenGalleryFor(null);
+              } catch (e: any) {
+                alert(e.message || 'Upload failed');
+              }
+            }}>Upload</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
