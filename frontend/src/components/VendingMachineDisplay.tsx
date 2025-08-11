@@ -147,7 +147,7 @@ function VendingMachineDisplay({ machine }: { machine: VendingMachine }) {
             <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
               {machine.name}
               {(machine as any).featured?.length > 0 && (
-                <span className="status-badge active" style={{ background: '#f59e42', borderColor: '#f59e42' }}>
+                <span className="status-badge active" title="Featured machines appear first and receive more clicks" style={{ background: '#f59e42', borderColor: '#f59e42' }}>
                   ⭐ Featured
                 </span>
               )}

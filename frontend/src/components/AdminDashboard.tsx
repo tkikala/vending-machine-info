@@ -108,6 +108,9 @@ function AdminDashboard() {
           <Link to="/admin/claims" className="admin-button">
             🤝 Review Claims
           </Link>
+          <a href="/api/admin/qr?machineId=" className="admin-button" onClick={(e) => { e.preventDefault(); const id = prompt('Enter machine ID for QR sticker'); if (id) window.location.href = `/api/admin/qr?machineId=${id}`; }}>
+            🖨️ Generate QR Sticker
+          </a>
           <button className="admin-button" onClick={async () => {
             try {
               const url = await startCheckout('STARTER');
