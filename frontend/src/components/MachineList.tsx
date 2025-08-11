@@ -12,7 +12,7 @@ import LoadingSpinner from './LoadingSpinner';
 function MachineList() {
   const [machines, setMachines] = useState<VendingMachine[]>([]);
   const [query, setQuery] = useState('');
-  const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
+  const [selectedPayments, setSelectedPayments] = useState<string[]>([]); // e.g., ['card','girocard','coins','banknotes','cash']
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useDarkMode();
@@ -53,7 +53,24 @@ function MachineList() {
   const filtered = machines.filter((m) => {
     const text = `${m.name} ${m.location} ${(m.products||[]).map((mp:any)=>mp.product?.name||'').join(' ')}`.toLowerCase();
     const matchText = query.trim().length === 0 || text.includes(query.toLowerCase());
-    const matchPay = selectedPayments.length === 0 || selectedPayments.some((t)=> (m.paymentMethods||[]).some((pm:any)=>pm.paymentMethodType?.type === t));
+    if (selectedPayments.length === 0) return matchText;
+    const pay = (m.paymentMethods||[]).map((pm:any)=>pm.paymentMethodType?.type);
+    const hasCard = pay.includes('CREDIT_CARD') || pay.includes('GIROCARD');
+    const hasGiro = pay.includes('GIROCARD');
+    const hasCoins = pay.includes('COIN');
+    const hasBanknotes = pay.includes('BANKNOTE');
+    const isCashOnly = !hasCard && (hasCoins || hasBanknotes);
+    const check = (tag:string) => {
+      switch(tag){
+        case 'card': return hasCard;
+        case 'girocard': return hasGiro;
+        case 'coins': return hasCoins;
+        case 'banknotes': return hasBanknotes;
+        case 'cash': return isCashOnly;
+        default: return false;
+      }
+    };
+    const matchPay = selectedPayments.every(check);
     return matchText && matchPay;
   });
 
@@ -62,21 +79,21 @@ function MachineList() {
       <div className="header">
         <h1>Vending Machine Info</h1>
         <p style={{ color: '#888', fontWeight: 500 }}>Find out what each vending machine offers and how you can pay!</p>
-        <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '6px 10px' }}>
+        <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '8px 12px', maxWidth: 520 }}>
             <span style={{ opacity: 0.8 }}>🔎</span>
-            <input placeholder="Search machines, products, locations" value={query} onChange={(e)=>setQuery(e.target.value)} style={{ padding: '6px 6px', borderRadius: 8, border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-main)' }} />
+            <input placeholder="Search machines, products, locations" value={query} onChange={(e)=>setQuery(e.target.value)} style={{ padding: '6px 6px', borderRadius: 8, border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-main)', flex: 1 }} />
           </div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {['GIROCARD','CREDIT_CARD','COIN','BANKNOTE'].map((t)=>{
-              const active = selectedPayments.includes(t);
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[{k:'card',label:'Card'}, {k:'girocard',label:'Girocard'}, {k:'cash',label:'Cash only'}, {k:'coins',label:'Coins'}, {k:'banknotes',label:'Banknotes'}].map(({k,label})=>{
+              const active = selectedPayments.includes(k);
               return (
-                <button key={t} onClick={()=>{
-                  setSelectedPayments(prev=> active ? prev.filter(x=>x!==t) : [...prev, t]);
+                <button key={k} onClick={()=>{
+                  setSelectedPayments(prev=> active ? prev.filter(x=>x!==k) : [...prev, k]);
                 }} style={{
-                  padding: '6px 10px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)',
-                  background: active ? 'linear-gradient(135deg,#4f46e5,#9333ea)' : 'transparent', color: 'var(--text-main)'
-                }}>{t}</button>
+                  padding: '6px 12px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)',
+                  background: active ? 'linear-gradient(135deg,#4f46e5,#9333ea)' : 'transparent', color: 'var(--text-main)', fontWeight: 600
+                }}>{label}</button>
               );
             })}
             {selectedPayments.length>0 && (
