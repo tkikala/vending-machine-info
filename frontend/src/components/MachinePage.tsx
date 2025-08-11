@@ -63,13 +63,6 @@ function MachinePage() {
           <VendingMachineDisplay machine={machine} />
 
           <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-secondary" onClick={() => {
-              if (machine.coordinates) {
-                window.open(`https://www.google.com/maps?q=${encodeURIComponent(machine.coordinates)}`, '_blank');
-              } else {
-                window.open(`https://www.google.com/maps/search/${encodeURIComponent(machine.location)}`, '_blank');
-              }
-            }}>🗺️ Directions (Google Maps)</button>
             <button className="btn btn-secondary" onClick={async () => {
               const url = `${window.location.origin}/machine/${machine.id}`;
               try {
