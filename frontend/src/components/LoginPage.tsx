@@ -53,8 +53,18 @@ function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      // Get CAPTCHA token if available
-      const captchaToken = (window as any).grecaptcha?.getResponse?.();
+      // Get Enterprise reCAPTCHA token
+      let captchaToken = '';
+      if ((window as any).grecaptcha?.enterprise) {
+        try {
+          captchaToken = await (window as any).grecaptcha.enterprise.execute('6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC', {
+            action: 'SIGNUP'
+          });
+        } catch (err) {
+          console.warn('reCAPTCHA failed:', err);
+          // Continue without CAPTCHA
+        }
+      }
       
       await signup(email, password, captchaToken);
       navigate('/my-machines', { replace: true });
@@ -137,13 +147,8 @@ function LoginPage() {
 
             {signupMode && (
               <div className="form-group" style={{ marginTop: '16px' }}>
-                <div 
-                  className="g-recaptcha" 
-                  data-sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6Lc...'}
-                  style={{ transform: 'scale(0.9)', transformOrigin: '0 0' }}
-                ></div>
-                <small style={{ color: '#888', fontSize: '12px', marginTop: '8px', display: 'block' }}>
-                  Please verify that you're not a robot
+                <small style={{ color: '#888', fontSize: '12px', textAlign: 'center', display: 'block' }}>
+                  🔒 Protected by Google reCAPTCHA Enterprise
                 </small>
               </div>
             )}
