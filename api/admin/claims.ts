@@ -51,24 +51,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Notify requester
         try {
           if (claim.requester.email) {
-            await sendEmail(
+            const result = await sendEmail(
               claim.requester.email,
               'Your machine claim was approved',
               `<p>Your ownership request for machine ${claim.machine.name} has been approved.</p>`
             );
+            console.log('Approval email result:', result);
           }
-        } catch {}
+        } catch (error) {
+          console.error('Failed to send approval email:', error);
+        }
       } else {
         await prisma.machineClaim.update({ where: { id }, data: { status: 'REJECTED', decidedByUserId: session.user.id, decidedAt: new Date() } });
         try {
           if (claim.requester.email) {
-            await sendEmail(
+            const result = await sendEmail(
               claim.requester.email,
               'Your machine claim was rejected',
               `<p>Your ownership request for machine ${claim.machine.name} was rejected.</p>`
             );
+            console.log('Rejection email result:', result);
           }
-        } catch {}
+        } catch (error) {
+          console.error('Failed to send rejection email:', error);
+        }
       }
 
       return res.status(200).json({ success: true });
