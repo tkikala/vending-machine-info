@@ -133,6 +133,10 @@ export default function MyMachines() {
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setShowFeatureInfo(true)}>❓ What is Featured?</button>
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => { setOpenGalleryFor(m.id); setLocalGallery([]); }}>📷 Add Photos</button>
               <button className="admin-button" style={{ background: 'transparent' }} onClick={() => setEmbedFor(m.id)}>🔗 Embed</button>
+              <button className="admin-button" style={{ background: 'transparent' }} onClick={() => {
+                const url = `/api/admin/qr?machineId=${m.id}`;
+                window.open(url, '_blank');
+              }}>📱 QR Code</button>
             </div>
           </div>
         ))}
