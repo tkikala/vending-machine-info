@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import LandingPage from './components/LandingPage';
 import MachineList from './components/MachineList';
 import MachinePage from './components/MachinePage';
 import LoginPage from './components/LoginPage';
@@ -22,7 +23,8 @@ function App() {
     <AuthProvider>
       <div className="App">
         <Routes>
-          <Route path="/" element={<MachineList />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/machines" element={<MachineList />} />
           <Route path="/machine/:id" element={<MachinePage />} />
           <Route path="/machines/:id" element={<MachinePage />} />
           <Route path="/login" element={<LoginPage />} />
