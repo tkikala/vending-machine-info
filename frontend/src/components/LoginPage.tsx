@@ -135,6 +135,19 @@ function LoginPage() {
               )}
             </div>
 
+            {signupMode && (
+              <div className="form-group" style={{ marginTop: '16px' }}>
+                <div 
+                  className="g-recaptcha" 
+                  data-sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6Lc...'}
+                  style={{ transform: 'scale(0.9)', transformOrigin: '0 0' }}
+                ></div>
+                <small style={{ color: '#888', fontSize: '12px', marginTop: '8px', display: 'block' }}>
+                  Please verify that you're not a robot
+                </small>
+              </div>
+            )}
+
             <button 
               type="submit" 
               className="login-button"
