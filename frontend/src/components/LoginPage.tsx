@@ -53,7 +53,10 @@ function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await signup(email, password);
+      // Get CAPTCHA token if available
+      const captchaToken = (window as any).grecaptcha?.getResponse?.();
+      
+      await signup(email, password, captchaToken);
       navigate('/my-machines', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Signup failed');
@@ -74,7 +77,26 @@ function LoginPage() {
 
       <div className="login-container">
         <div className="login-card">
-          <h2>Admin Login</h2>
+          <h2>{signupMode ? 'Create Account' : 'Admin Login'}</h2>
+          
+          {signupMode && (
+            <div style={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+              color: 'white', 
+              padding: '12px', 
+              borderRadius: '8px', 
+              marginBottom: '16px',
+              fontSize: '14px'
+            }}>
+              <strong>🎉 Free to Start!</strong> Create your account and get immediate access to:
+              <ul style={{ margin: '8px 0 0 20px', padding: 0 }}>
+                <li>Add up to 5 vending machines</li>
+                <li>Basic analytics and customer reviews</li>
+                <li>QR code generation</li>
+                <li>No credit card required</li>
+              </ul>
+            </div>
+          )}
           
           {error && (
             <div className="error-message">
@@ -91,7 +113,7 @@ function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@vendingmachine.com"
+                placeholder={signupMode ? "your@email.com" : "admin@vendingmachine.com"}
               />
             </div>
 
@@ -104,7 +126,13 @@ function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Enter your password"
+                minLength={signupMode ? 8 : undefined}
               />
+              {signupMode && (
+                <small style={{ color: '#888', fontSize: '12px' }}>
+                  Password must be at least 8 characters long
+                </small>
+              )}
             </div>
 
             <button 

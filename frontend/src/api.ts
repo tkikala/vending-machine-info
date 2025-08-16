@@ -87,12 +87,12 @@ export async function login(email: string, password: string) {
   }
 }
 
-export async function signup(email: string, password: string, name?: string) {
+export async function signup(email: string, password: string, captchaToken?: string, name?: string) {
   const res = await fetch(`${API_BASE}/auth?action=signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ email, password, name })
+    body: JSON.stringify({ email, password, name, captchaToken })
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));

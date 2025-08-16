@@ -3,6 +3,10 @@ import bcrypt from 'bcryptjs';
 import prisma from './prisma';
 import crypto from 'crypto';
 import Stripe from 'stripe';
+import { sendEmail } from './email';
+
+// Simple in-memory rate limiting (in production, use Redis)
+const signupAttempts = new Map<string, { count: number; lastAttempt: number }>();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
@@ -16,6 +20,131 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { action } = req.query;
+
+    // Handle signup
+    if (action === 'signup' && req.method === 'POST') {
+      const { email, password, name, captchaToken } = req.body || {};
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+
+      // Rate limiting: max 5 signup attempts per IP per hour
+      const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+      const now = Date.now();
+      const hourAgo = now - 60 * 60 * 1000;
+      
+      if (signupAttempts.has(clientIP as string)) {
+        const attempts = signupAttempts.get(clientIP as string)!;
+        if (attempts.lastAttempt > hourAgo && attempts.count >= 5) {
+          return res.status(429).json({ error: 'Too many signup attempts. Please try again later.' });
+        }
+        if (attempts.lastAttempt <= hourAgo) {
+          attempts.count = 0;
+        }
+        attempts.count++;
+        attempts.lastAttempt = now;
+      } else {
+        signupAttempts.set(clientIP as string, { count: 1, lastAttempt: now });
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Please enter a valid email address' });
+      }
+
+      // Password strength validation
+      if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+      }
+
+      // Optional CAPTCHA verification (if configured)
+      if (process.env.RECAPTCHA_SECRET_KEY && captchaToken) {
+        try {
+          const captchaRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              secret: process.env.RECAPTCHA_SECRET_KEY,
+              response: captchaToken
+            })
+          });
+          const captchaData = await captchaRes.json();
+          if (!captchaData.success) {
+            return res.status(400).json({ error: 'CAPTCHA verification failed' });
+          }
+        } catch (err) {
+          console.warn('CAPTCHA verification error:', err);
+          // Continue without CAPTCHA if verification fails
+        }
+      }
+
+      try {
+        const normalizedEmail = String(email).toLowerCase();
+        const exists = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+        if (exists) {
+          return res.status(409).json({ error: 'Email already in use' });
+        }
+
+        const hash = await bcrypt.hash(String(password), 10);
+        const user = await prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            password: hash,
+            name: String(name || normalizedEmail.split('@')[0]),
+            role: 'OWNER',
+            isActive: true,
+          }
+        });
+
+        // Ensure Stripe customer for billing
+        try {
+          if (process.env.STRIPE_SECRET_KEY) {
+            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+            const customer = await stripe.customers.create({ email: user.email, name: user.name });
+            await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId: customer.id } });
+          }
+        } catch (err) {
+          console.warn('⚠️ Stripe customer create on signup failed:', err);
+        }
+
+        // Send welcome email
+        try {
+          await sendEmail(
+            user.email,
+            'Welcome to Vending Community!',
+            `<h2>Welcome to Vending Community!</h2>
+            <p>Hi ${user.name},</p>
+            <p>Thank you for joining Vending Community! Your account has been created successfully.</p>
+            <p>You can now:</p>
+            <ul>
+              <li>Add your vending machines</li>
+              <li>Track analytics and customer behavior</li>
+              <li>Manage customer reviews</li>
+              <li>Generate QR codes for your machines</li>
+            </ul>
+            <p>Start with our free tier and upgrade when you need more features!</p>
+            <p>Best regards,<br>The Vending Community Team</p>`
+          );
+        } catch (err) {
+          console.warn('⚠️ Welcome email failed:', err);
+        }
+
+        // Create session
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await prisma.session.create({ data: { userId: user.id, token: sessionToken, expiresAt } });
+        res.setHeader('Set-Cookie', `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=${24 * 60 * 60}; Path=/`);
+
+        return res.status(201).json({
+          message: 'Signup successful',
+          user: { id: user.id, email: user.email, name: user.name, role: user.role }
+        });
+      } catch (dbError: any) {
+        console.error('❌ Database error during signup:', dbError);
+        return res.status(500).json({ error: 'Database connection failed', details: dbError.message });
+      }
+    }
 
     // Handle login
     if (action === 'login' && req.method === 'POST') {
@@ -106,14 +235,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Handle logout
     if (action === 'logout' && req.method === 'POST') {
-      console.log('Logout attempt');
-      
-      // Get session token from cookie
       const sessionToken = req.cookies?.session;
       
       if (sessionToken) {
         try {
-          // Delete the session from database
           await prisma.session.deleteMany({
             where: { token: sessionToken }
           });
@@ -132,58 +257,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({
         message: 'Logout successful'
       });
-    }
-
-    // Handle signup
-    if (action === 'signup' && req.method === 'POST') {
-      const { email, password, name } = req.body || {};
-      if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required' });
-      }
-
-      try {
-        const normalizedEmail = String(email).toLowerCase();
-        const exists = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-        if (exists) {
-          return res.status(409).json({ error: 'Email already in use' });
-        }
-
-        const hash = await bcrypt.hash(String(password), 10);
-        const user = await prisma.user.create({
-          data: {
-            email: normalizedEmail,
-            password: hash,
-            name: String(name || normalizedEmail.split('@')[0]),
-            role: 'OWNER',
-            isActive: true,
-          }
-        });
-
-        // Ensure Stripe customer for billing
-        try {
-          if (process.env.STRIPE_SECRET_KEY) {
-            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-            const customer = await stripe.customers.create({ email: user.email, name: user.name });
-            await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId: customer.id } });
-          }
-        } catch (err) {
-          console.warn('⚠️ Stripe customer create on signup failed:', err);
-        }
-
-        // Create session
-        const sessionToken = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await prisma.session.create({ data: { userId: user.id, token: sessionToken, expiresAt } });
-        res.setHeader('Set-Cookie', `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=${24 * 60 * 60}; Path=/`);
-
-        return res.status(201).json({
-          message: 'Signup successful',
-          user: { id: user.id, email: user.email, name: user.name, role: user.role }
-        });
-      } catch (dbError: any) {
-        console.error('❌ Database error during signup:', dbError);
-        return res.status(500).json({ error: 'Database connection failed', details: dbError.message });
-      }
     }
 
     // Handle Google OAuth start
@@ -222,8 +295,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Find or create user
         let user = await prisma.user.findUnique({ where: { email } });
+        let isNewUser = false;
         if (!user) {
           user = await prisma.user.create({ data: { email, name, role: 'OWNER', isActive: true } });
+          isNewUser = true;
+          
+          // Send welcome email for new Google users
+          try {
+            await sendEmail(
+              user.email,
+              'Welcome to Vending Community!',
+              `<h2>Welcome to Vending Community!</h2>
+              <p>Hi ${user.name},</p>
+              <p>Thank you for joining Vending Community with Google! Your account has been created successfully.</p>
+              <p>You can now:</p>
+              <ul>
+                <li>Add your vending machines</li>
+                <li>Track analytics and customer behavior</li>
+                <li>Manage customer reviews</li>
+                <li>Generate QR codes for your machines</li>
+              </ul>
+              <p>Start with our free tier and upgrade when you need more features!</p>
+              <p>Best regards,<br>The Vending Community Team</p>`
+            );
+          } catch (err) {
+            console.warn('⚠️ Welcome email failed for Google user:', err);
+          }
         }
 
         // Create session
@@ -305,10 +402,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           });
         }
 
-        console.log('✅ Authenticated user:', session.user.name, session.user.role);
+        console.log('✅ Session valid for:', session.user.name, session.user.role);
 
         return res.status(200).json({
-          message: 'Authenticated',
+          message: 'Session valid',
           authenticated: true,
           user: {
             id: session.user.id,
@@ -319,22 +416,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
 
       } catch (dbError: any) {
-        console.error('❌ Database error during auth check:', dbError);
+        console.error('❌ Database error during session check:', dbError);
         return res.status(500).json({
-          error: 'Database connection failed',
-          details: dbError.message,
+          message: 'Database connection failed',
           authenticated: false,
-          user: null
+          user: null,
+          details: dbError.message
         });
       }
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
-  } catch (error) {
+    return res.status(400).json({ error: 'Invalid action' });
+
+  } catch (error: any) {
     console.error('❌ Auth Error:', error);
     return res.status(500).json({
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error.message
     });
   }
 } 
