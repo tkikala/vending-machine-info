@@ -56,20 +56,20 @@ const LandingPage: React.FC = () => {
               <div className="text-2xl">📊</div>
             </div>
             <h3 className="text-xl font-semibold mb-4">Smart Analytics</h3>
-            <p className="text-gray-400">
-              Track views, clicks, and customer behavior. Know exactly what's working and what's not.
-            </p>
+                                    <p className="text-gray-200">
+                          Track views, clicks, and customer behavior. Know exactly what's working and what's not.
+                        </p>
           </div>
 
           {/* Feature 2 */}
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-slate-700">
-            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-6 animate-bounce">
+            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-6 animate-spin">
               <div className="text-2xl">⭐</div>
             </div>
             <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-            <p className="text-gray-400">
-              Build trust with customer reviews and ratings. Respond to feedback and improve your service.
-            </p>
+                                    <p className="text-gray-200">
+                          Build trust with customer reviews and ratings. Respond to feedback and improve your service.
+                        </p>
           </div>
 
           {/* Feature 3 */}
@@ -78,20 +78,20 @@ const LandingPage: React.FC = () => {
               <div className="text-2xl">⚡</div>
             </div>
             <h3 className="text-xl font-semibold mb-4">Featured Listings</h3>
-            <p className="text-gray-400">
-              Get priority placement and more visibility. Stand out from the competition.
-            </p>
+                                    <p className="text-gray-200">
+                          Get priority placement and more visibility. Stand out from the competition.
+                        </p>
           </div>
 
           {/* Feature 4 */}
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-slate-700">
-            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-6 animate-bounce">
+            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-6 animate-ping">
               <div className="text-2xl">📱</div>
             </div>
             <h3 className="text-xl font-semibold mb-4">QR Code Stickers</h3>
-            <p className="text-gray-400">
-              Generate branded QR codes for each machine. Customers can easily check products and prices.
-            </p>
+                                    <p className="text-gray-200">
+                          Generate branded QR codes for each machine. Customers can easily check products and prices.
+                        </p>
           </div>
 
           {/* Feature 5 */}
@@ -100,20 +100,20 @@ const LandingPage: React.FC = () => {
               <div className="text-2xl">🔗</div>
             </div>
             <h3 className="text-xl font-semibold mb-4">Embeddable Widgets</h3>
-            <p className="text-gray-400">
-              Add machine information to your website or venue pages. Increase discoverability.
-            </p>
+                                    <p className="text-gray-200">
+                          Add machine information to your website or venue pages. Increase discoverability.
+                        </p>
           </div>
 
           {/* Feature 6 */}
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-slate-700">
-            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-6 animate-bounce">
+            <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-6 animate-pulse">
               <div className="text-2xl">✅</div>
             </div>
             <h3 className="text-xl font-semibold mb-4">Easy Management</h3>
-            <p className="text-gray-400">
-              Simple dashboard to manage all your machines. Update products, photos, and information easily.
-            </p>
+                                    <p className="text-gray-200">
+                          Simple dashboard to manage all your machines. Update products, photos, and information easily.
+                        </p>
           </div>
         </div>
       </section>

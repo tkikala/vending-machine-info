@@ -9,10 +9,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const sessionToken = req.cookies?.session;
   if (!sessionToken) return res.status(401).json({ error: 'Unauthorized' });
   const session = await prisma.session.findUnique({ where: { token: sessionToken }, include: { user: true } });
-  if (!session?.user || session.user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
-
+  if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
+  
   const machineId = String(req.query.machineId || '');
   if (!machineId) return res.status(400).json({ error: 'machineId required' });
+  
+  // Check if user is admin OR owns the machine
+  if (session.user.role !== 'ADMIN') {
+    const machine = await prisma.vendingMachine.findUnique({
+      where: { id: machineId },
+      select: { ownerId: true }
+    });
+    if (!machine || machine.ownerId !== session.user.id) {
+      return res.status(403).json({ error: 'Forbidden - You can only generate QR codes for your own machines' });
+    }
+  }
 
   const base = process.env.APP_URL || '';
   const url = `${base}/machine/${machineId}?utm_source=sticker&utm_medium=offline&utm_campaign=reviews`;

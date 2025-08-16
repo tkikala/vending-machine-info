@@ -231,7 +231,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await prisma.session.create({ data: { userId: user.id, token: sessionToken, expiresAt } });
         res.setHeader('Set-Cookie', `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=${24 * 60 * 60}; Path=/`);
-        return res.status(302).setHeader('Location', '/my-machines').end();
+        
+        // Redirect based on user role
+        const redirectPath = user.role === 'ADMIN' ? '/admin' : '/my-machines';
+        return res.status(302).setHeader('Location', redirectPath).end();
       } catch (e: any) {
         console.error('Google OAuth error:', e);
         return res.status(500).json({ error: 'Google auth failed' });

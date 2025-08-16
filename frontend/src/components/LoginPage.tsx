@@ -24,8 +24,13 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      navigate(from, { replace: true });
+      const user = await login(email, password);
+      // Redirect based on user role
+      if (user?.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/my-machines', { replace: true });
+      }
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
