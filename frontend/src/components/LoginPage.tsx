@@ -53,15 +53,15 @@ function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      // Get reCAPTCHA v3 token
+      // Get reCAPTCHA Enterprise token
       let captchaToken = '';
       console.log('reCAPTCHA available:', !!(window as any).grecaptcha);
       console.log('reCAPTCHA object:', (window as any).grecaptcha);
       
-      if ((window as any).grecaptcha) {
+      if ((window as any).grecaptcha?.enterprise) {
         try {
-          console.log('Attempting reCAPTCHA execute...');
-          captchaToken = await (window as any).grecaptcha.execute('6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC', {
+          console.log('Attempting reCAPTCHA Enterprise execute...');
+          captchaToken = await (window as any).grecaptcha.enterprise.execute('6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC', {
             action: 'SIGNUP'
           });
           console.log('reCAPTCHA token received:', captchaToken ? 'YES' : 'NO');
@@ -70,7 +70,7 @@ function LoginPage() {
           // Continue without CAPTCHA
         }
       } else {
-        console.warn('reCAPTCHA not loaded');
+        console.warn('reCAPTCHA Enterprise not loaded');
       }
       
       await signup(email, password, captchaToken);
@@ -155,7 +155,7 @@ function LoginPage() {
             {signupMode && (
               <div className="form-group" style={{ marginTop: '16px' }}>
                 <small style={{ color: '#888', fontSize: '12px', textAlign: 'center', display: 'block' }}>
-                  🔒 Protected by Google reCAPTCHA v3
+                  🔒 Protected by Google reCAPTCHA Enterprise
                 </small>
                 <small style={{ color: '#666', fontSize: '10px', textAlign: 'center', display: 'block', marginTop: '4px' }}>
                   (Invisible protection - no interaction needed)
