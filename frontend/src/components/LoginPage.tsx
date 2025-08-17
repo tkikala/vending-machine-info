@@ -61,7 +61,7 @@ function LoginPage() {
       if ((window as any).grecaptcha?.enterprise) {
         try {
           console.log('Attempting reCAPTCHA Enterprise execute...');
-          captchaToken = await (window as any).grecaptcha.enterprise.execute('6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC', {
+          captchaToken = await (window as any).grecaptcha.enterprise.execute('6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIlOznNeC', {
             action: 'SIGNUP'
           });
           console.log('reCAPTCHA token received:', captchaToken ? 'YES' : 'NO');

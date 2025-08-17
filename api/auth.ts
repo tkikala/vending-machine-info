@@ -68,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               event: {
                 token: captchaToken,
                 expectedAction: 'SIGNUP',
-                siteKey: '6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC'
+                siteKey: '6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIlOznNeC'
               }
             })
           });
