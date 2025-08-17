@@ -112,22 +112,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.warn('⚠️ Stripe customer create on signup failed:', err);
         }
 
-        // Send welcome email
+        // Generate email verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            emailVerificationToken: verificationToken,
+            emailVerificationExpires: verificationExpires
+          }
+        });
+
+        // Send welcome email with verification link
         try {
+          const verificationUrl = `${process.env.APP_URL || ''}/verify-email?token=${verificationToken}`;
           await sendEmail(
             user.email,
-            'Welcome to Vending Community!',
+            'Welcome to Vending Community! Please verify your email',
             `<h2>Welcome to Vending Community!</h2>
             <p>Hi ${user.name},</p>
             <p>Thank you for joining Vending Community! Your account has been created successfully.</p>
-            <p>You can now:</p>
+            <p>To get full access to all features, please verify your email address:</p>
+            <p style="text-align: center; margin: 30px 0;">
+              <a href="${verificationUrl}" style="background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                Verify Email Address
+              </a>
+            </p>
+            <p>Or copy this link: <a href="${verificationUrl}">${verificationUrl}</a></p>
+            <p><strong>What you can do now:</strong></p>
             <ul>
-              <li>Add your vending machines</li>
-              <li>Track analytics and customer behavior</li>
-              <li>Manage customer reviews</li>
+              <li>Add up to 2 vending machines (unverified limit)</li>
+              <li>Basic analytics and customer reviews</li>
               <li>Generate QR codes for your machines</li>
             </ul>
-            <p>Start with our free tier and upgrade when you need more features!</p>
+            <p><strong>After verification:</strong></p>
+            <ul>
+              <li>Add up to 5 vending machines</li>
+              <li>Access to billing and subscriptions</li>
+              <li>Full feature access</li>
+            </ul>
+            <p>This verification link expires in 24 hours.</p>
             <p>Best regards,<br>The Vending Community Team</p>`
           );
         } catch (err) {
@@ -427,6 +452,115 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           user: null,
           details: dbError.message
         });
+      }
+    }
+
+    // Handle email verification
+    if (action === 'verify-email' && req.method === 'GET') {
+      const { token } = req.query;
+      
+      if (!token) {
+        return res.status(400).json({ error: 'Verification token required' });
+      }
+
+      try {
+        const user = await prisma.user.findUnique({
+          where: { emailVerificationToken: String(token) }
+        });
+
+        if (!user) {
+          return res.status(400).json({ error: 'Invalid verification token' });
+        }
+
+        if (user.emailVerificationExpires && user.emailVerificationExpires < new Date()) {
+          return res.status(400).json({ error: 'Verification token has expired' });
+        }
+
+        // Mark email as verified
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            emailVerified: true,
+            emailVerificationToken: null,
+            emailVerificationExpires: null
+          }
+        });
+
+        console.log('✅ Email verified for:', user.email);
+
+        return res.status(200).json({
+          message: 'Email verified successfully',
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            emailVerified: true
+          }
+        });
+
+      } catch (dbError: any) {
+        console.error('❌ Database error during email verification:', dbError);
+        return res.status(500).json({ error: 'Database connection failed', details: dbError.message });
+      }
+    }
+
+    // Handle resend verification email
+    if (action === 'resend-verification' && req.method === 'POST') {
+      const sessionToken = req.cookies?.session;
+      if (!sessionToken) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      try {
+        const session = await prisma.session.findUnique({
+          where: { token: sessionToken },
+          include: { user: true }
+        });
+
+        if (!session?.user) {
+          return res.status(401).json({ error: 'Invalid session' });
+        }
+
+        if (session.user.emailVerified) {
+          return res.status(400).json({ error: 'Email already verified' });
+        }
+
+        // Generate new verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        
+        await prisma.user.update({
+          where: { id: session.user.id },
+          data: {
+            emailVerificationToken: verificationToken,
+            emailVerificationExpires: verificationExpires
+          }
+        });
+
+        // Send verification email
+        const verificationUrl = `${process.env.APP_URL || ''}/verify-email?token=${verificationToken}`;
+        await sendEmail(
+          session.user.email,
+          'Verify your Vending Community email',
+          `<h2>Email Verification</h2>
+          <p>Hi ${session.user.name},</p>
+          <p>Please verify your email address to get full access to Vending Community:</p>
+          <p style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              Verify Email Address
+            </a>
+          </p>
+          <p>Or copy this link: <a href="${verificationUrl}">${verificationUrl}</a></p>
+          <p>This verification link expires in 24 hours.</p>
+          <p>Best regards,<br>The Vending Community Team</p>`
+        );
+
+        return res.status(200).json({ message: 'Verification email sent' });
+
+      } catch (error: any) {
+        console.error('❌ Error resending verification:', error);
+        return res.status(500).json({ error: 'Failed to send verification email' });
       }
     }
 

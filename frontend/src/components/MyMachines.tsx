@@ -12,7 +12,7 @@ export default function MyMachines() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string; slots?: { used: number; limit: number }; onboarding?: any } | null>(null);
+  const [usage, setUsage] = useState<{ used: number; limit: number; plan?: string; slots?: { used: number; limit: number }; onboarding?: any; emailVerified?: boolean } | null>(null);
   const { logout } = useAuth() as any;
   const [openGalleryFor, setOpenGalleryFor] = useState<string | null>(null);
   const [localGallery, setLocalGallery] = useState<any[]>([]);
@@ -44,6 +44,54 @@ export default function MyMachines() {
         <button className="admin-button" onClick={async () => { try { await logout(); } catch {} }} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' }}>Logout</button>
       </div>
       {usage && <OnboardingBanner data={{ plan: usage.plan, onboarding: (usage as any).onboarding }} />}
+      
+      {/* Email Verification Banner */}
+      {usage && !usage.emailVerified && (
+        <div style={{ 
+          background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
+          color: 'white', 
+          padding: '16px', 
+          borderRadius: '8px', 
+          marginBottom: '16px',
+          border: '1px solid #f59e0b'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: '4px' }}>📧 Verify Your Email</div>
+              <div style={{ fontSize: '14px', opacity: 0.9 }}>
+                Verify your email to unlock full features: up to 5 machines, billing access, and more.
+              </div>
+            </div>
+            <button 
+              className="admin-button" 
+              style={{ 
+                background: 'rgba(255,255,255,0.2)', 
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: 'white',
+                fontSize: '12px',
+                padding: '8px 12px'
+              }}
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/auth?action=resend-verification', { 
+                    method: 'POST', 
+                    credentials: 'include' 
+                  });
+                  if (res.ok) {
+                    alert('Verification email sent! Check your inbox.');
+                  } else {
+                    alert('Failed to send verification email. Please try again.');
+                  }
+                } catch (err) {
+                  alert('Failed to send verification email. Please try again.');
+                }
+              }}
+            >
+              Resend Email
+            </button>
+          </div>
+        </div>
+      )}
       {usage && (
         <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.85 }}>
           Usage: {usage.used}/{usage.limit} machines

@@ -5,6 +5,7 @@ import LandingPage from './components/LandingPage';
 import MachineList from './components/MachineList';
 import MachinePage from './components/MachinePage';
 import LoginPage from './components/LoginPage';
+import EmailVerification from './components/EmailVerification';
 import AdminDashboard from './components/AdminDashboard';
 import AdminSubscriptions from './components/AdminSubscriptions';
 import AdminClaims from './components/AdminClaims';
@@ -27,6 +28,7 @@ function App() {
           <Route path="/machines" element={<MachineList />} />
           <Route path="/machine/:id" element={<MachinePage />} />
           <Route path="/machines/:id" element={<MachinePage />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin>

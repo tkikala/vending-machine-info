@@ -7,6 +7,7 @@ interface User {
   name: string;
   role: 'ADMIN' | 'OWNER';
   isActive: boolean;
+  emailVerified?: boolean;
 }
 
 interface AuthContextType {
