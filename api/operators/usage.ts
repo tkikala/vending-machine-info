@@ -47,6 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ 
       machineLimit, featuredSlots, usedMachines, activeFeatured, plan,
+      emailVerified: session.user.emailVerified,
       onboarding: { hasActiveSubscription, hasMachine: usedMachines > 0, hasPhotos, hasReviews, hasReply }
     });
   } catch (error) {

@@ -440,7 +440,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             id: session.user.id,
             email: session.user.email,
             name: session.user.name,
-            role: session.user.role
+            role: session.user.role,
+            emailVerified: session.user.emailVerified
           }
         });
 

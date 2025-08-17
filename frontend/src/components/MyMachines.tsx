@@ -19,19 +19,40 @@ export default function MyMachines() {
   const [showFeatureInfo, setShowFeatureInfo] = useState(false);
   const [embedFor, setEmbedFor] = useState<string | null>(null);
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [data, u] = await Promise.all([fetchMyMachines(), fetchUsage()]);
+      setRows(data);
+      setUsage({ 
+        used: u.usedMachines, 
+        limit: u.machineLimit, 
+        plan: u.plan, 
+        slots: { used: u.activeFeatured, limit: u.featuredSlots }, 
+        onboarding: u.onboarding,
+        emailVerified: u.emailVerified
+      });
+    } catch (e: any) {
+      setError(e.message || 'Failed to load your machines');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const [data, u] = await Promise.all([fetchMyMachines(), fetchUsage()]);
-        setRows(data);
-        setUsage({ used: u.usedMachines, limit: u.machineLimit, plan: u.plan, slots: { used: u.activeFeatured, limit: u.featuredSlots }, onboarding: u.onboarding });
-      } catch (e: any) {
-        setError(e.message || 'Failed to load your machines');
-      } finally {
-        setLoading(false);
+    fetchData();
+  }, []);
+
+  // Refresh data when component becomes visible (for email verification)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchData();
       }
-    })();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   if (loading) return <div>Loading…</div>;

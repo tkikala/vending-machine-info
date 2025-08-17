@@ -28,6 +28,12 @@ export default function EmailVerification() {
         if (response.ok) {
           setStatus('success');
           setMessage('Email verified successfully! You now have full access to all features.');
+          
+          // Update the user context with verified status
+          if (data.user) {
+            // Force a page reload to update all components
+            window.location.href = '/my-machines';
+          }
         } else {
           setStatus('error');
           setMessage(data.error || 'Verification failed');
