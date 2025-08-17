@@ -53,11 +53,11 @@ function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      // Get Enterprise reCAPTCHA token
+      // Get reCAPTCHA v3 token
       let captchaToken = '';
-      if ((window as any).grecaptcha?.enterprise) {
+      if ((window as any).grecaptcha) {
         try {
-          captchaToken = await (window as any).grecaptcha.enterprise.execute('6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC', {
+          captchaToken = await (window as any).grecaptcha.execute('6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC', {
             action: 'SIGNUP'
           });
         } catch (err) {
@@ -148,7 +148,7 @@ function LoginPage() {
             {signupMode && (
               <div className="form-group" style={{ marginTop: '16px' }}>
                 <small style={{ color: '#888', fontSize: '12px', textAlign: 'center', display: 'block' }}>
-                  🔒 Protected by Google reCAPTCHA Enterprise
+                  🔒 Protected by Google reCAPTCHA v3
                 </small>
               </div>
             )}

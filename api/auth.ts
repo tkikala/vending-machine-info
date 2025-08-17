@@ -58,30 +58,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'Password must be at least 8 characters long' });
       }
 
-      // Optional Enterprise reCAPTCHA verification (if configured)
+      // Optional reCAPTCHA v3 verification (if configured)
       if (process.env.RECAPTCHA_SECRET_KEY && captchaToken) {
         try {
-          const captchaRes = await fetch('https://recaptchaenterprise.googleapis.com/v1/projects/your-project-id/assessments', {
+          const captchaRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
             method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.GOOGLE_CLOUD_API_KEY || ''}`
-            },
-            body: JSON.stringify({
-              event: {
-                token: captchaToken,
-                siteKey: '6LdyX6grAAAAAJ_fSEF9e1TQJMP8I6udIl0znNeC',
-                expectedAction: 'SIGNUP'
-              }
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              secret: process.env.RECAPTCHA_SECRET_KEY,
+              response: captchaToken
             })
           });
           const captchaData = await captchaRes.json();
-          if (!captchaData.riskAnalysis?.score || captchaData.riskAnalysis.score < 0.5) {
-            console.warn('reCAPTCHA Enterprise score too low:', captchaData.riskAnalysis?.score);
+          if (!captchaData.success) {
+            console.warn('reCAPTCHA v3 verification failed:', captchaData);
+            // Continue without blocking - just log the failure
+          } else if (captchaData.score < 0.5) {
+            console.warn('reCAPTCHA v3 score too low:', captchaData.score);
             // Continue without blocking - just log the low score
           }
         } catch (err) {
-          console.warn('Enterprise reCAPTCHA verification error:', err);
+          console.warn('reCAPTCHA v3 verification error:', err);
           // Continue without CAPTCHA if verification fails
         }
       }
