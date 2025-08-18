@@ -43,17 +43,8 @@ export default function MyMachines() {
     fetchData();
   }, []);
 
-  // Refresh data when component becomes visible (for email verification)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchData();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+  // Note: Removed visibility change listener to prevent unnecessary refreshes
+  // Email verification will redirect and refresh the page naturally
 
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error: {error}</div>;

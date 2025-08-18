@@ -73,16 +73,12 @@ function LoginPage() {
         console.warn('reCAPTCHA Enterprise not loaded');
       }
       
-      const signupResponse = await signup(email, password, captchaToken);
+      await signup(email, password, captchaToken);
       
       // Auto-login after successful signup
-      if (signupResponse.user) {
-        // The backend already created a session, just update the auth context
-        const { login } = useAuth();
-        // Call login to update the context with the new user
-        await login(email, password);
-        navigate('/my-machines', { replace: true });
-      }
+      const { login } = useAuth();
+      await login(email, password);
+      navigate('/my-machines', { replace: true });
     } catch (err: any) {
       setError(err.message || 'Signup failed');
     } finally {
