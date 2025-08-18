@@ -76,7 +76,6 @@ function LoginPage() {
       await signup(email, password, captchaToken);
       
       // Auto-login after successful signup
-      const { login } = useAuth();
       await login(email, password);
       navigate('/my-machines', { replace: true });
     } catch (err: any) {
