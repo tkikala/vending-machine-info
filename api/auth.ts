@@ -59,9 +59,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       // Optional reCAPTCHA Enterprise verification (if configured)
-      if (process.env.RECAPTCHA_SECRET_KEY && captchaToken) {
+      if (process.env.GOOGLE_CLOUD_API_KEY && captchaToken) {
         try {
-          const captchaRes = await fetch('https://recaptchaenterprise.googleapis.com/v1/projects/automatcheck/assessments?key=' + (process.env.GOOGLE_CLOUD_API_KEY || ''), {
+          console.log('🔐 Verifying reCAPTCHA token with Google Cloud API...');
+          const captchaRes = await fetch('https://recaptchaenterprise.googleapis.com/v1/projects/automatcheck/assessments?key=' + process.env.GOOGLE_CLOUD_API_KEY, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -72,15 +73,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               }
             })
           });
+          
+          if (!captchaRes.ok) {
+            const errorText = await captchaRes.text();
+            console.error('❌ reCAPTCHA API error:', captchaRes.status, errorText);
+            throw new Error(`reCAPTCHA API error: ${captchaRes.status}`);
+          }
+          
           const captchaData = await captchaRes.json();
+          console.log('✅ reCAPTCHA verification response:', captchaData);
+          
           if (!captchaData.riskAnalysis?.score || captchaData.riskAnalysis.score < 0.5) {
-            console.warn('reCAPTCHA Enterprise score too low:', captchaData.riskAnalysis?.score);
+            console.warn('⚠️ reCAPTCHA Enterprise score too low:', captchaData.riskAnalysis?.score);
             // Continue without blocking - just log the low score
+          } else {
+            console.log('✅ reCAPTCHA verification successful, score:', captchaData.riskAnalysis.score);
           }
         } catch (err) {
-          console.warn('reCAPTCHA Enterprise verification error:', err);
+          console.error('❌ reCAPTCHA Enterprise verification error:', err);
           // Continue without CAPTCHA if verification fails
         }
+      } else {
+        console.warn('⚠️ reCAPTCHA verification skipped - missing GOOGLE_CLOUD_API_KEY or captchaToken');
       }
 
       try {
