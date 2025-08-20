@@ -59,10 +59,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       // Optional reCAPTCHA Enterprise verification (if configured)
-      if (process.env.GOOGLE_CLOUD_API_KEY && captchaToken) {
+      if (process.env.RECAPTCHA_SECRET_KEY && captchaToken) {
         try {
           console.log('🔐 Verifying reCAPTCHA token with Google Cloud API...');
-          const captchaRes = await fetch('https://recaptchaenterprise.googleapis.com/v1/projects/automatcheck/assessments?key=' + process.env.GOOGLE_CLOUD_API_KEY, {
+          const captchaRes = await fetch('https://recaptchaenterprise.googleapis.com/v1/projects/automatcheck/assessments?key=' + process.env.RECAPTCHA_SECRET_KEY, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -94,7 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           // Continue without CAPTCHA if verification fails
         }
       } else {
-        console.warn('⚠️ reCAPTCHA verification skipped - missing GOOGLE_CLOUD_API_KEY or captchaToken');
+        console.warn('⚠️ reCAPTCHA verification skipped - missing RECAPTCHA_SECRET_KEY or captchaToken');
       }
 
       try {
