@@ -567,78 +567,87 @@ const VendingGame: React.FC = () => {
                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Machine Details</h3>
                
                <div className="space-y-4">
-                 {/* Location Details */}
+                 {/* Get the current machine data from the updated machines array */}
                  {(() => {
-                   const location = gameState.locations.find(l => l.id === gameState.selectedMachine?.locationId);
-                   return location ? (
-                     <div className={`mb-4 p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                       <h4 className={`font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Location</h4>
-                       <div className="space-y-2">
-                         <div className="flex items-center space-x-2">
-                           <span className="text-blue-500">🏙️</span>
-                           <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                             {location.name}
-                           </span>
-                         </div>
-                         {location.suburb && (
-                           <div className="flex items-center space-x-2">
-                             <span className="text-green-500">🏘️</span>
-                             <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                               {location.suburb}
-                             </span>
+                   const currentMachine = gameState.machines.find(m => m.id === gameState.selectedMachine?.id);
+                   const location = gameState.locations.find(l => l.id === currentMachine?.locationId);
+                   
+                   return (
+                     <>
+                       {/* Location Details */}
+                       {location && (
+                         <div className={`mb-4 p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                           <h4 className={`font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Location</h4>
+                           <div className="space-y-2">
+                             <div className="flex items-center space-x-2">
+                               <span className="text-blue-500">🏙️</span>
+                               <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                                 {location.name}
+                               </span>
+                             </div>
+                             {location.suburb && (
+                               <div className="flex items-center space-x-2">
+                                 <span className="text-green-500">🏘️</span>
+                                 <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                   {location.suburb}
+                                 </span>
+                               </div>
+                             )}
+                             {location.road && (
+                               <div className="flex items-center space-x-2">
+                                 <span className="text-orange-500">🛣️</span>
+                                 <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                   {location.road}
+                                 </span>
+                               </div>
+                             )}
                            </div>
-                         )}
-                         {location.road && (
-                           <div className="flex items-center space-x-2">
-                             <span className="text-orange-500">🛣️</span>
-                             <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                               {location.road}
-                             </span>
-                           </div>
-                         )}
-                       </div>
-                     </div>
-                   ) : null;
-                 })()}
-                 
-                 <div className="grid grid-cols-2 gap-4">
-                   <div className={`${darkMode ? 'bg-blue-900/30' : 'bg-blue-50'} p-3 rounded-lg`}>
-                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Revenue</div>
-                     <div className="text-lg font-semibold text-green-500">€{gameState.selectedMachine.revenue.toFixed(0)}</div>
-                   </div>
-                   <div className={`${darkMode ? 'bg-red-900/30' : 'bg-red-50'} p-3 rounded-lg`}>
-                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Costs</div>
-                     <div className="text-lg font-semibold text-red-500">€{gameState.selectedMachine.costs.toFixed(0)}</div>
-                   </div>
-                   <div className={`${darkMode ? 'bg-green-900/30' : 'bg-green-50'} p-3 rounded-lg`}>
-                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Profit</div>
-                     <div className="text-lg font-semibold text-blue-500">€{gameState.selectedMachine.profit.toFixed(0)}</div>
-                   </div>
-                   <div className={`${darkMode ? 'bg-purple-900/30' : 'bg-purple-50'} p-3 rounded-lg`}>
-                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Customers</div>
-                     <div className="text-lg font-semibold text-purple-500">{gameState.selectedMachine.customerCount}</div>
-                   </div>
-                 </div>
-                 
-                 <div>
-                   <h4 className={`font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Products</h4>
-                   <div className="space-y-2">
-                     {gameState.selectedMachine.products.map((product) => (
-                       <div key={product.id} className={`flex justify-between items-center p-2 rounded ${
-                         darkMode ? 'bg-gray-700' : 'bg-gray-50'
-                       }`}>
-                         <div>
-                           <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{product.name}</div>
-                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Stock: {product.stock}</div>
                          </div>
-                         <div className="text-right">
-                           <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{product.price}</div>
-                           <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>€{product.cost} cost</div>
+                       )}
+                       
+                       {/* Machine Stats */}
+                       <div className="grid grid-cols-2 gap-4">
+                         <div className={`${darkMode ? 'bg-blue-900/30' : 'bg-blue-50'} p-3 rounded-lg`}>
+                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Revenue</div>
+                           <div className="text-lg font-semibold text-green-500">€{currentMachine?.revenue.toFixed(0) || '0'}</div>
+                         </div>
+                         <div className={`${darkMode ? 'bg-red-900/30' : 'bg-red-50'} p-3 rounded-lg`}>
+                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Costs</div>
+                           <div className="text-lg font-semibold text-red-500">€{currentMachine?.costs.toFixed(0) || '0'}</div>
+                         </div>
+                         <div className={`${darkMode ? 'bg-green-900/30' : 'bg-green-50'} p-3 rounded-lg`}>
+                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Profit</div>
+                           <div className="text-lg font-semibold text-blue-500">€{currentMachine?.profit.toFixed(0) || '0'}</div>
+                         </div>
+                         <div className={`${darkMode ? 'bg-purple-900/30' : 'bg-purple-50'} p-3 rounded-lg`}>
+                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Customers</div>
+                           <div className="text-lg font-semibold text-purple-500">{currentMachine?.customerCount || 0}</div>
                          </div>
                        </div>
-                     ))}
-                   </div>
-                 </div>
+                       
+                       {/* Products */}
+                       <div>
+                         <h4 className={`font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Products</h4>
+                         <div className="space-y-2">
+                           {currentMachine?.products.map((product) => (
+                             <div key={product.id} className={`flex justify-between items-center p-2 rounded ${
+                               darkMode ? 'bg-gray-700' : 'bg-gray-50'
+                             }`}>
+                               <div>
+                                 <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{product.name}</div>
+                                 <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Stock: {product.stock}</div>
+                               </div>
+                               <div className="text-right">
+                                 <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{product.price}</div>
+                                 <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>€{product.cost} cost</div>
+                               </div>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     </>
+                   );
+                                    })()}
                </div>
             </motion.div>
           </motion.div>
