@@ -16,6 +16,10 @@ interface Location {
   traffic: number;
   isOccupied: boolean;
   machineId?: string;
+  lat?: number;
+  lng?: number;
+  suburb?: string;
+  road?: string;
 }
 
 interface VendingMachine {
@@ -128,9 +132,13 @@ const VendingGame: React.FC = () => {
     const machineCost = 3000;
     if (gameState.money < machineCost) return;
 
+    // Find the selected location
+    const selectedLocation = gameState.selectedLocation;
+    if (!selectedLocation) return;
+
     const newMachine: VendingMachine = {
       id: `machine-${Date.now()}`,
-      locationId,
+      locationId: selectedLocation.id, // Use the selected location's ID
       products: [
         { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 0.8 },
         { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 0.6 },
@@ -144,15 +152,29 @@ const VendingGame: React.FC = () => {
       satisfaction: 0.8,
     };
 
-    setGameState(prev => ({
-      ...prev,
-      money: prev.money - machineCost,
-      machines: [...prev.machines, newMachine],
-      locations: prev.locations.map(loc => 
-        loc.id === locationId ? { ...loc, isOccupied: true, machineId: newMachine.id } : loc
-      ),
-    }));
-  }, [gameState.money]);
+    setGameState(prev => {
+      // Check if this location already exists in the locations array
+      const existingLocationIndex = prev.locations.findIndex(loc => loc.id === selectedLocation.id);
+      
+      let updatedLocations;
+      if (existingLocationIndex >= 0) {
+        // Update existing location
+        updatedLocations = prev.locations.map(loc => 
+          loc.id === selectedLocation.id ? { ...loc, isOccupied: true, machineId: newMachine.id } : loc
+        );
+      } else {
+        // Add new location to the array
+        updatedLocations = [...prev.locations, { ...selectedLocation, isOccupied: true, machineId: newMachine.id }];
+      }
+
+      return {
+        ...prev,
+        money: prev.money - machineCost,
+        machines: [...prev.machines, newMachine],
+        locations: updatedLocations,
+      };
+    });
+  }, [gameState.money, gameState.selectedLocation]);
 
   const togglePause = () => {
     setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
@@ -422,6 +444,38 @@ const VendingGame: React.FC = () => {
                onClick={(e: React.MouseEvent) => e.stopPropagation()}
              >
                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.selectedLocation.name}</h3>
+            
+            {/* Location Details */}
+            <div className={`mb-4 p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+              <div className="space-y-2">
+                {gameState.selectedLocation.lat && gameState.selectedLocation.lng && (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-500">🏙️</span>
+                      <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                        {gameState.selectedLocation.name}
+                      </span>
+                    </div>
+                    {gameState.selectedLocation.suburb && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-green-500">🏘️</span>
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          {gameState.selectedLocation.suburb}
+                        </span>
+                      </div>
+                    )}
+                    {gameState.selectedLocation.road && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-orange-500">🛣️</span>
+                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                          {gameState.selectedLocation.road}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
                
                <div className="space-y-3 mb-6">
                  <div className="flex justify-between">

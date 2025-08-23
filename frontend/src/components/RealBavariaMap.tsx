@@ -22,6 +22,8 @@ interface Location {
   isOccupied: boolean;
   lat?: number;
   lng?: number;
+  suburb?: string;
+  road?: string;
 }
 
 interface RealBavariaMapProps {
@@ -144,7 +146,13 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
     // Add location markers
     const markers: L.Marker[] = [];
     locations.forEach((location) => {
-      const coords = getLocationCoordinates(location);
+      // Get coordinates - use lat/lng if available, otherwise use the coordinate mapping
+      let coords;
+      if (location.lat && location.lng) {
+        coords = { lat: location.lat, lng: location.lng };
+      } else {
+        coords = getLocationCoordinates(location);
+      }
       
       // Custom marker icon
       const customIcon = L.divIcon({
