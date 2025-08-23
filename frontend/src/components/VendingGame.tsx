@@ -55,11 +55,11 @@ const VendingGame: React.FC = () => {
     isPaused: false,
     gameSpeed: 1,
     locations: [
-      { id: '1', name: 'München Universität', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
-      { id: '2', name: 'Olympia Einkaufszentrum', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
-      { id: '3', name: 'BMW Headquarters', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
-      { id: '4', name: 'Klinikum Großhadern', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
-      { id: '5', name: 'Aral Tankstelle', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
+      { id: '1', name: 'München Universität', x: 25, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
+      { id: '2', name: 'Olympia Einkaufszentrum', x: 45, y: 35, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
+      { id: '3', name: 'BMW Headquarters', x: 65, y: 40, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
+      { id: '4', name: 'Klinikum Großhadern', x: 75, y: 50, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
+      { id: '5', name: 'Aral Tankstelle', x: 60, y: 70, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
     ],
     machines: [],
   });
@@ -168,11 +168,11 @@ const VendingGame: React.FC = () => {
       isPaused: false,
       gameSpeed: 1,
       locations: [
-        { id: '1', name: 'München Universität', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
-        { id: '2', name: 'Olympia Einkaufszentrum', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
-        { id: '3', name: 'BMW Headquarters', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
-        { id: '4', name: 'Klinikum Großhadern', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
-        { id: '5', name: 'Aral Tankstelle', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
+        { id: '1', name: 'München Universität', x: 25, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
+        { id: '2', name: 'Olympia Einkaufszentrum', x: 45, y: 35, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
+        { id: '3', name: 'BMW Headquarters', x: 65, y: 40, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
+        { id: '4', name: 'Klinikum Großhadern', x: 75, y: 50, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
+        { id: '5', name: 'Aral Tankstelle', x: 60, y: 70, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
       ],
       machines: [],
     });
@@ -311,15 +311,38 @@ const VendingGame: React.FC = () => {
                   ? 'bg-gradient-to-br from-gray-700 to-gray-600' 
                   : 'bg-gradient-to-br from-green-100 to-blue-100'
               }`}>
-                {/* Roads */}
+                {/* Real Bavaria Map Background */}
                 <div className="absolute inset-0 pointer-events-none">
                   <svg className="w-full h-full" viewBox="0 0 100 100">
-                    <path d="M20 50 L80 50" stroke={darkMode ? "#999" : "#666"} strokeWidth="0.5" fill="none" />
-                    <path d="M50 20 L50 80" stroke={darkMode ? "#999" : "#666"} strokeWidth="0.5" fill="none" />
+                    {/* Bavaria outline */}
+                    <path 
+                      d="M15 20 L25 15 L35 18 L45 25 L55 30 L65 35 L75 40 L85 45 L90 55 L85 65 L80 75 L70 80 L60 85 L50 90 L40 85 L30 80 L20 75 L15 65 L10 55 L15 45 L20 35 L15 25 Z" 
+                      fill={darkMode ? "#374151" : "#e5f3ff"} 
+                      stroke={darkMode ? "#6b7280" : "#3b82f6"} 
+                      strokeWidth="0.5"
+                    />
+                    
+                    {/* Major cities */}
+                    <circle cx="25" cy="30" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
+                    <circle cx="45" cy="35" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
+                    <circle cx="65" cy="40" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
+                    <circle cx="75" cy="50" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
+                    <circle cx="60" cy="70" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
+                    <circle cx="40" cy="75" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
+                    <circle cx="25" cy="65" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
+                    
+                    {/* Major roads */}
+                    <path d="M20 25 L45 35 L70 45 L80 55" stroke={darkMode ? "#6b7280" : "#3b82f6"} strokeWidth="0.3" fill="none" />
+                    <path d="M30 20 L50 30 L65 40" stroke={darkMode ? "#6b7280" : "#3b82f6"} strokeWidth="0.3" fill="none" />
+                    <path d="M25 65 L45 75 L65 80" stroke={darkMode ? "#6b7280" : "#3b82f6"} strokeWidth="0.3" fill="none" />
+                    
+                    {/* Rivers */}
+                    <path d="M15 40 Q30 45 45 50 Q60 55 75 60" stroke={darkMode ? "#60a5fa" : "#0ea5e9"} strokeWidth="0.4" fill="none" />
+                    <path d="M20 60 Q35 65 50 70" stroke={darkMode ? "#60a5fa" : "#0ea5e9"} strokeWidth="0.3" fill="none" />
                   </svg>
                 </div>
                 
-                {/* Locations */}
+                {/* Locations with real coordinates */}
                 {gameState.locations.map((location) => (
                   <motion.div
                     key={location.id}
