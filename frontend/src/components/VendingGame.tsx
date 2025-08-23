@@ -225,7 +225,7 @@ const VendingGame: React.FC = () => {
               
               <div className="flex items-center space-x-2">
                 <FaChartLine className="text-green-500 text-xl" />
-                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{totalProfit.toLocaleString()}</span>
+                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{Math.round(totalProfit).toLocaleString()}</span>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -338,12 +338,12 @@ const VendingGame: React.FC = () => {
                 
                 <div className="flex justify-between items-center">
                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Total Revenue</span>
-                  <span className="font-semibold text-green-500">€{totalRevenue.toLocaleString()}</span>
+                  <span className="font-semibold text-green-500">€{Math.round(totalRevenue).toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Total Profit</span>
-                  <span className="font-semibold text-blue-500">€{totalProfit.toLocaleString()}</span>
+                  <span className="font-semibold text-blue-500">€{Math.round(totalProfit).toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
