@@ -40,6 +40,12 @@ const LandingPage: React.FC = () => {
           >
             Start Free Trial
           </Link>
+          <Link 
+            to="/game" 
+            className="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+          >
+            🎮 Try Vending Simulator
+          </Link>
           <button className="border border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
             Watch Demo
           </button>

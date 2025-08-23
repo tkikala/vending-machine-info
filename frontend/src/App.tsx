@@ -17,6 +17,7 @@ import BillingSuccess from './components/BillingSuccess';
 import AddMachineForm from './components/AddMachineForm';
 import EditMachineForm from './components/EditMachineForm';
 import ProductsManagement from './components/ProductsManagement';
+import VendingGame from './components/VendingGame';
 import './App.css';
 
 function App() {
@@ -83,6 +84,7 @@ function App() {
           <Route path="/request-machine" element={<LeadForm />} />
           <Route path="/billing/success" element={<BillingSuccess />} />
           <Route path="/billing/cancel" element={<BillingSuccess canceled />} />
+          <Route path="/game" element={<VendingGame />} />
         </Routes>
       </div>
     </AuthProvider>

@@ -1,0 +1,517 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaMapMarkerAlt, FaCoins, FaChartLine, FaCog, FaPlay, FaPause, FaUndo, FaQuestionCircle } from 'react-icons/fa';
+import { MdLocationOn, MdAttachMoney, MdInventory, MdSpeed } from 'react-icons/md';
+import GameTutorial from './GameTutorial';
+
+interface Location {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  rent: number;
+  utilities: number;
+  population: number;
+  traffic: number;
+  isOccupied: boolean;
+  machineId?: string;
+}
+
+interface VendingMachine {
+  id: string;
+  locationId: string;
+  products: Product[];
+  revenue: number;
+  costs: number;
+  profit: number;
+  customerCount: number;
+  satisfaction: number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  cost: number;
+  stock: number;
+  demand: number;
+}
+
+interface GameState {
+  money: number;
+  day: number;
+  isPaused: boolean;
+  locations: Location[];
+  machines: VendingMachine[];
+  selectedLocation?: Location;
+  selectedMachine?: VendingMachine;
+  gameSpeed: number;
+}
+
+const VendingGame: React.FC = () => {
+  const [gameState, setGameState] = useState<GameState>({
+    money: 10000,
+    day: 1,
+    isPaused: false,
+    gameSpeed: 1,
+    locations: [
+      { id: '1', name: 'University Campus', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
+      { id: '2', name: 'Shopping Mall', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
+      { id: '3', name: 'Office Building', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
+      { id: '4', name: 'Hospital', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
+      { id: '5', name: 'Gas Station', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
+    ],
+    machines: [],
+  });
+
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showMachineModal, setShowMachineModal] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Game loop
+  useEffect(() => {
+    if (gameState.isPaused) return;
+
+    const interval = setInterval(() => {
+      setGameState(prev => {
+        const newState = { ...prev };
+        
+        // Process each machine
+        newState.machines.forEach(machine => {
+          const location = newState.locations.find(l => l.id === machine.locationId);
+          if (!location) return;
+
+          // Calculate daily revenue based on location factors
+          const baseCustomers = Math.floor(location.population * 0.01 * (location.traffic / 100));
+          const dailyCustomers = Math.floor(baseCustomers * (0.8 + Math.random() * 0.4));
+          
+          let dailyRevenue = 0;
+          machine.products.forEach(product => {
+            const sales = Math.min(dailyCustomers, product.stock);
+            dailyRevenue += sales * product.price;
+            product.stock = Math.max(0, product.stock - sales);
+          });
+
+          machine.revenue += dailyRevenue;
+          machine.customerCount += dailyCustomers;
+          machine.profit = machine.revenue - machine.costs;
+        });
+
+        // Add daily costs
+        newState.machines.forEach(machine => {
+          const location = newState.locations.find(l => l.id === machine.locationId);
+          if (location) {
+            machine.costs += (location.rent + location.utilities) / 30; // Daily costs
+          }
+        });
+
+        newState.day += 1;
+        return newState;
+      });
+    }, 1000 / gameState.gameSpeed);
+
+    return () => clearInterval(interval);
+  }, [gameState.isPaused, gameState.gameSpeed]);
+
+  const placeMachine = useCallback((locationId: string) => {
+    const machineCost = 3000;
+    if (gameState.money < machineCost) return;
+
+    const newMachine: VendingMachine = {
+      id: `machine-${Date.now()}`,
+      locationId,
+      products: [
+        { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 0.8 },
+        { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 0.6 },
+        { id: '3', name: 'Water', price: 1.00, cost: 0.30, stock: 40, demand: 0.9 },
+        { id: '4', name: 'Chips', price: 2.00, cost: 1.00, stock: 25, demand: 0.7 },
+      ],
+      revenue: 0,
+      costs: 0,
+      profit: 0,
+      customerCount: 0,
+      satisfaction: 0.8,
+    };
+
+    setGameState(prev => ({
+      ...prev,
+      money: prev.money - machineCost,
+      machines: [...prev.machines, newMachine],
+      locations: prev.locations.map(loc => 
+        loc.id === locationId ? { ...loc, isOccupied: true, machineId: newMachine.id } : loc
+      ),
+    }));
+  }, [gameState.money]);
+
+  const togglePause = () => {
+    setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
+  };
+
+  const changeSpeed = (speed: number) => {
+    setGameState(prev => ({ ...prev, gameSpeed: speed }));
+  };
+
+  const resetGame = () => {
+    setGameState({
+      money: 10000,
+      day: 1,
+      isPaused: false,
+      gameSpeed: 1,
+      locations: [
+        { id: '1', name: 'University Campus', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
+        { id: '2', name: 'Shopping Mall', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
+        { id: '3', name: 'Office Building', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
+        { id: '4', name: 'Hospital', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
+        { id: '5', name: 'Gas Station', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
+      ],
+      machines: [],
+    });
+  };
+
+  const totalRevenue = gameState.machines.reduce((sum, m) => sum + m.revenue, 0);
+  const totalProfit = gameState.machines.reduce((sum, m) => sum + m.profit, 0);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <motion.div 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-white shadow-lg border-b border-gray-200"
+      >
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="text-2xl font-bold text-gray-800">🎮 Vending Tycoon</div>
+              <div className="text-sm text-gray-600">Day {gameState.day}</div>
+            </div>
+            
+                           <div className="flex items-center space-x-6">
+                 <div className="flex items-center space-x-2">
+                   <FaCoins className="text-yellow-500 text-xl" />
+                   <span className="font-semibold text-gray-800">${gameState.money.toLocaleString()}</span>
+                 </div>
+                 
+                 <div className="flex items-center space-x-2">
+                   <FaChartLine className="text-green-500 text-xl" />
+                   <span className="font-semibold text-gray-800">${totalProfit.toLocaleString()}</span>
+                 </div>
+                 
+                 <div className="flex items-center space-x-2">
+                   <button
+                     onClick={() => setShowTutorial(true)}
+                     className="p-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+                     title="Show Tutorial"
+                   >
+                     <FaQuestionCircle />
+                   </button>
+                   
+                   <button
+                     onClick={togglePause}
+                     className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                   >
+                     {gameState.isPaused ? <FaPlay /> : <FaPause />}
+                   </button>
+                   
+                   <select
+                     value={gameState.gameSpeed}
+                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => changeSpeed(Number(e.target.value))}
+                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   >
+                     <option value={0.5}>0.5x</option>
+                     <option value={1}>1x</option>
+                     <option value={2}>2x</option>
+                     <option value={5}>5x</option>
+                   </select>
+                   
+                   <button
+                     onClick={resetGame}
+                     className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                   >
+                     <FaUndo />
+                   </button>
+                 </div>
+               </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Main Game Area */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Map */}
+          <div className="lg:col-span-2">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200"
+            >
+              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <MdLocationOn className="mr-2 text-blue-500" />
+                City Map
+              </h2>
+              
+              <div className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-xl p-4 h-96">
+                {/* Roads */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <svg className="w-full h-full" viewBox="0 0 100 100">
+                    <path d="M20 50 L80 50" stroke="#666" strokeWidth="0.5" fill="none" />
+                    <path d="M50 20 L50 80" stroke="#666" strokeWidth="0.5" fill="none" />
+                  </svg>
+                </div>
+                
+                {/* Locations */}
+                {gameState.locations.map((location) => (
+                  <motion.div
+                    key={location.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`absolute cursor-pointer transition-all duration-200 ${
+                      location.isOccupied ? 'opacity-60' : 'hover:opacity-80'
+                    }`}
+                    style={{ left: `${location.x}%`, top: `${location.y}%` }}
+                    onClick={() => {
+                      setGameState(prev => ({ ...prev, selectedLocation: location }));
+                      setShowLocationModal(true);
+                    }}
+                  >
+                    <div className={`relative ${location.isOccupied ? 'text-green-600' : 'text-blue-600'}`}>
+                      <FaMapMarkerAlt className="text-3xl drop-shadow-lg" />
+                      {location.isOccupied && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                      )}
+                    </div>
+                    
+                    <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded text-xs font-medium shadow-lg whitespace-nowrap">
+                      {location.name}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Stats Panel */}
+          <div className="space-y-6">
+            <motion.div 
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200"
+            >
+              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <MdAttachMoney className="mr-2 text-green-500" />
+                Business Stats
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Machines</span>
+                  <span className="font-semibold text-gray-800">{gameState.machines.length}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Total Revenue</span>
+                  <span className="font-semibold text-green-600">${totalRevenue.toLocaleString()}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Total Profit</span>
+                  <span className="font-semibold text-blue-600">${totalProfit.toLocaleString()}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Customers Served</span>
+                  <span className="font-semibold text-gray-800">
+                    {gameState.machines.reduce((sum, m) => sum + m.customerCount, 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Machines List */}
+            {gameState.machines.length > 0 && (
+              <motion.div 
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200"
+              >
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                  <MdInventory className="mr-2 text-purple-500" />
+                  Your Machines
+                </h3>
+                
+                <div className="space-y-3">
+                  {gameState.machines.map((machine) => {
+                    const location = gameState.locations.find(l => l.id === machine.locationId);
+                    return (
+                      <motion.div
+                        key={machine.id}
+                        whileHover={{ scale: 1.02 }}
+                        className="p-3 bg-gray-50 rounded-lg cursor-pointer border border-gray-200"
+                        onClick={() => {
+                          setGameState(prev => ({ ...prev, selectedMachine: machine }));
+                          setShowMachineModal(true);
+                        }}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-medium text-gray-800">{location?.name}</div>
+                            <div className="text-sm text-gray-600">${machine.profit.toFixed(2)} profit</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-green-600">${machine.revenue.toFixed(0)}</div>
+                            <div className="text-xs text-gray-500">{machine.customerCount} customers</div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Location Modal */}
+      <AnimatePresence>
+        {showLocationModal && gameState.selectedLocation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            onClick={() => setShowLocationModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+                             className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+               onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold text-gray-800 mb-4">{gameState.selectedLocation.name}</h3>
+              
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Monthly Rent</span>
+                  <span className="font-semibold">${gameState.selectedLocation.rent}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Utilities</span>
+                  <span className="font-semibold">${gameState.selectedLocation.utilities}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Population</span>
+                  <span className="font-semibold">{gameState.selectedLocation.population.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Traffic</span>
+                  <span className="font-semibold">{gameState.selectedLocation.traffic}%</span>
+                </div>
+              </div>
+              
+              {gameState.selectedLocation.isOccupied ? (
+                <div className="text-center text-gray-600">
+                  <div className="text-lg font-semibold text-green-600 mb-2">✓ Machine Placed</div>
+                  <div className="text-sm">This location is already occupied</div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="text-center text-gray-600">
+                    <div className="text-lg font-semibold mb-2">Place Vending Machine</div>
+                    <div className="text-sm">Cost: $3,000</div>
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      placeMachine(gameState.selectedLocation!.id);
+                      setShowLocationModal(false);
+                    }}
+                    disabled={gameState.money < 3000}
+                    className="w-full py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {gameState.money < 3000 ? 'Not Enough Money' : 'Place Machine'}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+             {/* Machine Modal */}
+       <AnimatePresence>
+         {showMachineModal && gameState.selectedMachine && (
+           <motion.div
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             exit={{ opacity: 0 }}
+             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+             onClick={() => setShowMachineModal(false)}
+           >
+             <motion.div
+               initial={{ scale: 0.9, opacity: 0 }}
+               animate={{ scale: 1, opacity: 1 }}
+               exit={{ scale: 0.9, opacity: 0 }}
+               className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[80vh] overflow-y-auto"
+               onClick={(e: React.MouseEvent) => e.stopPropagation()}
+             >
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Machine Details</h3>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="text-sm text-gray-600">Revenue</div>
+                    <div className="text-lg font-semibold text-green-600">${gameState.selectedMachine.revenue.toFixed(2)}</div>
+                  </div>
+                  <div className="bg-red-50 p-3 rounded-lg">
+                    <div className="text-sm text-gray-600">Costs</div>
+                    <div className="text-lg font-semibold text-red-600">${gameState.selectedMachine.costs.toFixed(2)}</div>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="text-sm text-gray-600">Profit</div>
+                    <div className="text-lg font-semibold text-blue-600">${gameState.selectedMachine.profit.toFixed(2)}</div>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <div className="text-sm text-gray-600">Customers</div>
+                    <div className="text-lg font-semibold text-purple-600">{gameState.selectedMachine.customerCount}</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-3">Products</h4>
+                  <div className="space-y-2">
+                    {gameState.selectedMachine.products.map((product) => (
+                      <div key={product.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div>
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-sm text-gray-600">Stock: {product.stock}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold">${product.price}</div>
+                          <div className="text-xs text-gray-500">${product.cost} cost</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+                 )}
+       </AnimatePresence>
+
+       {/* Tutorial Modal */}
+       <AnimatePresence>
+         {showTutorial && (
+           <GameTutorial onClose={() => setShowTutorial(false)} />
+         )}
+       </AnimatePresence>
+     </div>
+   );
+ };
+
+export default VendingGame;
