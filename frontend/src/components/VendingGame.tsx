@@ -220,12 +220,12 @@ const VendingGame: React.FC = () => {
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <FaCoins className="text-yellow-500 text-xl" />
-                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${gameState.money.toLocaleString()}</span>
+                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{gameState.money.toLocaleString()}</span>
               </div>
               
               <div className="flex items-center space-x-2">
                 <FaChartLine className="text-green-500 text-xl" />
-                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${totalProfit.toLocaleString()}</span>
+                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{totalProfit.toLocaleString()}</span>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -338,12 +338,12 @@ const VendingGame: React.FC = () => {
                 
                 <div className="flex justify-between items-center">
                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Total Revenue</span>
-                  <span className="font-semibold text-green-500">${totalRevenue.toLocaleString()}</span>
+                  <span className="font-semibold text-green-500">€{totalRevenue.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Total Profit</span>
-                  <span className="font-semibold text-blue-500">${totalProfit.toLocaleString()}</span>
+                  <span className="font-semibold text-blue-500">€{totalProfit.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
@@ -387,10 +387,10 @@ const VendingGame: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{location?.name}</div>
-                            <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>${machine.profit.toFixed(2)} profit</div>
+                            <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>€{machine.profit.toFixed(0)} profit</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium text-green-500">${machine.revenue.toFixed(0)}</div>
+                            <div className="text-sm font-medium text-green-500">€{machine.revenue.toFixed(0)}</div>
                             <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{machine.customerCount} customers</div>
                           </div>
                         </div>
@@ -411,7 +411,7 @@ const VendingGame: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]"
             onClick={() => setShowLocationModal(false)}
           >
                          <motion.div
@@ -426,11 +426,11 @@ const VendingGame: React.FC = () => {
                <div className="space-y-3 mb-6">
                  <div className="flex justify-between">
                    <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Monthly Rent</span>
-                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${gameState.selectedLocation.rent}</span>
+                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{gameState.selectedLocation.rent}</span>
                  </div>
                  <div className="flex justify-between">
                    <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Utilities</span>
-                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${gameState.selectedLocation.utilities}</span>
+                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{gameState.selectedLocation.utilities}</span>
                  </div>
                  <div className="flex justify-between">
                    <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Population</span>
@@ -451,7 +451,7 @@ const VendingGame: React.FC = () => {
                  <div className="space-y-3">
                    <div className={`text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                      <div className="text-lg font-semibold mb-2">Place Vending Machine</div>
-                     <div className="text-sm">Cost: $3,000</div>
+                     <div className="text-sm">Cost: €3,000</div>
                    </div>
                    
                    <button
@@ -473,14 +473,14 @@ const VendingGame: React.FC = () => {
 
              {/* Machine Modal */}
        <AnimatePresence>
-         {showMachineModal && gameState.selectedMachine && (
-           <motion.div
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             exit={{ opacity: 0 }}
-             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-             onClick={() => setShowMachineModal(false)}
-           >
+                 {showMachineModal && gameState.selectedMachine && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]"
+            onClick={() => setShowMachineModal(false)}
+          >
                           <motion.div
                initial={{ scale: 0.9, opacity: 0 }}
                animate={{ scale: 1, opacity: 1 }}
@@ -494,15 +494,15 @@ const VendingGame: React.FC = () => {
                  <div className="grid grid-cols-2 gap-4">
                    <div className={`${darkMode ? 'bg-blue-900/30' : 'bg-blue-50'} p-3 rounded-lg`}>
                      <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Revenue</div>
-                     <div className="text-lg font-semibold text-green-500">${gameState.selectedMachine.revenue.toFixed(2)}</div>
+                     <div className="text-lg font-semibold text-green-500">€{gameState.selectedMachine.revenue.toFixed(0)}</div>
                    </div>
                    <div className={`${darkMode ? 'bg-red-900/30' : 'bg-red-50'} p-3 rounded-lg`}>
                      <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Costs</div>
-                     <div className="text-lg font-semibold text-red-500">${gameState.selectedMachine.costs.toFixed(2)}</div>
+                     <div className="text-lg font-semibold text-red-500">€{gameState.selectedMachine.costs.toFixed(0)}</div>
                    </div>
                    <div className={`${darkMode ? 'bg-green-900/30' : 'bg-green-50'} p-3 rounded-lg`}>
                      <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Profit</div>
-                     <div className="text-lg font-semibold text-blue-500">${gameState.selectedMachine.profit.toFixed(2)}</div>
+                     <div className="text-lg font-semibold text-blue-500">€{gameState.selectedMachine.profit.toFixed(0)}</div>
                    </div>
                    <div className={`${darkMode ? 'bg-purple-900/30' : 'bg-purple-50'} p-3 rounded-lg`}>
                      <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Customers</div>
@@ -522,8 +522,8 @@ const VendingGame: React.FC = () => {
                            <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Stock: {product.stock}</div>
                          </div>
                          <div className="text-right">
-                           <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${product.price}</div>
-                           <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>${product.cost} cost</div>
+                           <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{product.price}</div>
+                           <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>€{product.cost} cost</div>
                          </div>
                        </div>
                      ))}

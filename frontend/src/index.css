@@ -5,6 +5,11 @@
 /* Leaflet Map Styles */
 .leaflet-container {
   font-family: inherit;
+  z-index: 1 !important; /* Lower z-index so modals appear on top */
+}
+
+.leaflet-control-container {
+  z-index: 2 !important; /* Keep controls above map but below modals */
 }
 
 .leaflet-popup-content-wrapper {

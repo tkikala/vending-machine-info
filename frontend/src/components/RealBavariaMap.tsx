@@ -144,8 +144,8 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
         <div style="min-width: 200px;">
           <h3 style="margin: 0 0 8px 0; color: #1f2937; font-weight: bold;">${location.name}</h3>
           <div style="font-size: 12px; color: #6b7280;">
-            <div>💰 Rent: $${location.rent}/month</div>
-            <div>⚡ Utilities: $${location.utilities}/month</div>
+            <div>💰 Rent: €${location.rent}/month</div>
+            <div>⚡ Utilities: €${location.utilities}/month</div>
             <div>👥 Population: ${location.population.toLocaleString()}</div>
             <div>🚶 Traffic: ${location.traffic}%</div>
             <div style="margin-top: 8px; padding: 4px 8px; background: ${location.isOccupied ? '#dcfce7' : '#dbeafe'}; color: ${location.isOccupied ? '#166534' : '#1e40af'}; border-radius: 4px; font-weight: bold;">
