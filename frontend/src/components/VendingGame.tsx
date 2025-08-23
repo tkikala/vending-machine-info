@@ -189,8 +189,17 @@ const VendingGame: React.FC = () => {
           loc.id === selectedLocation.id ? { ...loc, isOccupied: true, machineId: newMachine.id } : loc
         );
       } else {
-        // Add new location to the array
-        updatedLocations = [...prev.locations, { ...selectedLocation, isOccupied: true, machineId: newMachine.id }];
+        // Add new location to the array with a proper ID
+        const newLocation = {
+          ...selectedLocation,
+          id: selectedLocation.id.startsWith('temp-') ? selectedLocation.id : `location-${Date.now()}`,
+          isOccupied: true,
+          machineId: newMachine.id
+        };
+        updatedLocations = [...prev.locations, newLocation];
+        
+        // Update the machine to use the new location ID
+        newMachine.locationId = newLocation.id;
       }
 
       return {
