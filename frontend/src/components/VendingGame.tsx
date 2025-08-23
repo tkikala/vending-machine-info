@@ -84,7 +84,11 @@ const VendingGame: React.FC = () => {
         // Process each machine with proper immutable updates
         const updatedMachines = prev.machines.map(machine => {
           const location = prev.locations.find(l => l.id === machine.locationId);
-          if (!location) return machine;
+          if (!location) {
+            console.log('❌ Machine not found in locations:', machine.id, 'locationId:', machine.locationId);
+            console.log('Available locations:', prev.locations.map(l => ({ id: l.id, name: l.name })));
+            return machine;
+          }
 
           // Realistic customer calculation based on real data from Neufahr bei Freising
           // Peak hours: 8PM-1AM (5 hours) with 0.5 customers per minute
@@ -204,6 +208,13 @@ const VendingGame: React.FC = () => {
         customerCount: 0,
         satisfaction: 0.8,
       };
+
+      console.log('✅ Created machine:', {
+        machineId: newMachine.id,
+        locationId: newMachine.locationId,
+        locationName: selectedLocation.name,
+        isNewLocation: existingLocationIndex === -1
+      });
 
       return {
         ...prev,
