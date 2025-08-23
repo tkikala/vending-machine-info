@@ -107,20 +107,29 @@ const VendingGame: React.FC = () => {
           let dailyRevenue = 0;
           let totalSales = 0;
           
-          machine.products.forEach(product => {
+          // Create a new products array to ensure React state updates properly
+          const updatedProducts = machine.products.map(product => {
+            let newStock = product.stock;
+            
             // Restock products if they're running low (more realistic threshold)
-            if (product.stock < 5) {
-              product.stock = 50; // Restock to full
+            if (newStock < 5) {
+              newStock = 50; // Restock to full
             }
             
             // More realistic sales distribution - not all customers buy every product
             const productDemand = Math.floor(dailyCustomers * product.demand * 0.3); // Only 30% of customers buy each product
-            const sales = Math.min(productDemand, product.stock);
+            const sales = Math.min(productDemand, newStock);
             dailyRevenue += sales * product.price;
             totalSales += sales;
-            product.stock = Math.max(0, product.stock - sales);
+            newStock = Math.max(0, newStock - sales);
+            
+            return {
+              ...product,
+              stock: newStock
+            };
           });
 
+          machine.products = updatedProducts;
           machine.revenue += dailyRevenue;
           machine.customerCount += totalSales;
         });
@@ -462,31 +471,27 @@ const VendingGame: React.FC = () => {
             {/* Location Details */}
             <div className={`mb-4 p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
               <div className="space-y-2">
-                {gameState.selectedLocation.lat && gameState.selectedLocation.lng && (
-                  <>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-blue-500">🏙️</span>
-                      <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                        {gameState.selectedLocation.name}
-                      </span>
-                    </div>
-                    {gameState.selectedLocation.suburb && (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-green-500">🏘️</span>
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          {gameState.selectedLocation.suburb}
-                        </span>
-                      </div>
-                    )}
-                    {gameState.selectedLocation.road && (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-orange-500">🛣️</span>
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                          {gameState.selectedLocation.road}
-                        </span>
-                      </div>
-                    )}
-                  </>
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-500">🏙️</span>
+                  <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                    {gameState.selectedLocation.name}
+                  </span>
+                </div>
+                {gameState.selectedLocation.suburb && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-green-500">🏘️</span>
+                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {gameState.selectedLocation.suburb}
+                    </span>
+                  </div>
+                )}
+                {gameState.selectedLocation.road && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-orange-500">🛣️</span>
+                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {gameState.selectedLocation.road}
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
