@@ -88,14 +88,22 @@ const VendingGame: React.FC = () => {
           const dailyCustomers = Math.floor(baseCustomers * (0.8 + Math.random() * 0.4));
           
           let dailyRevenue = 0;
+          let totalSales = 0;
+          
           machine.products.forEach(product => {
+            // Restock products if they're running low
+            if (product.stock < 10) {
+              product.stock = Math.max(product.stock, 50);
+            }
+            
             const sales = Math.min(dailyCustomers, product.stock);
             dailyRevenue += sales * product.price;
+            totalSales += sales;
             product.stock = Math.max(0, product.stock - sales);
           });
 
           machine.revenue += dailyRevenue;
-          machine.customerCount += dailyCustomers;
+          machine.customerCount += totalSales;
         });
 
         // Add daily costs and calculate profit
@@ -170,6 +178,22 @@ const VendingGame: React.FC = () => {
     });
   };
 
+  const cashOut = () => {
+    const totalProfit = gameState.machines.reduce((sum, m) => sum + m.profit, 0);
+    if (totalProfit > 0) {
+      setGameState(prev => ({
+        ...prev,
+        money: prev.money + totalProfit,
+        machines: prev.machines.map(machine => ({
+          ...machine,
+          revenue: 0,
+          costs: 0,
+          profit: 0,
+        }))
+      }));
+    }
+  };
+
   const totalRevenue = gameState.machines.reduce((sum, m) => sum + m.revenue, 0);
   const totalProfit = gameState.machines.reduce((sum, m) => sum + m.profit, 0);
 
@@ -242,12 +266,25 @@ const VendingGame: React.FC = () => {
                   <option value={5}>5x</option>
                 </select>
                 
-                <button
-                  onClick={resetGame}
-                  className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
-                >
-                  <FaUndo />
-                </button>
+                                 <button
+                   onClick={cashOut}
+                   disabled={totalProfit <= 0}
+                   className={`p-2 rounded-lg transition-colors ${
+                     totalProfit > 0 
+                       ? 'bg-green-500 text-white hover:bg-green-600' 
+                       : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                   }`}
+                   title="Cash Out Profits"
+                 >
+                   💰
+                 </button>
+                 
+                 <button
+                   onClick={resetGame}
+                   className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                 >
+                   <FaUndo />
+                 </button>
               </div>
             </div>
           </div>
