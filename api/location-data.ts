@@ -146,13 +146,13 @@ function estimatePopulation(components: any): number {
   if (components.city === 'Munich') {
     return 1500000;
   } else if (components.town) {
-    return 50000 + Math.random() * 100000;
+    return 75000; // Fixed value instead of random
   } else if (components.village) {
-    return 1000 + Math.random() * 10000;
+    return 5000; // Fixed value instead of random
   } else if (components.suburb) {
-    return 10000 + Math.random() * 50000;
+    return 30000; // Fixed value instead of random
   }
-  return 5000 + Math.random() * 20000;
+  return 15000; // Fixed default value
 }
 
 function estimateTraffic(components: any): number {
@@ -172,7 +172,7 @@ function estimateTraffic(components: any): number {
     baseTraffic += 10;
   }
   
-  return Math.min(100, Math.max(30, baseTraffic + (Math.random() * 20 - 10)));
+  return Math.min(100, Math.max(30, baseTraffic)); // Remove randomness
 }
 
 function getNearbyAmenities(components: any): string[] {

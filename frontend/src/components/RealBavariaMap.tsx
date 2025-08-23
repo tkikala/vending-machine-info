@@ -243,7 +243,7 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
       baseRent += 150;
     }
     
-    return Math.round(baseRent + (Math.random() * 200 - 100));
+    return baseRent; // Remove randomness for consistent values
   };
 
   const calculateUtilitiesFromData = (data: any): number => {
@@ -257,7 +257,7 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
       baseUtilities += 50;
     }
     
-    return Math.round(baseUtilities + (Math.random() * 50 - 25));
+    return baseUtilities; // Remove randomness for consistent values
   };
 
   // Cleanup map on unmount
