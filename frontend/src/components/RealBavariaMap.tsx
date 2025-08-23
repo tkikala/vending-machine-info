@@ -61,22 +61,35 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
   };
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current) return;
 
-    // Initialize map centered on Bavaria
-    const map = L.map(mapRef.current, {
-      center: [48.7758, 11.4198], // Center of Bavaria
-      zoom: 8,
-      zoomControl: true,
-      attributionControl: true,
-    });
+    // Initialize map only once
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapRef.current, {
+        center: [48.7758, 11.4198], // Center of Bavaria
+        zoom: 8,
+        zoomControl: true,
+        attributionControl: true,
+      });
 
-    // Add OpenStreetMap tiles
-    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
+      // Add OpenStreetMap tiles
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+      });
+      tileLayer.addTo(map);
+
+      mapInstanceRef.current = map;
+    }
+
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    // Clear existing layers
+    map.eachLayer((layer) => {
+      if (layer instanceof L.TileLayer) return; // Keep the base tile layer
+      map.removeLayer(layer);
     });
-    tileLayer.addTo(map);
 
     // Add Bavaria boundary (simplified polygon)
     const bavariaBoundary = L.polygon([
@@ -93,6 +106,7 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
     bavariaBoundary.addTo(map);
 
     // Add location markers
+    const markers: L.Marker[] = [];
     locations.forEach((location) => {
       const coords = getLocationCoordinates(location);
       
@@ -123,6 +137,7 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
       });
 
       const marker = L.marker([coords.lat, coords.lng], { icon: customIcon }).addTo(map);
+      markers.push(marker);
       
       // Add popup with location info
       const popupContent = `
@@ -148,19 +163,36 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
       });
     });
 
-    // Fit map to show all markers
-    const bounds = L.latLngBounds(locations.map(loc => getLocationCoordinates(loc)));
-    map.fitBounds(bounds, { padding: [20, 20] });
+    // Fit map to show all markers (only if there are markers and map is not already positioned)
+    if (markers.length > 0 && !mapInstanceRef.current._fittedBounds) {
+      // Small delay to ensure map is fully loaded
+      setTimeout(() => {
+        const bounds = L.latLngBounds(markers.map(marker => marker.getLatLng()));
+        map.fitBounds(bounds, { padding: [20, 20] });
+        mapInstanceRef.current._fittedBounds = true;
+      }, 100);
+    }
 
-    mapInstanceRef.current = map;
+    // Cleanup function
+    return () => {
+      // Don't remove the map instance here, just clean up markers
+      markers.forEach(marker => {
+        if (map.hasLayer(marker)) {
+          map.removeLayer(marker);
+        }
+      });
+    };
+  }, [locations, darkMode, onLocationClick]);
 
+  // Cleanup map on unmount
+  useEffect(() => {
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
     };
-  }, [locations, darkMode, onLocationClick]);
+  }, []);
 
   return (
     <div 
