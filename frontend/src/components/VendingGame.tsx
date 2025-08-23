@@ -88,20 +88,34 @@ const VendingGame: React.FC = () => {
           const location = newState.locations.find(l => l.id === machine.locationId);
           if (!location) return;
 
-          // Calculate daily revenue based on location factors
-          const baseCustomers = Math.floor(location.population * 0.01 * (location.traffic / 100));
-          const dailyCustomers = Math.floor(baseCustomers * (0.8 + Math.random() * 0.4));
+          // Realistic customer calculation based on real data from Neufahr bei Freising
+          // Peak hours: 8PM-1AM (5 hours) with 0.5 customers per minute
+          // Off-peak hours: 19 hours with much lower traffic
+          const peakHoursCustomers = 5 * 60 * 0.5; // 150 customers during peak
+          const offPeakHoursCustomers = 19 * 60 * 0.1; // ~114 customers during off-peak (much lower)
+          const totalDailyCustomers = peakHoursCustomers + offPeakHoursCustomers; // ~264 total
+          
+          // Scale based on location population and traffic
+          const populationFactor = Math.min(location.population / 5000, 3); // Cap at 3x for very large locations
+          const trafficFactor = location.traffic / 100;
+          const scaledCustomers = Math.floor(totalDailyCustomers * populationFactor * trafficFactor);
+          
+          // Add some daily variation (±30%)
+          const variation = 0.7 + Math.random() * 0.6;
+          const dailyCustomers = Math.floor(scaledCustomers * variation);
           
           let dailyRevenue = 0;
           let totalSales = 0;
           
           machine.products.forEach(product => {
-            // Restock products if they're running low
-            if (product.stock < 10) {
-              product.stock = Math.max(product.stock, 50);
+            // Restock products if they're running low (more realistic threshold)
+            if (product.stock < 5) {
+              product.stock = 50; // Restock to full
             }
             
-            const sales = Math.min(dailyCustomers, product.stock);
+            // More realistic sales distribution - not all customers buy every product
+            const productDemand = Math.floor(dailyCustomers * product.demand * 0.3); // Only 30% of customers buy each product
+            const sales = Math.min(productDemand, product.stock);
             dailyRevenue += sales * product.price;
             totalSales += sales;
             product.stock = Math.max(0, product.stock - sales);
@@ -191,11 +205,11 @@ const VendingGame: React.FC = () => {
       isPaused: false,
       gameSpeed: 1,
       locations: [
-        { id: '1', name: 'München Universität', x: 25, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
-        { id: '2', name: 'Olympia Einkaufszentrum', x: 45, y: 35, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
-        { id: '3', name: 'BMW Headquarters', x: 65, y: 40, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
-        { id: '4', name: 'Klinikum Großhadern', x: 75, y: 50, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
-        { id: '5', name: 'Aral Tankstelle', x: 60, y: 70, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
+        { id: '1', name: 'München Universität', x: 25, y: 30, rent: 800, utilities: 200, population: 5000, traffic: 85, isOccupied: false },
+        { id: '2', name: 'Olympia Einkaufszentrum', x: 45, y: 35, rent: 1200, utilities: 300, population: 3000, traffic: 90, isOccupied: false },
+        { id: '3', name: 'BMW Headquarters', x: 65, y: 40, rent: 600, utilities: 150, population: 2000, traffic: 75, isOccupied: false },
+        { id: '4', name: 'Klinikum Großhadern', x: 75, y: 50, rent: 1000, utilities: 250, population: 1500, traffic: 80, isOccupied: false },
+        { id: '5', name: 'Aral Tankstelle', x: 60, y: 70, rent: 400, utilities: 100, population: 1000, traffic: 70, isOccupied: false },
       ],
       machines: [],
     });
