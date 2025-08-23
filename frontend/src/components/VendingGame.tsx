@@ -162,45 +162,48 @@ const VendingGame: React.FC = () => {
     const selectedLocation = gameState.selectedLocation;
     if (!selectedLocation) return;
 
-    const newMachine: VendingMachine = {
-      id: `machine-${Date.now()}`,
-      locationId: selectedLocation.id, // Use the selected location's ID
-      products: [
-        { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 0.8 },
-        { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 0.6 },
-        { id: '3', name: 'Water', price: 1.00, cost: 0.30, stock: 40, demand: 0.9 },
-        { id: '4', name: 'Chips', price: 2.00, cost: 1.00, stock: 25, demand: 0.7 },
-      ],
-      revenue: 0,
-      costs: 0,
-      profit: 0,
-      customerCount: 0,
-      satisfaction: 0.8,
-    };
-
     setGameState(prev => {
       // Check if this location already exists in the locations array
       const existingLocationIndex = prev.locations.findIndex(loc => loc.id === selectedLocation.id);
       
       let updatedLocations;
+      let finalLocationId = selectedLocation.id;
+      
       if (existingLocationIndex >= 0) {
         // Update existing location
         updatedLocations = prev.locations.map(loc => 
-          loc.id === selectedLocation.id ? { ...loc, isOccupied: true, machineId: newMachine.id } : loc
+          loc.id === selectedLocation.id ? { ...loc, isOccupied: true, machineId: `machine-${Date.now()}` } : loc
         );
       } else {
         // Add new location to the array with a proper ID
+        const newLocationId = selectedLocation.id.startsWith('temp-') ? selectedLocation.id : `location-${Date.now()}`;
+        finalLocationId = newLocationId;
+        
         const newLocation = {
           ...selectedLocation,
-          id: selectedLocation.id.startsWith('temp-') ? selectedLocation.id : `location-${Date.now()}`,
+          id: newLocationId,
           isOccupied: true,
-          machineId: newMachine.id
+          machineId: `machine-${Date.now()}`
         };
         updatedLocations = [...prev.locations, newLocation];
-        
-        // Update the machine to use the new location ID
-        newMachine.locationId = newLocation.id;
       }
+
+      // Create the machine with the correct location ID
+      const newMachine: VendingMachine = {
+        id: `machine-${Date.now()}`,
+        locationId: finalLocationId,
+        products: [
+          { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 0.8 },
+          { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 0.6 },
+          { id: '3', name: 'Water', price: 1.00, cost: 0.30, stock: 40, demand: 0.9 },
+          { id: '4', name: 'Chips', price: 2.00, cost: 1.00, stock: 25, demand: 0.7 },
+        ],
+        revenue: 0,
+        costs: 0,
+        profit: 0,
+        customerCount: 0,
+        satisfaction: 0.8,
+      };
 
       return {
         ...prev,
