@@ -55,14 +55,16 @@ const VendingGame: React.FC = () => {
     isPaused: false,
     gameSpeed: 1,
     locations: [
-      { id: '1', name: 'University Campus', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
-      { id: '2', name: 'Shopping Mall', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
-      { id: '3', name: 'Office Building', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
-      { id: '4', name: 'Hospital', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
-      { id: '5', name: 'Gas Station', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
+      { id: '1', name: 'München Universität', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
+      { id: '2', name: 'Olympia Einkaufszentrum', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
+      { id: '3', name: 'BMW Headquarters', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
+      { id: '4', name: 'Klinikum Großhadern', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
+      { id: '5', name: 'Aral Tankstelle', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
     ],
     machines: [],
   });
+
+  const [darkMode, setDarkMode] = useState(false);
 
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showMachineModal, setShowMachineModal] = useState(false);
@@ -94,14 +96,14 @@ const VendingGame: React.FC = () => {
 
           machine.revenue += dailyRevenue;
           machine.customerCount += dailyCustomers;
-          machine.profit = machine.revenue - machine.costs;
         });
 
-        // Add daily costs
+        // Add daily costs and calculate profit
         newState.machines.forEach(machine => {
           const location = newState.locations.find(l => l.id === machine.locationId);
           if (location) {
             machine.costs += (location.rent + location.utilities) / 30; // Daily costs
+            machine.profit = machine.revenue - machine.costs;
           }
         });
 
@@ -158,11 +160,11 @@ const VendingGame: React.FC = () => {
       isPaused: false,
       gameSpeed: 1,
       locations: [
-        { id: '1', name: 'University Campus', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
-        { id: '2', name: 'Shopping Mall', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
-        { id: '3', name: 'Office Building', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
-        { id: '4', name: 'Hospital', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
-        { id: '5', name: 'Gas Station', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
+        { id: '1', name: 'München Universität', x: 20, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
+        { id: '2', name: 'Olympia Einkaufszentrum', x: 70, y: 25, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
+        { id: '3', name: 'BMW Headquarters', x: 45, y: 60, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
+        { id: '4', name: 'Klinikum Großhadern', x: 80, y: 70, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
+        { id: '5', name: 'Aral Tankstelle', x: 15, y: 80, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
       ],
       machines: [],
     });
@@ -171,67 +173,83 @@ const VendingGame: React.FC = () => {
   const totalRevenue = gameState.machines.reduce((sum, m) => sum + m.revenue, 0);
   const totalProfit = gameState.machines.reduce((sum, m) => sum + m.profit, 0);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    return (
+    <div className={`min-h-screen transition-colors duration-300 ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+    }`}>
       {/* Header */}
       <motion.div 
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white shadow-lg border-b border-gray-200"
+        className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-lg border-b transition-colors duration-300`}
       >
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="text-2xl font-bold text-gray-800">🎮 Vending Tycoon</div>
-              <div className="text-sm text-gray-600">Day {gameState.day}</div>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🎮 Vending Tycoon</div>
+              <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Day {gameState.day}</div>
             </div>
             
-                           <div className="flex items-center space-x-6">
-                 <div className="flex items-center space-x-2">
-                   <FaCoins className="text-yellow-500 text-xl" />
-                   <span className="font-semibold text-gray-800">${gameState.money.toLocaleString()}</span>
-                 </div>
-                 
-                 <div className="flex items-center space-x-2">
-                   <FaChartLine className="text-green-500 text-xl" />
-                   <span className="font-semibold text-gray-800">${totalProfit.toLocaleString()}</span>
-                 </div>
-                 
-                 <div className="flex items-center space-x-2">
-                   <button
-                     onClick={() => setShowTutorial(true)}
-                     className="p-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors"
-                     title="Show Tutorial"
-                   >
-                     <FaQuestionCircle />
-                   </button>
-                   
-                   <button
-                     onClick={togglePause}
-                     className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                   >
-                     {gameState.isPaused ? <FaPlay /> : <FaPause />}
-                   </button>
-                   
-                   <select
-                     value={gameState.gameSpeed}
-                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => changeSpeed(Number(e.target.value))}
-                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   >
-                     <option value={0.5}>0.5x</option>
-                     <option value={1}>1x</option>
-                     <option value={2}>2x</option>
-                     <option value={5}>5x</option>
-                   </select>
-                   
-                   <button
-                     onClick={resetGame}
-                     className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
-                   >
-                     <FaUndo />
-                   </button>
-                 </div>
-               </div>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <FaCoins className="text-yellow-500 text-xl" />
+                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${gameState.money.toLocaleString()}</span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <FaChartLine className="text-green-500 text-xl" />
+                <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${totalProfit.toLocaleString()}</span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className={`p-2 rounded-lg ${darkMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                  title="Toggle Dark Mode"
+                >
+                  {darkMode ? '☀️' : '🌙'}
+                </button>
+                
+                <button
+                  onClick={() => setShowTutorial(true)}
+                  className="p-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+                  title="Show Tutorial"
+                >
+                  <FaQuestionCircle />
+                </button>
+                
+                <button
+                  onClick={togglePause}
+                  className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                >
+                  {gameState.isPaused ? <FaPlay /> : <FaPause />}
+                </button>
+                
+                <select
+                  value={gameState.gameSpeed}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => changeSpeed(Number(e.target.value))}
+                  className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                    darkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'bg-white border-gray-300 text-gray-800'
+                  }`}
+                >
+                  <option value={0.5}>0.5x</option>
+                  <option value={1}>1x</option>
+                  <option value={2}>2x</option>
+                  <option value={5}>5x</option>
+                </select>
+                
+                <button
+                  onClick={resetGame}
+                  className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                >
+                  <FaUndo />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -244,19 +262,23 @@ const VendingGame: React.FC = () => {
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200"
+              className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}
             >
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <h2 className={`text-xl font-bold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                 <MdLocationOn className="mr-2 text-blue-500" />
-                City Map
+                Bayern Map
               </h2>
               
-              <div className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-xl p-4 h-96">
+              <div className={`relative rounded-xl p-4 h-96 transition-colors duration-300 ${
+                darkMode 
+                  ? 'bg-gradient-to-br from-gray-700 to-gray-600' 
+                  : 'bg-gradient-to-br from-green-100 to-blue-100'
+              }`}>
                 {/* Roads */}
                 <div className="absolute inset-0 pointer-events-none">
                   <svg className="w-full h-full" viewBox="0 0 100 100">
-                    <path d="M20 50 L80 50" stroke="#666" strokeWidth="0.5" fill="none" />
-                    <path d="M50 20 L50 80" stroke="#666" strokeWidth="0.5" fill="none" />
+                    <path d="M20 50 L80 50" stroke={darkMode ? "#999" : "#666"} strokeWidth="0.5" fill="none" />
+                    <path d="M50 20 L50 80" stroke={darkMode ? "#999" : "#666"} strokeWidth="0.5" fill="none" />
                   </svg>
                 </div>
                 
@@ -277,14 +299,18 @@ const VendingGame: React.FC = () => {
                       setShowLocationModal(true);
                     }}
                   >
-                    <div className={`relative ${location.isOccupied ? 'text-green-600' : 'text-blue-600'}`}>
+                    <div className={`relative ${location.isOccupied ? 'text-green-500' : 'text-blue-500'}`}>
                       <FaMapMarkerAlt className="text-3xl drop-shadow-lg" />
                       {location.isOccupied && (
                         <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                       )}
                     </div>
                     
-                    <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded text-xs font-medium shadow-lg whitespace-nowrap">
+                    <div className={`absolute top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 rounded text-xs font-medium shadow-lg whitespace-nowrap ${
+                      darkMode 
+                        ? 'bg-gray-800 text-white border border-gray-600' 
+                        : 'bg-white text-gray-800'
+                    }`}>
                       {location.name}
                     </div>
                   </motion.div>
@@ -298,32 +324,32 @@ const VendingGame: React.FC = () => {
             <motion.div 
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200"
+              className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}
             >
-              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+              <h3 className={`text-lg font-bold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                 <MdAttachMoney className="mr-2 text-green-500" />
                 Business Stats
               </h3>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Machines</span>
-                  <span className="font-semibold text-gray-800">{gameState.machines.length}</span>
+                  <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Machines</span>
+                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.machines.length}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Total Revenue</span>
-                  <span className="font-semibold text-green-600">${totalRevenue.toLocaleString()}</span>
+                  <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Total Revenue</span>
+                  <span className="font-semibold text-green-500">${totalRevenue.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Total Profit</span>
-                  <span className="font-semibold text-blue-600">${totalProfit.toLocaleString()}</span>
+                  <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Total Profit</span>
+                  <span className="font-semibold text-blue-500">${totalProfit.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Customers Served</span>
-                  <span className="font-semibold text-gray-800">
+                  <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Customers Served</span>
+                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                     {gameState.machines.reduce((sum, m) => sum + m.customerCount, 0).toLocaleString()}
                   </span>
                 </div>
@@ -335,9 +361,9 @@ const VendingGame: React.FC = () => {
               <motion.div 
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200"
+                className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}
               >
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <h3 className={`text-lg font-bold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                   <MdInventory className="mr-2 text-purple-500" />
                   Your Machines
                 </h3>
@@ -349,7 +375,11 @@ const VendingGame: React.FC = () => {
                       <motion.div
                         key={machine.id}
                         whileHover={{ scale: 1.02 }}
-                        className="p-3 bg-gray-50 rounded-lg cursor-pointer border border-gray-200"
+                        className={`p-3 rounded-lg cursor-pointer border transition-colors duration-300 ${
+                          darkMode 
+                            ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
+                            : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                        }`}
                         onClick={() => {
                           setGameState(prev => ({ ...prev, selectedMachine: machine }));
                           setShowMachineModal(true);
@@ -357,12 +387,12 @@ const VendingGame: React.FC = () => {
                       >
                         <div className="flex justify-between items-start">
                           <div>
-                            <div className="font-medium text-gray-800">{location?.name}</div>
-                            <div className="text-sm text-gray-600">${machine.profit.toFixed(2)} profit</div>
+                            <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{location?.name}</div>
+                            <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>${machine.profit.toFixed(2)} profit</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium text-green-600">${machine.revenue.toFixed(0)}</div>
-                            <div className="text-xs text-gray-500">{machine.customerCount} customers</div>
+                            <div className="text-sm font-medium text-green-500">${machine.revenue.toFixed(0)}</div>
+                            <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{machine.customerCount} customers</div>
                           </div>
                         </div>
                       </motion.div>
@@ -385,58 +415,58 @@ const VendingGame: React.FC = () => {
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
             onClick={() => setShowLocationModal(false)}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-                             className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                         <motion.div
+               initial={{ scale: 0.9, opacity: 0 }}
+               animate={{ scale: 1, opacity: 1 }}
+               exit={{ scale: 0.9, opacity: 0 }}
+               className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-md w-full shadow-2xl transition-colors duration-300`}
                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            >
-              <h3 className="text-xl font-bold text-gray-800 mb-4">{gameState.selectedLocation.name}</h3>
+             >
+               <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.selectedLocation.name}</h3>
+               
+               <div className="space-y-3 mb-6">
+                 <div className="flex justify-between">
+                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Monthly Rent</span>
+                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${gameState.selectedLocation.rent}</span>
+                 </div>
+                 <div className="flex justify-between">
+                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Utilities</span>
+                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${gameState.selectedLocation.utilities}</span>
+                 </div>
+                 <div className="flex justify-between">
+                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Population</span>
+                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.selectedLocation.population.toLocaleString()}</span>
+                 </div>
+                 <div className="flex justify-between">
+                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Traffic</span>
+                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.selectedLocation.traffic}%</span>
+                 </div>
+               </div>
               
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Monthly Rent</span>
-                  <span className="font-semibold">${gameState.selectedLocation.rent}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Utilities</span>
-                  <span className="font-semibold">${gameState.selectedLocation.utilities}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Population</span>
-                  <span className="font-semibold">{gameState.selectedLocation.population.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Traffic</span>
-                  <span className="font-semibold">{gameState.selectedLocation.traffic}%</span>
-                </div>
-              </div>
-              
-              {gameState.selectedLocation.isOccupied ? (
-                <div className="text-center text-gray-600">
-                  <div className="text-lg font-semibold text-green-600 mb-2">✓ Machine Placed</div>
-                  <div className="text-sm">This location is already occupied</div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="text-center text-gray-600">
-                    <div className="text-lg font-semibold mb-2">Place Vending Machine</div>
-                    <div className="text-sm">Cost: $3,000</div>
-                  </div>
-                  
-                  <button
-                    onClick={() => {
-                      placeMachine(gameState.selectedLocation!.id);
-                      setShowLocationModal(false);
-                    }}
-                    disabled={gameState.money < 3000}
-                    className="w-full py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {gameState.money < 3000 ? 'Not Enough Money' : 'Place Machine'}
-                  </button>
-                </div>
-              )}
+                             {gameState.selectedLocation.isOccupied ? (
+                 <div className={`text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                   <div className="text-lg font-semibold text-green-500 mb-2">✓ Machine Placed</div>
+                   <div className="text-sm">This location is already occupied</div>
+                 </div>
+               ) : (
+                 <div className="space-y-3">
+                   <div className={`text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                     <div className="text-lg font-semibold mb-2">Place Vending Machine</div>
+                     <div className="text-sm">Cost: $3,000</div>
+                   </div>
+                   
+                   <button
+                     onClick={() => {
+                       placeMachine(gameState.selectedLocation!.id);
+                       setShowLocationModal(false);
+                     }}
+                     disabled={gameState.money < 3000}
+                     className="w-full py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                   >
+                     {gameState.money < 3000 ? 'Not Enough Money' : 'Place Machine'}
+                   </button>
+                 </div>
+               )}
             </motion.div>
           </motion.div>
         )}
@@ -452,53 +482,55 @@ const VendingGame: React.FC = () => {
              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
              onClick={() => setShowMachineModal(false)}
            >
-             <motion.div
+                          <motion.div
                initial={{ scale: 0.9, opacity: 0 }}
                animate={{ scale: 1, opacity: 1 }}
                exit={{ scale: 0.9, opacity: 0 }}
-               className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[80vh] overflow-y-auto"
+               className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[80vh] overflow-y-auto transition-colors duration-300`}
                onClick={(e: React.MouseEvent) => e.stopPropagation()}
              >
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Machine Details</h3>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="text-sm text-gray-600">Revenue</div>
-                    <div className="text-lg font-semibold text-green-600">${gameState.selectedMachine.revenue.toFixed(2)}</div>
-                  </div>
-                  <div className="bg-red-50 p-3 rounded-lg">
-                    <div className="text-sm text-gray-600">Costs</div>
-                    <div className="text-lg font-semibold text-red-600">${gameState.selectedMachine.costs.toFixed(2)}</div>
-                  </div>
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="text-sm text-gray-600">Profit</div>
-                    <div className="text-lg font-semibold text-blue-600">${gameState.selectedMachine.profit.toFixed(2)}</div>
-                  </div>
-                  <div className="bg-purple-50 p-3 rounded-lg">
-                    <div className="text-sm text-gray-600">Customers</div>
-                    <div className="text-lg font-semibold text-purple-600">{gameState.selectedMachine.customerCount}</div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">Products</h4>
-                  <div className="space-y-2">
-                    {gameState.selectedMachine.products.map((product) => (
-                      <div key={product.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <div>
-                          <div className="font-medium">{product.name}</div>
-                          <div className="text-sm text-gray-600">Stock: {product.stock}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold">${product.price}</div>
-                          <div className="text-xs text-gray-500">${product.cost} cost</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+               <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Machine Details</h3>
+               
+               <div className="space-y-4">
+                 <div className="grid grid-cols-2 gap-4">
+                   <div className={`${darkMode ? 'bg-blue-900/30' : 'bg-blue-50'} p-3 rounded-lg`}>
+                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Revenue</div>
+                     <div className="text-lg font-semibold text-green-500">${gameState.selectedMachine.revenue.toFixed(2)}</div>
+                   </div>
+                   <div className={`${darkMode ? 'bg-red-900/30' : 'bg-red-50'} p-3 rounded-lg`}>
+                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Costs</div>
+                     <div className="text-lg font-semibold text-red-500">${gameState.selectedMachine.costs.toFixed(2)}</div>
+                   </div>
+                   <div className={`${darkMode ? 'bg-green-900/30' : 'bg-green-50'} p-3 rounded-lg`}>
+                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Profit</div>
+                     <div className="text-lg font-semibold text-blue-500">${gameState.selectedMachine.profit.toFixed(2)}</div>
+                   </div>
+                   <div className={`${darkMode ? 'bg-purple-900/30' : 'bg-purple-50'} p-3 rounded-lg`}>
+                     <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Customers</div>
+                     <div className="text-lg font-semibold text-purple-500">{gameState.selectedMachine.customerCount}</div>
+                   </div>
+                 </div>
+                 
+                 <div>
+                   <h4 className={`font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Products</h4>
+                   <div className="space-y-2">
+                     {gameState.selectedMachine.products.map((product) => (
+                       <div key={product.id} className={`flex justify-between items-center p-2 rounded ${
+                         darkMode ? 'bg-gray-700' : 'bg-gray-50'
+                       }`}>
+                         <div>
+                           <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{product.name}</div>
+                           <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Stock: {product.stock}</div>
+                         </div>
+                         <div className="text-right">
+                           <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${product.price}</div>
+                           <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>${product.cost} cost</div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               </div>
             </motion.div>
           </motion.div>
                  )}
