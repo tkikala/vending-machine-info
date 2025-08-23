@@ -73,7 +73,7 @@ function getFallbackLocationData(lat: number, lng: number) {
       suburb: 'Altstadt',
       neighbourhood: 'City Center',
       population: 1500000,
-      traffic: 85,
+      traffic: 3, // 3% of Munich population passes by Marienplatz daily
       amenities: ['shopping_center', 'university', 'hospital', 'public_transport', 'tourist_attractions']
     };
   }
@@ -89,7 +89,7 @@ function getFallbackLocationData(lat: number, lng: number) {
       suburb: 'Schwabing-West',
       neighbourhood: 'BMW District',
       population: 25000,
-      traffic: 75,
+      traffic: 4, // 4% of BMW district population passes by daily
       amenities: ['office_buildings', 'public_transport', 'restaurants']
     };
   }
@@ -105,7 +105,7 @@ function getFallbackLocationData(lat: number, lng: number) {
       suburb: 'Hadern',
       neighbourhood: 'Medical District',
       population: 15000,
-      traffic: 80,
+      traffic: 5, // 5% of hospital district population passes by daily
       amenities: ['hospital', 'university', 'public_transport', 'pharmacies']
     };
   }
@@ -121,7 +121,7 @@ function getFallbackLocationData(lat: number, lng: number) {
       suburb: 'Moosach',
       neighbourhood: 'Shopping District',
       population: 35000,
-      traffic: 90,
+      traffic: 6, // 6% of shopping district population passes by daily
       amenities: ['shopping_center', 'public_transport', 'restaurants', 'entertainment']
     };
   }
@@ -135,8 +135,8 @@ function getFallbackLocationData(lat: number, lng: number) {
     road: 'Main Street',
     suburb: 'Central District',
     neighbourhood: 'Downtown',
-    population: 50000,
-    traffic: 70,
+          population: 50000,
+      traffic: 2, // 2% of default location population passes by daily
     amenities: ['shopping_center', 'public_transport']
   };
 }
@@ -156,23 +156,31 @@ function estimatePopulation(components: any): number {
 }
 
 function estimateTraffic(components: any): number {
-  let baseTraffic = 50;
+  // Realistic traffic: % of population that passes by this specific street daily
+  let baseTraffic = 2; // Default: only 2% of population passes by
   
+  if (components.city === 'Munich') {
+    baseTraffic = 3; // Slightly higher for city areas
+  } else if (components.town) {
+    baseTraffic = 4; // Towns have more concentrated foot traffic
+  } else if (components.village) {
+    baseTraffic = 6; // Villages have very concentrated foot traffic
+  } else if (components.suburb) {
+    baseTraffic = 2.5; // Suburbs have moderate foot traffic
+  }
+  
+  // Adjust based on road type
   if (components.road) {
-    if (components.road.includes('A') || components.road.includes('B')) {
-      baseTraffic += 30;
-    } else if (components.road.includes('highway')) {
-      baseTraffic += 40;
+    if (components.road.includes('platz') || components.road.includes('platz')) {
+      baseTraffic += 2; // Squares are busier
+    } else if (components.road.includes('straße') || components.road.includes('strasse')) {
+      baseTraffic += 1; // Main streets
+    } else if (components.road.includes('weg') || components.road.includes('gasse')) {
+      baseTraffic -= 0.5; // Smaller streets
     }
   }
   
-  if (components.city === 'Munich') {
-    baseTraffic += 20;
-  } else if (components.suburb) {
-    baseTraffic += 10;
-  }
-  
-  return Math.min(100, Math.max(30, baseTraffic)); // Remove randomness
+  return Math.min(10, Math.max(1, baseTraffic)); // Cap between 1% and 10%
 }
 
 function getNearbyAmenities(components: any): string[] {
@@ -188,3 +196,4 @@ function getNearbyAmenities(components: any): string[] {
   
   return amenities;
 }
+

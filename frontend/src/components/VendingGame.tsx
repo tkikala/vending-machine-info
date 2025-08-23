@@ -97,10 +97,10 @@ const VendingGame: React.FC = () => {
           const offPeakHoursCustomers = 19 * 60 * 0.1; // ~114 customers during off-peak (much lower)
           const totalDailyCustomers = peakHoursCustomers + offPeakHoursCustomers; // ~264 total
           
-          // Scale based on location population and traffic
-          const populationFactor = Math.min(location.population / 5000, 3); // Cap at 3x for very large locations
-          const trafficFactor = location.traffic / 100;
-          const scaledCustomers = Math.floor(totalDailyCustomers * populationFactor * trafficFactor);
+          // Realistic calculation: Traffic = % of population that passes by this street daily
+          const effectivePopulation = location.population * (location.traffic / 100);
+          const populationFactor = Math.min(effectivePopulation / 5000, 3); // Cap at 3x for very large locations
+          const scaledCustomers = Math.floor(totalDailyCustomers * populationFactor);
           
           // Add some daily variation (±30%)
           const variation = 0.7 + Math.random() * 0.6;
@@ -239,13 +239,7 @@ const VendingGame: React.FC = () => {
       day: 1,
       isPaused: false,
       gameSpeed: 1,
-      locations: [
-        { id: '1', name: 'München Universität', x: 25, y: 30, rent: 800, utilities: 200, population: 5000, traffic: 85, isOccupied: false },
-        { id: '2', name: 'Olympia Einkaufszentrum', x: 45, y: 35, rent: 1200, utilities: 300, population: 3000, traffic: 90, isOccupied: false },
-        { id: '3', name: 'BMW Headquarters', x: 65, y: 40, rent: 600, utilities: 150, population: 2000, traffic: 75, isOccupied: false },
-        { id: '4', name: 'Klinikum Großhadern', x: 75, y: 50, rent: 1000, utilities: 250, population: 1500, traffic: 80, isOccupied: false },
-        { id: '5', name: 'Aral Tankstelle', x: 60, y: 70, rent: 400, utilities: 100, population: 1000, traffic: 70, isOccupied: false },
-      ],
+      locations: [], // No predefined locations - all locations come from map clicks
       machines: [],
     });
   };
