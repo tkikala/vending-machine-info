@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaMapMarkerAlt, FaCoins, FaChartLine, FaCog, FaPlay, FaPause, FaUndo, FaQuestionCircle } from 'react-icons/fa';
+import RealBavariaMap from './RealBavariaMap';
 import { MdLocationOn, MdAttachMoney, MdInventory, MdSpeed } from 'react-icons/md';
 import GameTutorial from './GameTutorial';
 
@@ -306,76 +307,14 @@ const VendingGame: React.FC = () => {
                 Bayern Map
               </h2>
               
-              <div className={`relative rounded-xl p-4 h-96 transition-colors duration-300 ${
-                darkMode 
-                  ? 'bg-gradient-to-br from-gray-700 to-gray-600' 
-                  : 'bg-gradient-to-br from-green-100 to-blue-100'
-              }`}>
-                {/* Real Bavaria Map Background */}
-                <div className="absolute inset-0 pointer-events-none">
-                  <svg className="w-full h-full" viewBox="0 0 100 100">
-                    {/* Bavaria outline */}
-                    <path 
-                      d="M15 20 L25 15 L35 18 L45 25 L55 30 L65 35 L75 40 L85 45 L90 55 L85 65 L80 75 L70 80 L60 85 L50 90 L40 85 L30 80 L20 75 L15 65 L10 55 L15 45 L20 35 L15 25 Z" 
-                      fill={darkMode ? "#374151" : "#e5f3ff"} 
-                      stroke={darkMode ? "#6b7280" : "#3b82f6"} 
-                      strokeWidth="0.5"
-                    />
-                    
-                    {/* Major cities */}
-                    <circle cx="25" cy="30" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
-                    <circle cx="45" cy="35" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
-                    <circle cx="65" cy="40" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
-                    <circle cx="75" cy="50" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
-                    <circle cx="60" cy="70" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
-                    <circle cx="40" cy="75" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
-                    <circle cx="25" cy="65" r="1" fill={darkMode ? "#9ca3af" : "#1e40af"} />
-                    
-                    {/* Major roads */}
-                    <path d="M20 25 L45 35 L70 45 L80 55" stroke={darkMode ? "#6b7280" : "#3b82f6"} strokeWidth="0.3" fill="none" />
-                    <path d="M30 20 L50 30 L65 40" stroke={darkMode ? "#6b7280" : "#3b82f6"} strokeWidth="0.3" fill="none" />
-                    <path d="M25 65 L45 75 L65 80" stroke={darkMode ? "#6b7280" : "#3b82f6"} strokeWidth="0.3" fill="none" />
-                    
-                    {/* Rivers */}
-                    <path d="M15 40 Q30 45 45 50 Q60 55 75 60" stroke={darkMode ? "#60a5fa" : "#0ea5e9"} strokeWidth="0.4" fill="none" />
-                    <path d="M20 60 Q35 65 50 70" stroke={darkMode ? "#60a5fa" : "#0ea5e9"} strokeWidth="0.3" fill="none" />
-                  </svg>
-                </div>
-                
-                {/* Locations with real coordinates */}
-                {gameState.locations.map((location) => (
-                  <motion.div
-                    key={location.id}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`absolute cursor-pointer transition-all duration-200 ${
-                      location.isOccupied ? 'opacity-60' : 'hover:opacity-80'
-                    }`}
-                    style={{ left: `${location.x}%`, top: `${location.y}%` }}
-                    onClick={() => {
-                      setGameState(prev => ({ ...prev, selectedLocation: location }));
-                      setShowLocationModal(true);
-                    }}
-                  >
-                    <div className={`relative ${location.isOccupied ? 'text-green-500' : 'text-blue-500'}`}>
-                      <FaMapMarkerAlt className="text-3xl drop-shadow-lg" />
-                      {location.isOccupied && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                      )}
-                    </div>
-                    
-                    <div className={`absolute top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 rounded text-xs font-medium shadow-lg whitespace-nowrap ${
-                      darkMode 
-                        ? 'bg-gray-800 text-white border border-gray-600' 
-                        : 'bg-white text-gray-800'
-                    }`}>
-                      {location.name}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+              <RealBavariaMap
+                locations={gameState.locations}
+                darkMode={darkMode}
+                onLocationClick={(location) => {
+                  setGameState(prev => ({ ...prev, selectedLocation: location }));
+                  setShowLocationModal(true);
+                }}
+              />
             </motion.div>
           </div>
 
