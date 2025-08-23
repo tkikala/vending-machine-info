@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,9 +30,23 @@ interface RealBavariaMapProps {
   onLocationClick: (location: Location) => void;
 }
 
+interface LocationData {
+  population?: number;
+  city?: string;
+  state?: string;
+  country?: string;
+  postcode?: string;
+  road?: string;
+  suburb?: string;
+  neighbourhood?: string;
+  amenities?: string[];
+  traffic?: number;
+}
+
 const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, onLocationClick }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const [locationData, setLocationData] = useState<{ [key: string]: LocationData }>({});
 
   // Real coordinates for Bavaria locations
   const bavariaCoordinates = {
@@ -59,6 +73,42 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
     };
     return coordMap[location.id] || bavariaCoordinates.munich;
   };
+
+  // Fetch real location data from our API
+  const fetchLocationData = async (lat: number, lng: number, locationId: string) => {
+    try {
+      const response = await fetch(`/api/location-data?lat=${lat}&lng=${lng}`);
+      
+      if (!response.ok) {
+        console.warn('Location data API not available, using fallback data');
+        return;
+      }
+
+      const data = await response.json();
+      
+      const locationInfo: LocationData = {
+        city: data.city,
+        state: data.state,
+        country: data.country,
+        postcode: data.postcode,
+        road: data.road,
+        suburb: data.suburb,
+        neighbourhood: data.neighbourhood,
+        population: data.population,
+        traffic: data.traffic,
+        amenities: data.amenities
+      };
+
+      setLocationData(prev => ({
+        ...prev,
+        [locationId]: locationInfo
+      }));
+    } catch (error) {
+      console.warn('Error fetching location data:', error);
+    }
+  };
+
+
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -110,6 +160,9 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
     locations.forEach((location) => {
       const coords = getLocationCoordinates(location);
       
+      // Fetch real location data for this location
+      fetchLocationData(coords.lat, coords.lng, location.id);
+      
       // Custom marker icon
       const customIcon = L.divIcon({
         className: 'custom-marker',
@@ -139,15 +192,23 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
       const marker = L.marker([coords.lat, coords.lng], { icon: customIcon }).addTo(map);
       markers.push(marker);
       
-      // Add popup with location info
+      // Get location data for this marker
+      const data = locationData[location.id];
+      
+      // Add popup with enhanced location info
       const popupContent = `
-        <div style="min-width: 200px;">
+        <div style="min-width: 250px;">
           <h3 style="margin: 0 0 8px 0; color: #1f2937; font-weight: bold;">${location.name}</h3>
           <div style="font-size: 12px; color: #6b7280;">
+            ${data?.city ? `<div>🏙️ City: ${data.city}</div>` : ''}
+            ${data?.suburb ? `<div>🏘️ Area: ${data.suburb}</div>` : ''}
+            ${data?.road ? `<div>🛣️ Road: ${data.road}</div>` : ''}
             <div>💰 Rent: €${location.rent}/month</div>
             <div>⚡ Utilities: €${location.utilities}/month</div>
             <div>👥 Population: ${location.population.toLocaleString()}</div>
             <div>🚶 Traffic: ${location.traffic}%</div>
+            ${data?.amenities && data.amenities.length > 0 ? 
+              `<div>🏪 Nearby: ${data.amenities.join(', ')}</div>` : ''}
             <div style="margin-top: 8px; padding: 4px 8px; background: ${location.isOccupied ? '#dcfce7' : '#dbeafe'}; color: ${location.isOccupied ? '#166534' : '#1e40af'}; border-radius: 4px; font-weight: bold;">
               ${location.isOccupied ? 'Occupied' : 'Available'}
             </div>
@@ -164,12 +225,12 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
     });
 
     // Fit map to show all markers (only if there are markers and map is not already positioned)
-    if (markers.length > 0 && !mapInstanceRef.current._fittedBounds) {
+    if (markers.length > 0 && !(mapInstanceRef.current as any)._fittedBounds) {
       // Small delay to ensure map is fully loaded
       setTimeout(() => {
         const bounds = L.latLngBounds(markers.map(marker => marker.getLatLng()));
         map.fitBounds(bounds, { padding: [20, 20] });
-        mapInstanceRef.current._fittedBounds = true;
+        (mapInstanceRef.current as any)._fittedBounds = true;
       }, 100);
     }
 
@@ -182,7 +243,7 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
         }
       });
     };
-  }, [locations, darkMode, onLocationClick]);
+  }, [locations, darkMode, onLocationClick, locationData]);
 
   // Cleanup map on unmount
   useEffect(() => {
