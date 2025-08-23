@@ -81,12 +81,10 @@ const VendingGame: React.FC = () => {
 
     const interval = setInterval(() => {
       setGameState(prev => {
-        const newState = { ...prev };
-        
-        // Process each machine
-        newState.machines.forEach(machine => {
-          const location = newState.locations.find(l => l.id === machine.locationId);
-          if (!location) return;
+        // Process each machine with proper immutable updates
+        const updatedMachines = prev.machines.map(machine => {
+          const location = prev.locations.find(l => l.id === machine.locationId);
+          if (!location) return machine;
 
           // Realistic customer calculation based on real data from Neufahr bei Freising
           // Peak hours: 8PM-1AM (5 hours) with 0.5 customers per minute
@@ -129,22 +127,27 @@ const VendingGame: React.FC = () => {
             };
           });
 
-          machine.products = updatedProducts;
-          machine.revenue += dailyRevenue;
-          machine.customerCount += totalSales;
+          // Calculate daily costs
+          const dailyCosts = (location.rent + location.utilities) / 30;
+          const newCosts = machine.costs + dailyCosts;
+          const newRevenue = machine.revenue + dailyRevenue;
+          const newProfit = newRevenue - newCosts;
+
+          return {
+            ...machine,
+            products: updatedProducts,
+            revenue: newRevenue,
+            costs: newCosts,
+            profit: newProfit,
+            customerCount: machine.customerCount + totalSales,
+          };
         });
 
-        // Add daily costs and calculate profit
-        newState.machines.forEach(machine => {
-          const location = newState.locations.find(l => l.id === machine.locationId);
-          if (location) {
-            machine.costs += (location.rent + location.utilities) / 30; // Daily costs
-            machine.profit = machine.revenue - machine.costs;
-          }
-        });
-
-        newState.day += 1;
-        return newState;
+        return {
+          ...prev,
+          day: prev.day + 1,
+          machines: updatedMachines,
+        };
       });
     }, 1000 / gameState.gameSpeed);
 
@@ -564,6 +567,40 @@ const VendingGame: React.FC = () => {
                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Machine Details</h3>
                
                <div className="space-y-4">
+                 {/* Location Details */}
+                 {(() => {
+                   const location = gameState.locations.find(l => l.id === gameState.selectedMachine?.locationId);
+                   return location ? (
+                     <div className={`mb-4 p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                       <h4 className={`font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Location</h4>
+                       <div className="space-y-2">
+                         <div className="flex items-center space-x-2">
+                           <span className="text-blue-500">🏙️</span>
+                           <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                             {location.name}
+                           </span>
+                         </div>
+                         {location.suburb && (
+                           <div className="flex items-center space-x-2">
+                             <span className="text-green-500">🏘️</span>
+                             <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                               {location.suburb}
+                             </span>
+                           </div>
+                         )}
+                         {location.road && (
+                           <div className="flex items-center space-x-2">
+                             <span className="text-orange-500">🛣️</span>
+                             <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                               {location.road}
+                             </span>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                   ) : null;
+                 })()}
+                 
                  <div className="grid grid-cols-2 gap-4">
                    <div className={`${darkMode ? 'bg-blue-900/30' : 'bg-blue-50'} p-3 rounded-lg`}>
                      <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Revenue</div>

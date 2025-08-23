@@ -120,7 +120,9 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
               population: data.population || 5000,
               traffic: data.traffic || 70,
               isOccupied: false,
-              lat, lng
+              lat, lng,
+              suburb: data.suburb,
+              road: data.road
             };
             
             // Call the click handler with the temporary location
