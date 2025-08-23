@@ -110,11 +110,14 @@ const VendingGame: React.FC = () => {
           let totalSales = 0;
           
           // Create a new products array to ensure React state updates properly
+          let restockingCosts = 0;
           const updatedProducts = machine.products.map(product => {
             let newStock = product.stock;
             
             // Restock products if they're running low (more realistic threshold)
             if (newStock < 5) {
+              const restockAmount = 50 - newStock; // How much we need to restock
+              restockingCosts += restockAmount * product.cost; // Add restocking cost
               newStock = 50; // Restock to full
             }
             
@@ -131,8 +134,9 @@ const VendingGame: React.FC = () => {
             };
           });
 
-          // Calculate daily costs
-          const dailyCosts = (location.rent + location.utilities) / 30;
+          // Calculate daily costs (rent + utilities + restocking)
+          const dailyRentAndUtilities = (location.rent + location.utilities) / 30;
+          const dailyCosts = dailyRentAndUtilities + restockingCosts;
           const newCosts = machine.costs + dailyCosts;
           const newRevenue = machine.revenue + dailyRevenue;
           const newProfit = newRevenue - newCosts;
