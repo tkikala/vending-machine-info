@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './contexts/AuthContext';
 import LandingPage from './components/LandingPage';
 import MachineList from './components/MachineList';
@@ -86,6 +87,7 @@ function App() {
           <Route path="/billing/cancel" element={<BillingSuccess canceled />} />
           <Route path="/game" element={<VendingGame />} />
         </Routes>
+        <Analytics />
       </div>
     </AuthProvider>
   );
