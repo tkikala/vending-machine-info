@@ -30,11 +30,12 @@ interface RealBavariaMapProps {
   locations: Location[];
   darkMode: boolean;
   onLocationClick: (location: Location) => void;
+  userLocation?: {lat: number, lng: number} | null;
 }
 
 
 
-const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, onLocationClick }) => {
+const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, onLocationClick, userLocation }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   // Real coordinates for Bavaria locations
@@ -73,8 +74,8 @@ const RealBavariaMap: React.FC<RealBavariaMapProps> = ({ locations, darkMode, on
     // Initialize map only once
     if (!mapInstanceRef.current) {
       const map = L.map(mapRef.current, {
-        center: [48.7758, 11.4198], // Center of Bavaria
-        zoom: 8,
+        center: userLocation ? [userLocation.lat, userLocation.lng] : [48.7758, 11.4198], // Use user location or default to Bavaria center
+        zoom: userLocation ? 12 : 8, // Closer zoom for user location
         zoomControl: true,
         attributionControl: true,
       });

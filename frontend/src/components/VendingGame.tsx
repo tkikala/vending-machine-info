@@ -59,23 +59,49 @@ const VendingGame: React.FC = () => {
     day: 1,
     isPaused: false,
     gameSpeed: 1,
-    locations: [
-      { id: '1', name: 'München Universität', x: 25, y: 30, rent: 800, utilities: 200, population: 15000, traffic: 85, isOccupied: false },
-      { id: '2', name: 'Olympia Einkaufszentrum', x: 45, y: 35, rent: 1200, utilities: 300, population: 8000, traffic: 90, isOccupied: false },
-      { id: '3', name: 'BMW Headquarters', x: 65, y: 40, rent: 600, utilities: 150, population: 5000, traffic: 75, isOccupied: false },
-      { id: '4', name: 'Klinikum Großhadern', x: 75, y: 50, rent: 1000, utilities: 250, population: 3000, traffic: 80, isOccupied: false },
-      { id: '5', name: 'Aral Tankstelle', x: 60, y: 70, rent: 400, utilities: 100, population: 2000, traffic: 70, isOccupied: false },
-    ],
+    locations: [], // Remove all predefined locations
     machines: [],
   });
 
   const [darkMode, setDarkMode] = useState(false);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
 
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showMachineModal, setShowMachineModal] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
 
-  // Game loop
+  // Get user location on component mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Location access denied or error:', error);
+          // Default to Bavaria center if location access is denied
+          setUserLocation({ lat: 48.7758, lng: 11.4198 });
+        }
+      );
+    } else {
+      // Default to Bavaria center if geolocation is not supported
+      setUserLocation({ lat: 48.7758, lng: 11.4198 });
+    }
+  }, []);
+
+  // Update current date/time every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Game loop - now runs at real-time speed (1 second = 1 day)
   useEffect(() => {
     if (gameState.isPaused) return;
 
@@ -148,16 +174,17 @@ const VendingGame: React.FC = () => {
             costs: newCosts,
             profit: newProfit,
             customerCount: machine.customerCount + totalSales,
+            satisfaction: Math.min(100, machine.satisfaction + (totalSales > 0 ? 1 : -1))
           };
         });
 
         return {
           ...prev,
-          day: prev.day + 1,
           machines: updatedMachines,
+          day: prev.day + 1
         };
       });
-    }, 1000 / gameState.gameSpeed);
+    }, 1000 / gameState.gameSpeed); // Real-time: 1 second = 1 day
 
     return () => clearInterval(interval);
   }, [gameState.isPaused, gameState.gameSpeed]);
@@ -282,8 +309,13 @@ const VendingGame: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🎮 Vending Tycoon</div>
-              <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Day {gameState.day}</div>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🎮 Your Vending Business</div>
+              <div className="flex items-center space-x-4">
+                <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Day {gameState.day}</div>
+                <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {currentDateTime.toLocaleDateString()} {currentDateTime.toLocaleTimeString()}
+                </div>
+              </div>
             </div>
             
             <div className="flex items-center space-x-6">
@@ -371,11 +403,6 @@ const VendingGame: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}
             >
-              <h2 className={`text-xl font-bold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                <MdLocationOn className="mr-2 text-blue-500" />
-                Bayern Map
-              </h2>
-              
               <RealBavariaMap
                 locations={gameState.locations}
                 darkMode={darkMode}
@@ -383,6 +410,7 @@ const VendingGame: React.FC = () => {
                   setGameState(prev => ({ ...prev, selectedLocation: location }));
                   setShowLocationModal(true);
                 }}
+                userLocation={userLocation}
               />
             </motion.div>
           </div>
