@@ -64,7 +64,6 @@ const VendingGame: React.FC = () => {
   });
 
   const [darkMode, setDarkMode] = useState(false);
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
 
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -93,15 +92,7 @@ const VendingGame: React.FC = () => {
     }
   }, []);
 
-  // Update current date/time every second
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Game loop - now runs in real-time (1 second = 1 second)
+  // Game loop - back to daily-based updates
   useEffect(() => {
     if (gameState.isPaused) return;
 
@@ -116,30 +107,24 @@ const VendingGame: React.FC = () => {
             return machine;
           }
 
-          // Realistic customer calculation - now per second instead of per day
-          // Scale down the daily calculations to per-second
-          const secondsInDay = 24 * 60 * 60; // 86400 seconds
-          
+          // Realistic customer calculation based on real data from Neufahr bei Freising
           // Peak hours: 8PM-1AM (5 hours) with 0.5 customers per minute
           // Off-peak hours: 19 hours with much lower traffic
           const peakHoursCustomers = 5 * 60 * 0.5; // 150 customers during peak
           const offPeakHoursCustomers = 19 * 60 * 0.1; // ~114 customers during off-peak (much lower)
           const totalDailyCustomers = peakHoursCustomers + offPeakHoursCustomers; // ~264 total
           
-          // Convert daily customers to per-second customers
-          const customersPerSecond = totalDailyCustomers / secondsInDay;
-          
           // Realistic calculation: Traffic = % of population that passes by this street daily
           const effectivePopulation = location.population * (location.traffic / 100);
           const populationFactor = Math.min(effectivePopulation / 5000, 3); // Cap at 3x for very large locations
-          const scaledCustomersPerSecond = customersPerSecond * populationFactor;
+          const scaledCustomers = Math.floor(totalDailyCustomers * populationFactor);
           
-          // Add some variation (±30%)
+          // Add some daily variation (±30%)
           const variation = 0.7 + Math.random() * 0.6;
-          const actualCustomersThisSecond = scaledCustomersPerSecond * variation;
+          const dailyCustomers = Math.floor(scaledCustomers * variation);
           
-          let revenueThisSecond = 0;
-          let salesThisSecond = 0;
+          let dailyRevenue = 0;
+          let totalSales = 0;
           
           // Create a new products array to ensure React state updates properly
           let restockingCosts = 0;
@@ -154,10 +139,10 @@ const VendingGame: React.FC = () => {
             }
             
             // More realistic sales distribution - not all customers buy every product
-            const productDemand = actualCustomersThisSecond * product.demand * 0.3; // Only 30% of customers buy each product
+            const productDemand = Math.floor(dailyCustomers * product.demand * 0.3); // Only 30% of customers buy each product
             const sales = Math.min(productDemand, newStock);
-            revenueThisSecond += sales * product.price;
-            salesThisSecond += sales;
+            dailyRevenue += sales * product.price;
+            totalSales += sales;
             newStock = Math.max(0, newStock - sales);
             
             return {
@@ -166,13 +151,11 @@ const VendingGame: React.FC = () => {
             };
           });
 
-          // Calculate costs per second (rent + utilities + restocking)
+          // Calculate daily costs (rent + utilities + restocking)
           const dailyRentAndUtilities = (location.rent + location.utilities) / 30;
-          const rentAndUtilitiesPerSecond = dailyRentAndUtilities / secondsInDay;
-          const costsThisSecond = rentAndUtilitiesPerSecond + restockingCosts;
-          
-          const newCosts = machine.costs + costsThisSecond;
-          const newRevenue = machine.revenue + revenueThisSecond;
+          const dailyCosts = dailyRentAndUtilities + restockingCosts;
+          const newCosts = machine.costs + dailyCosts;
+          const newRevenue = machine.revenue + dailyRevenue;
           const newProfit = newRevenue - newCosts;
 
           return {
@@ -181,35 +164,20 @@ const VendingGame: React.FC = () => {
             revenue: newRevenue,
             costs: newCosts,
             profit: newProfit,
-            customerCount: machine.customerCount + salesThisSecond,
-            satisfaction: Math.min(100, machine.satisfaction + (salesThisSecond > 0 ? 0.01 : -0.01))
+            customerCount: machine.customerCount + totalSales,
+            satisfaction: Math.min(100, machine.satisfaction + (totalSales > 0 ? 1 : -1))
           };
         });
 
         return {
           ...prev,
           machines: updatedMachines,
-          // Don't increment day every second - only increment when we reach a full day
-          day: prev.day
+          day: prev.day + 1
         };
       });
-    }, 1000); // Always run every 1000ms (1 second) - real-time
+    }, 1000 / gameState.gameSpeed); // Back to speed-based timing
 
     return () => clearInterval(interval);
-  }, [gameState.isPaused]); // Remove gameSpeed dependency since we always run at 1 second
-
-  // Separate effect for day progression based on game speed
-  useEffect(() => {
-    if (gameState.isPaused) return;
-
-    const dayInterval = setInterval(() => {
-      setGameState(prev => ({
-        ...prev,
-        day: prev.day + 1
-      }));
-    }, 1000 / gameState.gameSpeed); // Speed multiplier affects day progression
-
-    return () => clearInterval(dayInterval);
   }, [gameState.isPaused, gameState.gameSpeed]);
 
   const placeMachine = useCallback((locationId: string) => {
@@ -335,9 +303,6 @@ const VendingGame: React.FC = () => {
               <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>🎮 Your Vending Business</div>
               <div className="flex items-center space-x-4">
                 <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Day {gameState.day}</div>
-                <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {currentDateTime.toLocaleDateString()} {currentDateTime.toLocaleTimeString()}
-                </div>
               </div>
             </div>
             
@@ -385,11 +350,12 @@ const VendingGame: React.FC = () => {
                       : 'bg-white border-gray-300 text-gray-800'
                   }`}
                 >
-                  <option value={0.25}>0.25x</option>
+                  <option value={0.05}>0.05x</option>
+                  <option value={0.1}>0.1x</option>
                   <option value={0.5}>0.5x</option>
                   <option value={1}>1x</option>
-                  <option value={2}>2x</option>
-                  <option value={4}>4x</option>
+                  <option value={5}>5x</option>
+                  <option value={20}>20x</option>
                 </select>
                 
                                  <button
