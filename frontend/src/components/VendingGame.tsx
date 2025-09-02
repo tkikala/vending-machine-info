@@ -101,7 +101,7 @@ const VendingGame: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Game loop - now runs at real-time speed (1 second = 1 day)
+  // Game loop - now runs in real-time (1 second = 1 second)
   useEffect(() => {
     if (gameState.isPaused) return;
 
@@ -116,24 +116,30 @@ const VendingGame: React.FC = () => {
             return machine;
           }
 
-          // Realistic customer calculation based on real data from Neufahr bei Freising
+          // Realistic customer calculation - now per second instead of per day
+          // Scale down the daily calculations to per-second
+          const secondsInDay = 24 * 60 * 60; // 86400 seconds
+          
           // Peak hours: 8PM-1AM (5 hours) with 0.5 customers per minute
           // Off-peak hours: 19 hours with much lower traffic
           const peakHoursCustomers = 5 * 60 * 0.5; // 150 customers during peak
           const offPeakHoursCustomers = 19 * 60 * 0.1; // ~114 customers during off-peak (much lower)
           const totalDailyCustomers = peakHoursCustomers + offPeakHoursCustomers; // ~264 total
           
+          // Convert daily customers to per-second customers
+          const customersPerSecond = totalDailyCustomers / secondsInDay;
+          
           // Realistic calculation: Traffic = % of population that passes by this street daily
           const effectivePopulation = location.population * (location.traffic / 100);
           const populationFactor = Math.min(effectivePopulation / 5000, 3); // Cap at 3x for very large locations
-          const scaledCustomers = Math.floor(totalDailyCustomers * populationFactor);
+          const scaledCustomersPerSecond = customersPerSecond * populationFactor;
           
-          // Add some daily variation (±30%)
+          // Add some variation (±30%)
           const variation = 0.7 + Math.random() * 0.6;
-          const dailyCustomers = Math.floor(scaledCustomers * variation);
+          const actualCustomersThisSecond = scaledCustomersPerSecond * variation;
           
-          let dailyRevenue = 0;
-          let totalSales = 0;
+          let revenueThisSecond = 0;
+          let salesThisSecond = 0;
           
           // Create a new products array to ensure React state updates properly
           let restockingCosts = 0;
@@ -148,10 +154,10 @@ const VendingGame: React.FC = () => {
             }
             
             // More realistic sales distribution - not all customers buy every product
-            const productDemand = Math.floor(dailyCustomers * product.demand * 0.3); // Only 30% of customers buy each product
+            const productDemand = actualCustomersThisSecond * product.demand * 0.3; // Only 30% of customers buy each product
             const sales = Math.min(productDemand, newStock);
-            dailyRevenue += sales * product.price;
-            totalSales += sales;
+            revenueThisSecond += sales * product.price;
+            salesThisSecond += sales;
             newStock = Math.max(0, newStock - sales);
             
             return {
@@ -160,11 +166,13 @@ const VendingGame: React.FC = () => {
             };
           });
 
-          // Calculate daily costs (rent + utilities + restocking)
+          // Calculate costs per second (rent + utilities + restocking)
           const dailyRentAndUtilities = (location.rent + location.utilities) / 30;
-          const dailyCosts = dailyRentAndUtilities + restockingCosts;
-          const newCosts = machine.costs + dailyCosts;
-          const newRevenue = machine.revenue + dailyRevenue;
+          const rentAndUtilitiesPerSecond = dailyRentAndUtilities / secondsInDay;
+          const costsThisSecond = rentAndUtilitiesPerSecond + restockingCosts;
+          
+          const newCosts = machine.costs + costsThisSecond;
+          const newRevenue = machine.revenue + revenueThisSecond;
           const newProfit = newRevenue - newCosts;
 
           return {
@@ -173,20 +181,35 @@ const VendingGame: React.FC = () => {
             revenue: newRevenue,
             costs: newCosts,
             profit: newProfit,
-            customerCount: machine.customerCount + totalSales,
-            satisfaction: Math.min(100, machine.satisfaction + (totalSales > 0 ? 1 : -1))
+            customerCount: machine.customerCount + salesThisSecond,
+            satisfaction: Math.min(100, machine.satisfaction + (salesThisSecond > 0 ? 0.01 : -0.01))
           };
         });
 
         return {
           ...prev,
           machines: updatedMachines,
-          day: prev.day + 1
+          // Don't increment day every second - only increment when we reach a full day
+          day: prev.day
         };
       });
-    }, 1000 / gameState.gameSpeed); // Real-time: 1 second = 1 day
+    }, 1000); // Always run every 1000ms (1 second) - real-time
 
     return () => clearInterval(interval);
+  }, [gameState.isPaused]); // Remove gameSpeed dependency since we always run at 1 second
+
+  // Separate effect for day progression based on game speed
+  useEffect(() => {
+    if (gameState.isPaused) return;
+
+    const dayInterval = setInterval(() => {
+      setGameState(prev => ({
+        ...prev,
+        day: prev.day + 1
+      }));
+    }, 1000 / gameState.gameSpeed); // Speed multiplier affects day progression
+
+    return () => clearInterval(dayInterval);
   }, [gameState.isPaused, gameState.gameSpeed]);
 
   const placeMachine = useCallback((locationId: string) => {
@@ -362,10 +385,11 @@ const VendingGame: React.FC = () => {
                       : 'bg-white border-gray-300 text-gray-800'
                   }`}
                 >
+                  <option value={0.25}>0.25x</option>
                   <option value={0.5}>0.5x</option>
                   <option value={1}>1x</option>
                   <option value={2}>2x</option>
-                  <option value={5}>5x</option>
+                  <option value={4}>4x</option>
                 </select>
                 
                                  <button
