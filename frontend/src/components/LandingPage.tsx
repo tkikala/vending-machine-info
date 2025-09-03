@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { SOCIAL_CONFIG } from '../config/social';
 
 const LandingPage: React.FC = () => {
   return (
@@ -53,12 +54,12 @@ const LandingPage: React.FC = () => {
         
         {/* Social Media Links */}
         <div className="flex justify-center space-x-6">
-          <a 
-            href="https://x.com/vendingcommunity" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors group"
-          >
+                      <a 
+              href={SOCIAL_CONFIG.TWITTER_URL} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-white transition-colors group"
+            >
             <div className="flex flex-col items-center space-y-2">
               <div className="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center transition-colors group-hover:scale-110">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -69,12 +70,12 @@ const LandingPage: React.FC = () => {
             </div>
           </a>
           
-          <a 
-            href="https://t.me/vendingcommunity" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors group"
-          >
+                      <a 
+              href={SOCIAL_CONFIG.TELEGRAM_URL} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-white transition-colors group"
+            >
             <div className="flex flex-col items-center space-y-2">
               <div className="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center transition-colors group-hover:scale-110">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -281,7 +282,7 @@ const LandingPage: React.FC = () => {
             {/* Social Media Links in Footer */}
             <div className="flex space-x-6">
               <a 
-                href="https://x.com/vendingcommunity" 
+                href={SOCIAL_CONFIG.TWITTER_URL} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -293,7 +294,7 @@ const LandingPage: React.FC = () => {
               </a>
               
               <a 
-                href="https://t.me/vendingcommunity" 
+                href={SOCIAL_CONFIG.TELEGRAM_URL} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
