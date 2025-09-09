@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMapMarkerAlt, FaCoins, FaChartLine, FaCog, FaPlay, FaPause, FaUndo, FaQuestionCircle } from 'react-icons/fa';
+import { FaCoins, FaChartLine, FaPlay, FaPause, FaUndo, FaQuestionCircle } from 'react-icons/fa';
 import RealBavariaMap from './RealBavariaMap';
-import { MdLocationOn, MdAttachMoney, MdInventory, MdSpeed } from 'react-icons/md';
+import { MdAttachMoney, MdInventory } from 'react-icons/md';
 import GameTutorial from './GameTutorial';
+import VendingMachineWizard from './VendingMachineWizard';
 
 interface Location {
   id: string;
@@ -66,9 +67,9 @@ const VendingGame: React.FC = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
 
-  const [showLocationModal, setShowLocationModal] = useState(false);
   const [showMachineModal, setShowMachineModal] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
 
   // Get user location on component mount
   useEffect(() => {
@@ -180,36 +181,49 @@ const VendingGame: React.FC = () => {
     return () => clearInterval(interval);
   }, [gameState.isPaused, gameState.gameSpeed]);
 
-  const placeMachine = useCallback((locationId: string) => {
-    const machineCost = 3000;
-    if (gameState.money < machineCost) return;
-
-    // Find the selected location
-    const selectedLocation = gameState.selectedLocation;
-    if (!selectedLocation) return;
+  const handleWizardComplete = useCallback((wizardData: any) => {
+    const machineCost = wizardData.purchaseOption === 'buy' ? wizardData.machineCost : 0;
+    
+    // Check if user has enough money
+    if (gameState.money < machineCost) {
+      alert('Not enough money to buy this machine!');
+      return;
+    }
 
     setGameState(prev => {
       // Check if this location already exists in the locations array
-      const existingLocationIndex = prev.locations.findIndex(loc => loc.id === selectedLocation.id);
+      const existingLocationIndex = prev.locations.findIndex(loc => loc.id === wizardData.location.id);
       
       let updatedLocations;
-      let finalLocationId = selectedLocation.id;
+      let finalLocationId = wizardData.location.id;
       
       if (existingLocationIndex >= 0) {
-        // Update existing location
+        // Update existing location with wizard data
         updatedLocations = prev.locations.map(loc => 
-          loc.id === selectedLocation.id ? { ...loc, isOccupied: true, machineId: `machine-${Date.now()}` } : loc
+          loc.id === wizardData.location.id ? { 
+            ...loc, 
+            isOccupied: true, 
+            machineId: `machine-${Date.now()}`,
+            population: wizardData.population,
+            traffic: wizardData.traffic,
+            rent: wizardData.monthlyRent,
+            utilities: wizardData.monthlyUtilities
+          } : loc
         );
       } else {
-        // Add new location to the array with a proper ID
-        const newLocationId = selectedLocation.id.startsWith('temp-') ? selectedLocation.id : `location-${Date.now()}`;
+        // Add new location to the array with wizard data
+        const newLocationId = wizardData.location.id.startsWith('temp-') ? wizardData.location.id : `location-${Date.now()}`;
         finalLocationId = newLocationId;
         
         const newLocation = {
-          ...selectedLocation,
+          ...wizardData.location,
           id: newLocationId,
           isOccupied: true,
-          machineId: `machine-${Date.now()}`
+          machineId: `machine-${Date.now()}`,
+          population: wizardData.population,
+          traffic: wizardData.traffic,
+          rent: wizardData.monthlyRent,
+          utilities: wizardData.monthlyUtilities
         };
         updatedLocations = [...prev.locations, newLocation];
       }
@@ -231,10 +245,12 @@ const VendingGame: React.FC = () => {
         satisfaction: 0.8,
       };
 
-      console.log('✅ Created machine:', {
+      console.log('✅ Created machine via wizard:', {
         machineId: newMachine.id,
         locationId: newMachine.locationId,
-        locationName: selectedLocation.name,
+        locationName: wizardData.location.name,
+        machineType: wizardData.machineType,
+        purchaseOption: wizardData.purchaseOption,
         isNewLocation: existingLocationIndex === -1
       });
 
@@ -245,7 +261,7 @@ const VendingGame: React.FC = () => {
         locations: updatedLocations,
       };
     });
-  }, [gameState.money, gameState.selectedLocation]);
+  }, [gameState.money]);
 
   const togglePause = () => {
     setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
@@ -308,12 +324,16 @@ const VendingGame: React.FC = () => {
             
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
-                <FaCoins className="text-yellow-500 text-xl" />
+                <div className="text-yellow-500 text-xl">
+                  <FaCoins />
+                </div>
                 <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{gameState.money.toLocaleString()}</span>
               </div>
               
               <div className="flex items-center space-x-2">
-                <FaChartLine className="text-green-500 text-xl" />
+                <div className="text-green-500 text-xl">
+                  <FaChartLine />
+                </div>
                 <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{Math.round(totalProfit).toLocaleString()}</span>
               </div>
               
@@ -398,7 +418,7 @@ const VendingGame: React.FC = () => {
                 darkMode={darkMode}
                 onLocationClick={(location) => {
                   setGameState(prev => ({ ...prev, selectedLocation: location }));
-                  setShowLocationModal(true);
+                  setShowWizard(true);
                 }}
                 userLocation={userLocation}
               />
@@ -413,7 +433,9 @@ const VendingGame: React.FC = () => {
               className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}
             >
               <h3 className={`text-lg font-bold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                <MdAttachMoney className="mr-2 text-green-500" />
+                <div className="text-green-500 mr-2">
+                  <MdAttachMoney />
+                </div>
                 Business Stats
               </h3>
               
@@ -450,7 +472,9 @@ const VendingGame: React.FC = () => {
                 className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}
               >
                 <h3 className={`text-lg font-bold mb-4 flex items-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  <MdInventory className="mr-2 text-purple-500" />
+                  <div className="text-purple-500 mr-2">
+                    <MdInventory />
+                  </div>
                   Your Machines
                 </h3>
                 
@@ -491,100 +515,6 @@ const VendingGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Location Modal */}
-      <AnimatePresence>
-        {showLocationModal && gameState.selectedLocation && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]"
-            onClick={() => setShowLocationModal(false)}
-          >
-                         <motion.div
-               initial={{ scale: 0.9, opacity: 0 }}
-               animate={{ scale: 1, opacity: 1 }}
-               exit={{ scale: 0.9, opacity: 0 }}
-               className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-md w-full shadow-2xl transition-colors duration-300`}
-               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-             >
-               <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.selectedLocation.name}</h3>
-            
-            {/* Location Details */}
-            <div className={`mb-4 p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-blue-500">🏙️</span>
-                  <span className={`font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                    {gameState.selectedLocation.name}
-                  </span>
-                </div>
-                {gameState.selectedLocation.suburb && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-green-500">🏘️</span>
-                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {gameState.selectedLocation.suburb}
-                    </span>
-                  </div>
-                )}
-                {gameState.selectedLocation.road && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-orange-500">🛣️</span>
-                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      {gameState.selectedLocation.road}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-               
-               <div className="space-y-3 mb-6">
-                 <div className="flex justify-between">
-                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Monthly Rent</span>
-                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{gameState.selectedLocation.rent}</span>
-                 </div>
-                 <div className="flex justify-between">
-                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Utilities</span>
-                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{gameState.selectedLocation.utilities}</span>
-                 </div>
-                 <div className="flex justify-between">
-                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Population</span>
-                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.selectedLocation.population.toLocaleString()}</span>
-                 </div>
-                 <div className="flex justify-between">
-                   <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Traffic</span>
-                   <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{gameState.selectedLocation.traffic}%</span>
-                 </div>
-               </div>
-              
-                             {gameState.selectedLocation.isOccupied ? (
-                 <div className={`text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                   <div className="text-lg font-semibold text-green-500 mb-2">✓ Machine Placed</div>
-                   <div className="text-sm">This location is already occupied</div>
-                 </div>
-               ) : (
-                 <div className="space-y-3">
-                   <div className={`text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                     <div className="text-lg font-semibold mb-2">Place Vending Machine</div>
-                     <div className="text-sm">Cost: €3,000</div>
-                   </div>
-                   
-                   <button
-                     onClick={() => {
-                       placeMachine(gameState.selectedLocation!.id);
-                       setShowLocationModal(false);
-                     }}
-                     disabled={gameState.money < 3000}
-                     className="w-full py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                   >
-                     {gameState.money < 3000 ? 'Not Enough Money' : 'Place Machine'}
-                   </button>
-                 </div>
-               )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
              {/* Machine Modal */}
        <AnimatePresence>
@@ -699,6 +629,16 @@ const VendingGame: React.FC = () => {
            <GameTutorial onClose={() => setShowTutorial(false)} />
          )}
        </AnimatePresence>
+
+       {/* Vending Machine Wizard */}
+       {gameState.selectedLocation && (
+         <VendingMachineWizard
+           isOpen={showWizard}
+           onClose={() => setShowWizard(false)}
+           onComplete={handleWizardComplete}
+           initialLocation={gameState.selectedLocation}
+         />
+       )}
      </div>
    );
  };
