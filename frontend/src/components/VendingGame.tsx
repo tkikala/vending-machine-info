@@ -182,11 +182,11 @@ const VendingGame: React.FC = () => {
   }, [gameState.isPaused, gameState.gameSpeed]);
 
   const handleWizardComplete = useCallback((wizardData: any) => {
-    const machineCost = wizardData.purchaseOption === 'buy' ? wizardData.machineCost : 0;
+    const totalInvestment = wizardData.deposit + (wizardData.purchaseOption === 'buy' ? wizardData.machineCost * wizardData.machineQuantity : 0);
     
     // Check if user has enough money
-    if (gameState.money < machineCost) {
-      alert('Not enough money to buy this machine!');
+    if (gameState.money < totalInvestment) {
+      alert(`Not enough money! You need €${totalInvestment.toLocaleString()} but only have €${gameState.money.toLocaleString()}`);
       return;
     }
 
@@ -228,36 +228,40 @@ const VendingGame: React.FC = () => {
         updatedLocations = [...prev.locations, newLocation];
       }
 
-      // Create the machine with the correct location ID
-      const newMachine: VendingMachine = {
-        id: `machine-${Date.now()}`,
-        locationId: finalLocationId,
-        products: [
-          { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 0.8 },
-          { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 0.6 },
-          { id: '3', name: 'Water', price: 1.00, cost: 0.30, stock: 40, demand: 0.9 },
-          { id: '4', name: 'Chips', price: 2.00, cost: 1.00, stock: 25, demand: 0.7 },
-        ],
-        revenue: 0,
-        costs: 0,
-        profit: 0,
-        customerCount: 0,
-        satisfaction: 0.8,
-      };
+      // Create machines based on quantity
+      const newMachines: VendingMachine[] = [];
+      for (let i = 0; i < wizardData.machineQuantity; i++) {
+        newMachines.push({
+          id: `machine-${Date.now()}-${i}`,
+          locationId: finalLocationId,
+          products: [
+            { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 0.8 },
+            { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 0.6 },
+            { id: '3', name: 'Water', price: 1.00, cost: 0.30, stock: 40, demand: 0.9 },
+            { id: '4', name: 'Chips', price: 2.00, cost: 1.00, stock: 25, demand: 0.7 },
+          ],
+          revenue: 0,
+          costs: 0,
+          profit: 0,
+          customerCount: 0,
+          satisfaction: 0.8,
+        });
+      }
 
-      console.log('✅ Created machine via wizard:', {
-        machineId: newMachine.id,
-        locationId: newMachine.locationId,
+      console.log('✅ Created machines via wizard:', {
+        machineCount: newMachines.length,
+        locationId: finalLocationId,
         locationName: wizardData.location.name,
-        machineType: wizardData.machineType,
+        businessType: wizardData.businessType,
         purchaseOption: wizardData.purchaseOption,
+        totalInvestment,
         isNewLocation: existingLocationIndex === -1
       });
 
       return {
         ...prev,
-        money: prev.money - machineCost,
-        machines: [...prev.machines, newMachine],
+        money: prev.money - totalInvestment,
+        machines: [...prev.machines, ...newMachines],
         locations: updatedLocations,
       };
     });
@@ -637,6 +641,7 @@ const VendingGame: React.FC = () => {
            onClose={() => setShowWizard(false)}
            onComplete={handleWizardComplete}
            initialLocation={gameState.selectedLocation}
+           darkMode={darkMode}
          />
        )}
      </div>
