@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowLeft, FaArrowRight, FaCheck, FaMapMarkerAlt, FaBuilding, FaEuroSign, FaCog } from 'react-icons/fa';
+import './VendingMachineWizard.css';
 
 interface Location {
   id: string;
@@ -128,7 +129,7 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto transition-colors duration-300`}
+          className={`vending-wizard ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto transition-colors duration-300`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -262,7 +263,9 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
                       onClick={() => handleBusinessTypeChange('single')}
                       className={`p-6 border-2 rounded-xl text-left transition-all ${
                         wizardData.businessType === 'single'
-                          ? 'border-purple-500 bg-purple-50'
+                          ? darkMode 
+                            ? 'border-purple-500 bg-purple-900/30' 
+                            : 'border-purple-500 bg-purple-50'
                           : darkMode 
                             ? 'border-gray-600 hover:border-gray-500 bg-gray-700' 
                             : 'border-gray-200 hover:border-gray-300'
@@ -279,7 +282,9 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
                       onClick={() => handleBusinessTypeChange('kiosk')}
                       className={`p-6 border-2 rounded-xl text-left transition-all ${
                         wizardData.businessType === 'kiosk'
-                          ? 'border-purple-500 bg-purple-50'
+                          ? darkMode 
+                            ? 'border-purple-500 bg-purple-900/30' 
+                            : 'border-purple-500 bg-purple-50'
                           : darkMode 
                             ? 'border-gray-600 hover:border-gray-500 bg-gray-700' 
                             : 'border-gray-200 hover:border-gray-300'
@@ -411,7 +416,9 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
                         onClick={() => updateWizardData({ purchaseOption: 'buy' })}
                         className={`p-4 border-2 rounded-lg text-center transition-all ${
                           wizardData.purchaseOption === 'buy'
-                            ? 'border-purple-500 bg-purple-50'
+                            ? darkMode 
+                              ? 'border-purple-500 bg-purple-900/30' 
+                              : 'border-purple-500 bg-purple-50'
                             : darkMode 
                               ? 'border-gray-600 hover:border-gray-500 bg-gray-700' 
                               : 'border-gray-200 hover:border-gray-300'
@@ -426,7 +433,9 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
                         onClick={() => updateWizardData({ purchaseOption: 'lease' })}
                         className={`p-4 border-2 rounded-lg text-center transition-all ${
                           wizardData.purchaseOption === 'lease'
-                            ? 'border-purple-500 bg-purple-50'
+                            ? darkMode 
+                              ? 'border-purple-500 bg-purple-900/30' 
+                              : 'border-purple-500 bg-purple-50'
                             : darkMode 
                               ? 'border-gray-600 hover:border-gray-500 bg-gray-700' 
                               : 'border-gray-200 hover:border-gray-300'
