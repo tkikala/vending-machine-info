@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowLeft, FaArrowRight, FaCheck, FaMapMarkerAlt, FaBuilding, FaEuroSign, FaCog } from 'react-icons/fa';
 import './VendingMachineWizard.css';
@@ -63,6 +63,31 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
     machineQuantity: 1, // Default: 1 machine
   });
 
+  // Reset wizard state when it opens
+  const resetWizard = () => {
+    setCurrentStep(1);
+    setWizardData({
+      location: initialLocation,
+      population: initialLocation.population,
+      traffic: initialLocation.traffic,
+      businessType: 'single',
+      monthlyRent: 0,
+      monthlyUtilities: 0,
+      deposit: 0,
+      purchaseOption: 'buy',
+      machineCost: 8000,
+      monthlyLeaseCost: 150,
+      machineQuantity: 1,
+    });
+  };
+
+  // Reset wizard when it opens
+  useEffect(() => {
+    if (isOpen) {
+      resetWizard();
+    }
+  }, [isOpen, initialLocation]);
+
   const updateWizardData = (updates: Partial<WizardData>) => {
     setWizardData(prev => ({ ...prev, ...updates }));
   };
@@ -92,6 +117,12 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
 
   const handleComplete = () => {
     onComplete(wizardData);
+    resetWizard(); // Reset wizard state after completion
+    onClose();
+  };
+
+  const handleClose = () => {
+    resetWizard(); // Reset wizard state when dismissed
     onClose();
   };
 
@@ -123,7 +154,7 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]"
-        onClick={onClose}
+        onClick={handleClose}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
@@ -136,7 +167,7 @@ const VendingMachineWizard: React.FC<VendingMachineWizardProps> = ({
           <div className="flex items-center justify-between mb-6">
             <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Setup Vending Machine Business</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className={`${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'} text-2xl transition-colors`}
             >
               ×
