@@ -5,6 +5,7 @@ import RealBavariaMap from './RealBavariaMap';
 import { MdAttachMoney, MdInventory } from 'react-icons/md';
 import GameTutorial from './GameTutorial';
 import VendingMachineWizard from './VendingMachineWizard';
+import ProductManagementModal from './ProductManagementModal';
 
 interface Location {
   id: string;
@@ -41,6 +42,8 @@ interface Product {
   cost: number;
   stock: number;
   demand: number;
+  category: string;
+  description?: string;
 }
 
 interface GameState {
@@ -70,6 +73,7 @@ const VendingGame: React.FC = () => {
   const [showMachineModal, setShowMachineModal] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
+  const [showProductManagement, setShowProductManagement] = useState(false);
 
   // Get user location on component mount
   useEffect(() => {
@@ -140,7 +144,7 @@ const VendingGame: React.FC = () => {
             }
             
             // More realistic sales distribution - not all customers buy every product
-            const productDemand = Math.floor(dailyCustomers * product.demand * 0.3); // Only 30% of customers buy each product
+            const productDemand = Math.floor(dailyCustomers * (product.demand / 100) * 0.3); // Only 30% of customers buy each product
             const sales = Math.min(productDemand, newStock);
             dailyRevenue += sales * product.price;
             totalSales += sales;
@@ -235,10 +239,10 @@ const VendingGame: React.FC = () => {
           id: `machine-${Date.now()}-${i}`,
           locationId: finalLocationId,
           products: [
-            { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 0.8 },
-            { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 0.6 },
-            { id: '3', name: 'Water', price: 1.00, cost: 0.30, stock: 40, demand: 0.9 },
-            { id: '4', name: 'Chips', price: 2.00, cost: 1.00, stock: 25, demand: 0.7 },
+            { id: '1', name: 'Coca Cola', price: 2.50, cost: 1.20, stock: 50, demand: 80, category: 'drinks', description: 'Classic cola drink' },
+            { id: '2', name: 'Snickers', price: 1.50, cost: 0.80, stock: 30, demand: 60, category: 'snacks', description: 'Chocolate bar with nuts' },
+            { id: '3', name: 'Water', price: 1.00, cost: 0.30, stock: 40, demand: 90, category: 'drinks', description: 'Still water' },
+            { id: '4', name: 'Chips', price: 2.00, cost: 1.00, stock: 25, demand: 70, category: 'snacks', description: 'Potato chips' },
           ],
           revenue: 0,
           costs: 0,
@@ -600,19 +604,49 @@ const VendingGame: React.FC = () => {
                        
                        {/* Products */}
                        <div>
-                         <h4 className={`font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Products</h4>
+                         <div className="flex items-center justify-between mb-3">
+                           <h4 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Products</h4>
+                           <button
+                             onClick={() => setShowProductManagement(true)}
+                             className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
+                               darkMode
+                                 ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                                 : 'bg-purple-600 hover:bg-purple-700 text-white'
+                             }`}
+                           >
+                             Manage Products
+                           </button>
+                         </div>
                          <div className="space-y-2">
                            {currentMachine?.products.map((product) => (
-                             <div key={product.id} className={`flex justify-between items-center p-2 rounded ${
+                             <div key={product.id} className={`flex justify-between items-center p-3 rounded-lg ${
                                darkMode ? 'bg-gray-700' : 'bg-gray-50'
                              }`}>
-                               <div>
-                                 <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{product.name}</div>
-                                 <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Stock: {product.stock}</div>
+                               <div className="flex items-center gap-3">
+                                 <div className="text-xl">
+                                   {product.category === 'drinks' && '🥤'}
+                                   {product.category === 'snacks' && '🍿'}
+                                   {product.category === 'healthy' && '🥗'}
+                                   {product.category === 'hot' && '🔥'}
+                                   {!['drinks', 'snacks', 'healthy', 'hot'].includes(product.category) && '📦'}
+                                 </div>
+                                 <div>
+                                   <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{product.name}</div>
+                                   <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                     Stock: {product.stock} • Demand: {product.demand}%
+                                   </div>
+                                   {product.description && (
+                                     <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                       {product.description}
+                                     </div>
+                                   )}
+                                 </div>
                                </div>
                                <div className="text-right">
-                                 <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{product.price}</div>
-                                 <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>€{product.cost} cost</div>
+                                 <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>€{product.price.toFixed(2)}</div>
+                                 <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                   Cost: €{product.cost.toFixed(2)} • Profit: {((product.price - product.cost) / product.price * 100).toFixed(1)}%
+                                 </div>
                                </div>
                              </div>
                            ))}
@@ -641,6 +675,26 @@ const VendingGame: React.FC = () => {
            onClose={() => setShowWizard(false)}
            onComplete={handleWizardComplete}
            initialLocation={gameState.selectedLocation}
+           darkMode={darkMode}
+         />
+       )}
+
+       {/* Product Management Modal */}
+       {gameState.selectedMachine && (
+         <ProductManagementModal
+           isOpen={showProductManagement}
+           onClose={() => setShowProductManagement(false)}
+           products={gameState.selectedMachine.products}
+           onProductsChange={(newProducts) => {
+             setGameState(prev => ({
+               ...prev,
+               machines: prev.machines.map(machine => 
+                 machine.id === gameState.selectedMachine?.id 
+                   ? { ...machine, products: newProducts }
+                   : machine
+               )
+             }));
+           }}
            darkMode={darkMode}
          />
        )}
